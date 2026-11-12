@@ -583,6 +583,16 @@ details.panel[open] summary h3::after{content:" −"}
 .shop input:checked+span{text-decoration:line-through;color:var(--muted)}
 .shop .chip{align-self:flex-start;margin-top:8px}
 .linkbtn{border:0;background:none;padding:0;color:var(--accent);font:inherit;font-weight:650;text-decoration:underline;cursor:pointer}
+.wtips{border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+.wtips ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:5px;font-size:14px;max-width:62ch}
+.cheer{margin:0;font-size:15px;font-weight:600;color:var(--ink);border-left:3px solid var(--accent);padding:2px 0 2px 10px;max-width:62ch}
+.donecard{display:flex;flex-direction:column;gap:6px;border:1.5px solid color-mix(in srgb,var(--good) 50%,var(--line));background:color-mix(in srgb,var(--good) 8%,transparent);border-radius:10px;padding:12px}
+.donecard .lbl{color:var(--good)}
+.dct{margin:0;display:flex;flex-direction:column}
+.dct b{font-size:16px}
+.dct span{font-size:13px;color:var(--muted)}
+.dcc{margin:0;font-weight:600}
+.donecard ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:3px;font-size:14px}
 .upnext{display:flex;flex-direction:column;gap:8px;border:1.5px solid color-mix(in srgb,var(--accent) 45%,var(--line));border-radius:10px;padding:12px;background:color-mix(in srgb,var(--accent) 6%,transparent)}
 .unw{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;border:0;background:none;text-align:left;padding:0;color:var(--ink)}
 .unw .ui{font-size:28px}
@@ -1286,7 +1296,7 @@ details.panel[open] summary h3::after{content:" −"}
 
 <script>
 (() => {
-const APP_VERSION="3.16.0";
+const APP_VERSION="3.16.1";
 const REPO="kefirman9000/fuel-log";
 const $ = id => document.getElementById(id);
 const OZ=29.5735, LB=0.45359237, IN=2.54;
@@ -2983,16 +2993,34 @@ async function upNext(){
   return {w,when,last:lastS,lw,trainedToday};
 }
 const whenText=k=>k===todayKey()?"today":k===shift(todayKey(),1)?"tomorrow":"on "+parseKey(k).toLocaleDateString(undefined,{weekday:"long"});
+const GENERIC_CHEERS=["Every bit of movement counts. Nice work.","Done is better than perfect. Well done.","You showed up today. That's what builds results.","One more workout in the bank.","Consistency is the secret, and you're practicing it."];
+/* Encouragement after a workout, built from what you've actually done. */
+async function doneCard(N){
+  const today=todayKey(), hist=await recentWorkouts(90), todays=hist.filter(h=>h.date===today); if(!todays.length) return "";
+  const week=hist.filter(h=>h.date>shift(today,-7)).length, total=hist.length, last=todays[todays.length-1], w=last.wid&&wById(last.wid);
+  const msgs=[];
+  const ms=[100,50,25,10,5,1].find(m=>total===m);
+  if(ms===1) msgs.push("Your first logged workout. The hardest one is behind you.");
+  else if(ms) msgs.push(`That's workout number ${ms}. 🎉`);
+  if(!ms||ms>1) msgs.push(week===1?"First workout this week. Great start.":`That's ${week} workouts in the last 7 days.`);
+  if(N.plan&&last.wid&&N.plan.rot.includes(last.wid)) msgs.push(`Next in your plan: ${N.w.n}, ${whenText(N.when)}.`);
+  const d=await getDay(today), g=G(), t=totals(d), pl=g.protein?Math.round(g.protein-t.p):0;
+  if(pl>10) msgs.push(`Protein helps your muscles recover: you have ${pl} g left today.`);
+  const cheer=w&&w.cheer?w.cheer:GENERIC_CHEERS[(parseKey(today).getDate()+todays.length)%GENERIC_CHEERS.length];
+  const mins=todays.reduce((a,x)=>a+(x.mins||0),0), kc=todays.reduce((a,x)=>a+(x.kcal||0),0);
+  return `<div class="donecard"><span class="lbl">Done today ✓</span><p class="dct"><b>${todays.map(x=>esc(x.name)).join(" + ")}</b><span>${mins} min · about ${kc.toLocaleString()} ${CU()}</span></p>
+    <p class="dcc">${esc(cheer)}</p>${msgs.length?`<ul>${msgs.map(m=>`<li>${esc(m)}</li>`).join("")}</ul>`:""}</div>`;
+}
 async function renderTrainTop(){
   const N=await upNext(), plan=N.plan;
-  let h="";
+  let h=await doneCard(N);
   if(N.w){
-    h=`<div class="upnext"><span class="lbl">${plan?`Your plan · ${esc(plan.n)}`:"Up next"}</span>
+    h+=`<div class="upnext"><span class="lbl">${plan?`Your plan · ${esc(plan.n)}`:"Up next"}</span>
       <button type="button" class="unw" data-wo="${N.w.id}"><span class="ui" aria-hidden="true">${FOCI[N.w.focus]||"🏋️"}</span><span><b>${esc(N.w.n)}</b><small>${N.w.mins} min · ${esc(EQN[N.w.eqc])} · ${whenText(N.when)}</small></span><span class="ua" aria-hidden="true">→</span></button>
-      <p class="hint" style="margin:0">${N.trainedToday?"Nice work today. ":""}${N.last&&!plan&&N.lw?`You did ${esc(N.lw.n.toLowerCase())} last, so ${esc(FOCN[N.w.focus].toLowerCase())} is a good next session${N.when!==todayKey()?" after a rest day":""}.`
+      <p class="hint" style="margin:0">${N.last&&!plan&&N.lw?`You did ${esc(N.lw.n.toLowerCase())} last, so ${esc(FOCN[N.w.focus].toLowerCase())} is a good next session${N.when!==todayKey()?" after a rest day":""}.`
         :plan?`Workout ${((S.settings.trainPlan.pos||0)%plan.rot.length)+1} of ${plan.rot.length} in the rotation. ${N.when===todayKey()?"Today is a training day.":"Rest or take a walk until then."}`:""}</p>
       ${plan?"":`<button type="button" class="linkbtn" data-scroll-plans>Pick a weekly plan for a full schedule</button>`}</div>`;
-  }else h=`<div class="upnext"><span class="lbl">Get started</span><p style="margin:0">Pick a weekly plan below for a schedule that tells you what to do each day, or try any workout. Log it and Fuel Log suggests what's next.</p>
+  }else h+=`<div class="upnext"><span class="lbl">Get started</span><p style="margin:0">Pick a weekly plan below for a schedule that tells you what to do each day, or try any workout. Log it and Fuel Log suggests what's next.</p>
     <button type="button" class="chip" data-scroll-plans>See plans</button></div>`;
   // this week
   const days=[...Array(7)].map((_,i)=>shift(todayKey(),i-6)), ds=await Promise.all(days.map(getDay)), g=G();
@@ -3057,6 +3085,8 @@ function renderWorkoutDetail(w){
     ${w.note?`<p class="rtip">${esc(w.note)}</p>`:""}
     <ol class="exlist">${w.b.map(exHTML).join("")}</ol>
     <p class="hint" style="margin:0;font-size:12.5px">Tap an exercise for how to do it.</p>
+    ${w.tips?`<div class="wtips"><h4 class="h4">Coach's tips</h4><ul>${w.tips.map(t=>`<li>${esc(t)}</li>`).join("")}</ul></div>`:""}
+    ${w.cheer?`<p class="cheer">💬 ${esc(w.cheer)}</p>`:""}
     <div class="ract"><div class="stepper"><span class="lbl">Minutes</span><div class="f"><input type="number" id="trLogMins" min="1" max="300" value="${w.mins}" inputmode="numeric" aria-label="Minutes"></div></div>
       <button type="button" class="primary" data-wolog="${w.id}">Log this workout</button></div>
     <p class="rnote">Calories use ${w.met} MET (${esc(w.metsrc)}, 2024 Compendium of Physical Activities) and ${S.settings.profile.weightKg>0?"your weight":"70 kg"}. Stop if you feel sharp pain, dizziness or chest pain. If you have a health condition or haven't exercised in a while, check with your doctor before starting.</p>`;
@@ -3105,7 +3135,7 @@ $("view-train").addEventListener("click",async ev=>{
   const tf=t.closest("[data-tf]"); if(tf){const [k,v]=tf.dataset.tf.split("|"); TF[k]=TF[k]===v?"":v; renderTrainList(); return}
   const ex=t.closest("[data-exo]"); if(ex){const d=ex.nextElementSibling, open=d.hidden; d.hidden=!open; ex.setAttribute("aria-expanded",open); return}
   const lg=t.closest("[data-wolog]"); if(lg){const w=wById(lg.dataset.wolog), mins=Math.max(1,+$("trLogMins").value||w.mins);
-    await logWorkout({wid:w.id,name:w.n,mins,met:w.met,kcal:burnFor(w.met,mins)}); toast(`Logged ${w.n} · about ${burnFor(w.met,mins)} ${CU()}`);
+    await logWorkout({wid:w.id,name:w.n,mins,met:w.met,kcal:burnFor(w.met,mins)}); toast(`Nice work! Logged ${w.n} · about ${burnFor(w.met,mins)} ${CU()}`);
     TF.mode="browse"; TF.open=null; await renderTrain(); window.scrollTo({top:0,behavior:calm?"auto":"smooth"}); return}
   const st=t.closest("[data-pstart]"); if(st){S.settings.trainPlan={id:st.dataset.pstart,since:todayKey(),pos:0,last:null}; saveSettings(); toast("Plan started. Your next workout is at the top of Train."); TF.mode="browse"; TF.open=null; await renderTrain(); window.scrollTo({top:0}); return}
   if(t.closest("[data-pstop]")){S.settings.trainPlan=null; saveSettings(); toast("Plan stopped"); renderTrain(); return}
@@ -3115,7 +3145,7 @@ $("view-train").addEventListener("click",async ev=>{
 });
 $("view-train").addEventListener("submit",async ev=>{if(ev.target.id!=="trQuick") return; ev.preventDefault();
   const a=WK.acts[+$("trAct").value], mins=Math.max(1,+$("trMins").value||30);
-  await logWorkout({name:a[0],mins,met:a[1],kcal:burnFor(a[1],mins)}); toast(`Logged ${mins} min ${a[0].toLowerCase()} · about ${burnFor(a[1],mins)} ${CU()}`); renderTrainTop()});
+  await logWorkout({name:a[0],mins,met:a[1],kcal:burnFor(a[1],mins)}); toast(`Nice work! Logged ${mins} min ${a[0].toLowerCase()} · about ${burnFor(a[1],mins)} ${CU()}`); renderTrainTop()});
 ["trFocus","trBody","trTime","trLvl"].forEach(id=>$(id).addEventListener("change",()=>{TF[{trFocus:"focus",trBody:"body",trTime:"time",trLvl:"lvl"}[id]]=$(id).value; renderTrainList()}));
 /* Workouts on Today's log */
 function renderLogWk(){

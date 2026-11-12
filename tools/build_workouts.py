@@ -5,7 +5,7 @@
 """
 import json, os, sys, collections
 sys.path.insert(0, os.path.dirname(__file__))
-from workouts_src import EX, W, P, ACTS
+from workouts_src import EX, W, P, ACTS, TIPS
 
 root = os.path.join(os.path.dirname(__file__), "..")
 errors = []
@@ -34,6 +34,9 @@ for w in W:
     w["mus"] = sorted(m for m, k in c.items() if k >= 2 or len(w["b"]) == 1)
     w["met"], w["metsrc"] = w["met"]
 ids = {w["id"] for w in W}
+missing_tips = ids - set(TIPS)
+if missing_tips: errors.append(f"workouts without tips: {sorted(missing_tips)}")
+if set(TIPS) - ids: errors.append(f"tips for unknown workouts: {sorted(set(TIPS) - ids)}")
 assert len(ids) == len(W), "duplicate workout ids"
 for p in P:
     for r in p["rot"]:
