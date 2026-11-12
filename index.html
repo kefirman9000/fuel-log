@@ -259,6 +259,22 @@ details.panel[open] summary h3::after{content:" −"}
 .qtype input{flex:1;min-width:0;border:1.5px solid var(--line);background:var(--bg);border-radius:9px;padding:11px 12px;font-size:16px;font-weight:500}
 .qtype input:focus{border-color:var(--protein);outline:none;box-shadow:0 0 0 3px color-mix(in srgb,var(--protein) 20%,transparent)}
 .quick .qtype .qfood{padding:10px 14px;font-size:16px}
+.favs{flex:1 1 100%;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;margin:-2px 0;padding:2px 0}
+.favs::-webkit-scrollbar{display:none}
+.fchip{flex:none;display:flex;align-items:center;gap:5px;border:1.5px solid color-mix(in srgb,var(--carbs) 45%,var(--line));background:var(--bg);border-radius:999px;padding:6px 11px;
+  font-weight:650;font-size:13px;white-space:nowrap;max-width:220px;transition:transform .12s,background .2s}
+.fchip .fn{overflow:hidden;text-overflow:ellipsis}
+.fchip small{color:var(--muted);font-weight:500;font-family:var(--mono);font-size:11px}
+.fchip:active{transform:scale(.95)}
+.fchip.edit{border-color:var(--warn);animation:wiggle .35s ease-in-out infinite alternate}
+.fchip.edit .x{color:var(--warn);font-weight:900}
+@keyframes wiggle{from{transform:rotate(-1.5deg)}to{transform:rotate(1.5deg)}}
+.fchip.tool{border-style:dashed;color:var(--muted);border-color:var(--line)}
+.fchip.hint{border-style:dashed;color:var(--muted);border-color:var(--line);cursor:default;font-weight:500}
+.fchip.logged{background:color-mix(in srgb,var(--good) 22%,var(--bg))}
+.star{border:0;background:none;padding:0 2px;margin-left:4px;font-size:16px;line-height:1;color:var(--carbs);vertical-align:-1px}
+.star[aria-pressed="false"]{color:var(--muted);opacity:.7}
+@media (prefers-reduced-motion:reduce){.fchip.edit{animation:none}}
 .qwater{flex:1 1 100%}
 .qwater .btns .chip{flex:1}
 .qwater .btns{gap:6px;flex-wrap:nowrap}
@@ -266,7 +282,36 @@ details.panel[open] summary h3::after{content:" −"}
 .qbar{height:4px;background:var(--soft);border-radius:2px;overflow:hidden}
 .qbar i{display:block;height:100%;width:0;background:var(--water);transition:width .4s ease}
 .qtxt{font-size:11px;color:var(--muted)}
-.panel,.label{scroll-margin-top:84px}
+.panel,.label{scroll-margin-top:150px}
+.addsheet{border:1.5px solid var(--ink);animation:obin .3s ease}
+.addsheet .ph h3{font-size:18px}
+/* Edit an entry */
+.item{cursor:pointer}
+.item.editing{display:flex;flex-direction:column;gap:10px;cursor:default;background:color-mix(in srgb,var(--soft) 60%,transparent);margin:0 -8px;padding:12px 8px;border-radius:8px}
+.item.editing .grid{grid-template-columns:repeat(5,minmax(0,1fr))}
+@media (max-width:420px){.item.editing .grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.edithint{font-size:12px;color:var(--muted)}
+/* Water reminder */
+.wnudge{display:flex;align-items:center;gap:10px;background:color-mix(in srgb,var(--water) 12%,var(--paper));border:1.5px solid color-mix(in srgb,var(--water) 45%,var(--line));border-radius:10px;padding:10px 12px;animation:obin .45s ease}
+.wnudge .wtxt{flex:1;font-size:14px;line-height:1.3}
+.wnudge .wdrop{font-size:22px;animation:bob 2s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-4px)}}
+.wnudge .x{border:0;background:none;color:var(--muted);font-size:20px;width:30px;height:30px;border-radius:50%}
+/* Streak and badges */
+.streakpill{display:inline-flex;align-items:center;gap:4px;font-weight:700;color:var(--warn);background:color-mix(in srgb,var(--warn) 12%,transparent);border-radius:999px;padding:1px 8px}
+.badges{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.badge{display:flex;flex-direction:column;align-items:center;gap:3px;text-align:center;padding:10px 4px;border:1px solid var(--line);border-radius:10px;background:var(--bg)}
+.badge .bi{font-size:28px;line-height:1.1}
+.badge b{font-size:12px}
+.badge small{font-size:10.5px;color:var(--muted)}
+.badge.locked .bi{filter:grayscale(1);opacity:.3}
+.badge.locked b{color:var(--muted)}
+.badge.got{border-color:color-mix(in srgb,var(--carbs) 55%,var(--line));background:color-mix(in srgb,var(--carbs) 10%,var(--bg))}
+.badgepop{position:fixed;left:50%;top:38%;transform:translate(-50%,-50%);z-index:45;background:var(--paper);border:2px solid var(--ink);border-radius:14px;padding:18px 26px;display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;box-shadow:0 12px 40px rgb(0 0 0 / .25);animation:bpop .5s cubic-bezier(.2,1.4,.4,1)}
+.badgepop .bicon{font-size:54px;line-height:1.1;animation:pop .6s ease .1s backwards}
+.badgepop b{font-family:var(--display);font-weight:900;font-stretch:75%;font-size:24px;text-transform:uppercase}
+.badgepop span{font-size:14px;color:var(--muted)}
+@keyframes bpop{from{transform:translate(-50%,-50%) scale(.6);opacity:0}}
 /* Install */
 .install{display:flex;align-items:center;gap:10px;background:var(--paper);border:1.5px solid var(--water);border-radius:10px;padding:10px 12px;animation:obin .45s ease}
 .install img{border-radius:9px;flex:none}
@@ -325,7 +370,7 @@ details.panel[open] summary h3::after{content:" −"}
     <button role="tab" data-view="me" aria-selected="false">Me &amp; goals</button>
   </div>
   <div class="update" id="updateBar" hidden><span id="updateText">A new version is available.</span><span class="actions"><button id="updateGo">Update now</button><button class="ghost" id="updateLater">Later</button></span></div>
-  <div class="status"><span class="dot" id="sDot"></span><span id="sText">Loading your log…</span></div>
+  <div class="status"><span class="dot" id="sDot"></span><span id="sText">Loading your log…</span><span id="sStreak"></span></div>
   <div class="install" id="installBar" hidden>
     <img src="icon-192.png" alt="" width="36" height="36">
     <span><b>Add Fuel Log to your home screen</b><br><small>Opens like an app, in one tap, even offline.</small></span>
@@ -341,8 +386,73 @@ details.panel[open] summary h3::after{content:" −"}
       <button class="qfood" id="qFood" type="submit"><span class="plus" aria-hidden="true">+</span><span class="qlbl">Add</span></button>
       <button class="qscan" id="qScan" type="button" aria-label="Scan a barcode"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7V4h3M18 4h3v3M21 17v3h-3M6 20H3v-3"/><path d="M7 8v8M10 8v8M13 8v8M16 8v8" stroke-width="1.6"/></svg><span>Scan</span></button>
     </form>
+    <div class="favs" id="favs" aria-label="Favorite foods"></div>
     <div class="qwater"><div class="btns" id="qWater"></div>
       <div class="qbar" aria-hidden="true"><i id="qBar"></i></div><span class="num qtxt" id="qTxt"></span></div>
+  </div>
+  <section class="panel addsheet" id="addPanel" aria-labelledby="hAdd" hidden>
+    <div class="ph"><h3 id="hAdd">Add food</h3><button type="button" class="chip ghost" id="addClose">Done</button></div>
+    <div class="tabs" id="foodTabs" role="tablist">
+      <button role="tab" data-tab="search" aria-selected="true">Search</button>
+      <button role="tab" data-tab="manual" aria-selected="false">Enter</button>
+      <button role="tab" data-tab="scan" aria-selected="false">Scan</button>
+      <button role="tab" data-tab="saved" aria-selected="false">My foods</button>
+    </div>
+
+    <div id="tab-search" style="display:flex;flex-direction:column;gap:10px">
+      <form class="searchbar" id="searchForm" autocomplete="off" hidden>
+        <div class="f"><input id="sq" placeholder="Slice of pizza, 2 nutty buddy, Chipotle bowl…" aria-label="What did you eat?" enterkeyhint="search"></div>
+        <button class="primary" type="submit">Find</button>
+      </form>
+      <p class="hint" id="searchMsg" aria-live="polite">Type what you ate in the bar at the top, like "2 eggs and toast", "slice of pizza" or "cup of tillamook ice cream". The amount is worked out for you.</p>
+      <div id="searchPick"></div>
+      <div id="searchResults"></div>
+    </div>
+
+    <form id="tab-manual" class="grid" autocomplete="off" hidden>
+      <label class="f full"><span class="lbl">Food</span><input id="mName" placeholder="Greek yogurt, 1 cup" required></label>
+      <label class="f"><span class="lbl p">Protein g</span><input id="mP" type="number" inputmode="decimal" min="0" step="0.1" placeholder="0"></label>
+      <label class="f"><span class="lbl c">Carbs g</span><input id="mC" type="number" inputmode="decimal" min="0" step="0.1" placeholder="0"></label>
+      <label class="f"><span class="lbl">Fat g</span><input id="mF" type="number" inputmode="decimal" min="0" step="0.1" placeholder="0"></label>
+      <label class="f"><span class="lbl">kcal</span><input id="mK" type="number" inputmode="numeric" min="0" placeholder="auto"></label>
+      <div class="actions full">
+        <button class="primary" type="submit">Log food</button>
+        <label class="hint" style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="mSave"> Save to my foods</label>
+      </div>
+    </form>
+
+    <div id="tab-scan" hidden style="display:flex;flex-direction:column;gap:12px">
+      <div class="scanbox" id="scanBox">
+        <div class="bars" aria-hidden="true">▌▍▌▌▎▍▌▎▌▍▌</div>
+        <p class="hint">Point your camera at the barcode. Known products log in one tap; new ones are looked up in Open Food Facts when you're online.</p>
+        <div id="camWrap" hidden style="width:100%;display:flex;flex-direction:column;gap:8px;align-items:center">
+          <video id="cam" playsinline muted style="width:100%;max-height:260px;object-fit:cover;border-radius:6px;background:#000"></video>
+          <button class="secondary" id="camStop" type="button">Stop camera</button>
+        </div>
+        <div class="actions" style="justify-content:center">
+          <button class="primary" id="camBtn" type="button">Scan with camera</button>
+          <label class="secondary" for="scanFile" style="cursor:pointer">Use a photo</label>
+          <input id="scanFile" type="file" accept="image/*" capture="environment" hidden>
+          <button class="secondary" id="typeCodeBtn" type="button">Type the number</button>
+        </div>
+        <div class="actions" id="typeCode" hidden>
+          <div class="f" style="width:180px"><input id="codeIn" inputmode="numeric" placeholder="e.g. 041196910184" aria-label="Barcode number"></div>
+          <button class="secondary" id="codeGo" type="button">Look up</button>
+        </div>
+        <p class="hint" id="scanMsg" aria-live="polite"></p>
+      </div>
+      <div id="scanResult"></div>
+    </div>
+
+    <div id="tab-saved" hidden style="display:flex;flex-direction:column;gap:6px">
+      <div class="f"><input id="savedFilter" placeholder="Search my foods" aria-label="Search saved foods"></div>
+      <div class="list" id="savedList"></div>
+    </div>
+  </section>
+  <div class="wnudge" id="wNudge" hidden>
+    <span class="wdrop" aria-hidden="true">💧</span><span class="wtxt" id="wNudgeTxt"></span>
+    <button type="button" class="chip w" id="wNudgeAdd"></button>
+    <button type="button" class="x" id="wNudgeX" aria-label="Remind me later">×</button>
   </div>
   <section class="label" aria-label="Daily totals">
     <h2>Nutrition Facts</h2>
@@ -387,66 +497,6 @@ details.panel[open] summary h3::after{content:" −"}
   <section class="panel" aria-labelledby="hSupp">
     <div class="ph"><h3 id="hSupp">Supplements</h3><span class="meta" id="suppMeta"></span></div>
     <div id="suppList"></div>
-  </section>
-
-  <section class="panel" aria-labelledby="hAdd">
-    <div class="ph"><h3 id="hAdd">Add food</h3></div>
-    <div class="tabs" id="foodTabs" role="tablist">
-      <button role="tab" data-tab="search" aria-selected="true">Search</button>
-      <button role="tab" data-tab="manual" aria-selected="false">Enter</button>
-      <button role="tab" data-tab="scan" aria-selected="false">Scan</button>
-      <button role="tab" data-tab="saved" aria-selected="false">Saved</button>
-    </div>
-
-    <div id="tab-search" style="display:flex;flex-direction:column;gap:10px">
-      <form class="searchbar" id="searchForm" autocomplete="off">
-        <div class="f"><input id="sq" placeholder="Slice of pizza, 2 nutty buddy, Chipotle bowl…" aria-label="What did you eat?" enterkeyhint="search"></div>
-        <button class="primary" type="submit">Find</button>
-      </form>
-      <p class="hint" id="searchMsg" aria-live="polite">Type what you ate, like "2 nutty buddy", "slice of pizza" or "cup of tillamook ice cream". The amount is worked out for you.</p>
-      <div id="searchPick"></div>
-      <div id="searchResults"></div>
-    </div>
-
-    <form id="tab-manual" class="grid" autocomplete="off" hidden>
-      <label class="f full"><span class="lbl">Food</span><input id="mName" placeholder="Greek yogurt, 1 cup" required></label>
-      <label class="f"><span class="lbl p">Protein g</span><input id="mP" type="number" inputmode="decimal" min="0" step="0.1" placeholder="0"></label>
-      <label class="f"><span class="lbl c">Carbs g</span><input id="mC" type="number" inputmode="decimal" min="0" step="0.1" placeholder="0"></label>
-      <label class="f"><span class="lbl">Fat g</span><input id="mF" type="number" inputmode="decimal" min="0" step="0.1" placeholder="0"></label>
-      <label class="f"><span class="lbl">kcal</span><input id="mK" type="number" inputmode="numeric" min="0" placeholder="auto"></label>
-      <div class="actions full">
-        <button class="primary" type="submit">Log food</button>
-        <label class="hint" style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="mSave"> Save to my foods</label>
-      </div>
-    </form>
-
-    <div id="tab-scan" hidden style="display:flex;flex-direction:column;gap:12px">
-      <div class="scanbox" id="scanBox">
-        <div class="bars" aria-hidden="true">▌▍▌▌▎▍▌▎▌▍▌</div>
-        <p class="hint">Point your camera at the barcode. Known products log in one tap; new ones are looked up in Open Food Facts when you're online.</p>
-        <div id="camWrap" hidden style="width:100%;display:flex;flex-direction:column;gap:8px;align-items:center">
-          <video id="cam" playsinline muted style="width:100%;max-height:260px;object-fit:cover;border-radius:6px;background:#000"></video>
-          <button class="secondary" id="camStop" type="button">Stop camera</button>
-        </div>
-        <div class="actions" style="justify-content:center">
-          <button class="primary" id="camBtn" type="button">Scan with camera</button>
-          <label class="secondary" for="scanFile" style="cursor:pointer">Use a photo</label>
-          <input id="scanFile" type="file" accept="image/*" capture="environment" hidden>
-          <button class="secondary" id="typeCodeBtn" type="button">Type the number</button>
-        </div>
-        <div class="actions" id="typeCode" hidden>
-          <div class="f" style="width:180px"><input id="codeIn" inputmode="numeric" placeholder="e.g. 041196910184" aria-label="Barcode number"></div>
-          <button class="secondary" id="codeGo" type="button">Look up</button>
-        </div>
-        <p class="hint" id="scanMsg" aria-live="polite"></p>
-      </div>
-      <div id="scanResult"></div>
-    </div>
-
-    <div id="tab-saved" hidden style="display:flex;flex-direction:column;gap:6px">
-      <div class="f"><input id="savedFilter" placeholder="Search my foods" aria-label="Search saved foods"></div>
-      <div class="list" id="savedList"></div>
-    </div>
   </section>
 
   <section class="panel" aria-labelledby="hLog">
@@ -502,6 +552,12 @@ details.panel[open] summary h3::after{content:" −"}
       <div class="actions full" id="goalsSaveRow"><button class="primary" type="submit">Save custom goals</button></div>
     </form>
     <p class="hint">Estimates from standard formulas (Mifflin-St Jeor for calories, body-weight ranges for protein and water). They're a starting point, not medical advice. Check with a doctor if you're pregnant, under 18, or managing a health condition.</p>
+  </section>
+
+  <section class="panel" aria-labelledby="hBadges">
+    <div class="ph"><h3 id="hBadges">Badges</h3><span class="meta" id="badgeMeta"></span></div>
+    <div class="badges" id="badges"></div>
+    <p class="hint">Log any food or water on a day to keep your streak going.</p>
   </section>
 
   <section class="panel" aria-labelledby="hSuppM">
@@ -617,11 +673,12 @@ details.panel[open] summary h3::after{content:" −"}
     <p class="hint" id="instNote"></p>
   </div>
 </div>
+<div class="badgepop" id="badgePop" hidden role="status"><div class="bicon" id="bpIcon"></div><b id="bpTitle"></b><span id="bpText"></span></div>
 <div class="toast" id="toast" role="status"></div>
 
 <script>
 (() => {
-const APP_VERSION="2.5.0";
+const APP_VERSION="2.7.0";
 const REPO="kefirman9000/fuel-log";
 const $ = id => document.getElementById(id);
 const OZ=29.5735, LB=0.45359237, IN=2.54;
@@ -805,17 +862,17 @@ function render(){
   $("wCustomIn").placeholder=uW();
 
   // log
-  $("logMeta").textContent=niceDate(S.date);
-  $("logList").innerHTML=day.entries.length?day.entries.map(e=>`
-    <div class="item${e.id===S.newId?" new":""}"><span class="nm">${esc(e.name)}${e.src?`<span class="tag">${esc(e.src)}</span>`:""}</span>
+  $("logMeta").innerHTML=day.entries.length?`<span class="edithint">Tap an entry to edit</span>`:esc(niceDate(S.date));
+  $("logList").innerHTML=day.entries.length?day.entries.map(e=>e.id===S.editId?editHTML(e):`
+    <div class="item${e.id===S.newId?" new":""}"><span class="nm">${esc(e.name)}${e.src?`<span class="tag">${esc(e.src)}</span>`:""}<button class="star" data-star-entry="${e.id}" aria-pressed="${isFavName(e.name)}" aria-label="Favorite ${esc(e.name)}">${isFavName(e.name)?"★":"☆"}</button></span>
     <span class="sm">${esc(e.t||"")} · ${kcalOf(e)} kcal${e.f?` · ${r1(+e.f)}g fat`:""}</span>
     <span class="mac"><span class="p">${r1(+e.p||0)}g P</span><br><span class="c">${r1(+e.c||0)}g C</span></span>
     <button class="del" data-del="${e.id}" aria-label="Remove ${esc(e.name)}">×</button></div>`).join("")
-    :`<p class="empty">Nothing logged ${S.date===todayKey()?"yet today":"on this day"}. Search for a food or scan a barcode above.</p>`;
+    :`<p class="empty">Nothing logged ${S.date===todayKey()?"yet today":"on this day"}. Type a food in the bar at the top, or tap Scan.</p>`;
 
   S.newId=null;
   checkGoals({p:!!g.protein&&t.p>=g.protein, c:!!g.carbs&&t.c>=g.carbs, w:!!g.waterMl&&t.w>=g.waterMl, s:onS.length>0&&took===onS.length});
-  renderCoach(day,t,g); renderSaved(); renderWeek();
+  renderCoach(day,t,g); renderSaved(); renderFavs(); renderWaterNudge(); checkBadges(); renderWeek();
 }
 
 function proteinIdea(left){
@@ -852,7 +909,7 @@ function renderSaved(){
   const q=$("savedFilter").value.trim().toLowerCase();
   const items=Object.entries(S.foods.items).filter(([,f])=>!q||f.name.toLowerCase().includes(q)).sort((a,b)=>(b[1].used||0)-(a[1].used||0));
   $("savedList").innerHTML=items.length?items.map(([id,f])=>`
-    <div class="item"><span class="nm">${esc(f.name)}${f.code?`<span class="tag">barcode</span>`:""}</span>
+    <div class="item"><span class="nm">${esc(f.name)}${f.code?`<span class="tag">barcode</span>`:""}<button class="star" data-star-saved="${esc(id)}" aria-pressed="${!!f.fav}" aria-label="Favorite ${esc(f.name)}">${f.fav?"★":"☆"}</button></span>
     <span class="sm">${f.serving?esc(f.serving)+" · ":""}${kcalOf(f)} kcal</span>
     <span class="mac"><span class="p">${r1(+f.p||0)}g P</span><br><span class="c">${r1(+f.c||0)}g C</span></span>
     <button class="chip" data-quick="${esc(id)}" style="grid-row:1/3;grid-column:3">Log</button></div>`).join("")
@@ -953,7 +1010,7 @@ function renderSuppManage(){
     <input class="sdose" data-dose="${esc(s.id)}" value="${esc(s.dose)}" aria-label="Dose for ${esc(s.name)}">
     ${s.custom?`<button class="del" style="grid-row:auto;grid-column:auto" data-rm="${esc(s.id)}" aria-label="Remove ${esc(s.name)}">×</button>`:"<span></span>"}</div>`).join("");
 }
-function renderMe(){fillProfile();renderPlan();renderSuppManage();$("verMeta").textContent="Version "+APP_VERSION}
+function renderMe(){fillProfile();renderPlan();renderSuppManage();renderBadges();$("verMeta").textContent="Version "+APP_VERSION}
 
 /* ---------- actions ---------- */
 function toast(msg){const t=$("toast");t.textContent=msg;t.classList.add("show");clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove("show"),2200)}
@@ -1013,6 +1070,66 @@ function saveFood(f,id){
   S.foods.items[id]={...S.foods.items[id],...f,used:(S.foods.items[id]?.used||0)};
   save("foods",S.foods); return id;
 }
+/* ---------- streaks and badges ---------- */
+const BADGES=[[1,"🌱","First log","You logged your first day"],[3,"✨","3-day streak","Three days in a row"],[7,"🔥","One week","7 days in a row"],[14,"💪","Two weeks","14 days in a row"],
+  [30,"🏅","One month","30 days in a row"],[60,"🥈","60 days","Two months straight"],[100,"🥇","100 days","Triple digits"],[365,"👑","One year","365 days in a row"]];
+function loggedOn(k){const d=S.days[k]||load(dayKey(k)); return !!(d&&((d.entries&&d.entries.length)||(d.water&&d.water.length)))}
+function currentStreak(){
+  let k=todayKey(); if(!loggedOn(k)) k=shift(k,-1);
+  let n=0; while(n<2000&&loggedOn(k)){n++;k=shift(k,-1)} return n;
+}
+function checkBadges(){
+  const st=currentStreak(), b=load("badges")||{}; let best=load("bestStreak")||0, earned=null;
+  if(st>best){best=st;save("bestStreak",best)}
+  BADGES.forEach(([n,ic,title,text])=>{if(best>=n&&!b[n]){b[n]=todayKey();earned=[ic,title,text]}});
+  save("badges",b);
+  $("sStreak").innerHTML=st?`<span class="streakpill">🔥 ${st}-day streak</span>`:"";
+  if(earned&&S.ready&&S.badgesChecked) showBadge(...earned);
+  S.badgesChecked=true;
+}
+function showBadge(ic,title,text){
+  $("bpIcon").textContent=ic; $("bpTitle").textContent=title; $("bpText").textContent=text+". Badge earned!";
+  $("badgePop").hidden=false; setTimeout(()=>burst($("bpIcon"),"var(--carbs)"),200);
+  clearTimeout(showBadge._t); showBadge._t=setTimeout(()=>{$("badgePop").hidden=true},3200);
+}
+$("badgePop").onclick=()=>{$("badgePop").hidden=true};
+function renderBadges(){
+  const b=load("badges")||{}, best=load("bestStreak")||0, st=currentStreak();
+  $("badgeMeta").textContent=`Current ${st} · Best ${best}`;
+  $("badges").innerHTML=BADGES.map(([n,ic,title])=>`<div class="badge ${b[n]?"got":"locked"}"><span class="bi">${ic}</span><b>${title}</b><small>${b[n]?"Earned "+niceDate(b[n]):n===1?"Log once":n+" days"}</small></div>`).join("");
+}
+
+/* ---------- water reminder ---------- */
+function renderWaterNudge(){
+  const el=$("wNudge"); if(S.date!==todayKey()){el.hidden=true;return}
+  const day=S.days[S.date]||emptyDay(), g=G(), t=totals(day), n=new Date(), h=n.getHours()+n.getMinutes()/60;
+  const behind=(g.waterMl||0)*Math.min(1,Math.max(0,(h-7)/15))-t.w, snooze=load("waterSnooze")||0;
+  const show=g.waterMl&&h>=10&&h<22&&behind>Math.max(240,g.waterMl*.12)&&Date.now()>snooze;
+  el.hidden=!show; if(!show) return;
+  const glass=S.settings.unit==="oz"?[8*OZ,"8 oz"]:[250,"250 ml"];
+  $("wNudgeTxt").innerHTML=`You're <b>${fmtW(behind)} ${uW()}</b> behind on water. A glass now keeps you on pace.`;
+  $("wNudgeAdd").dataset.ml=glass[0]; $("wNudgeAdd").textContent="+ "+glass[1];
+}
+$("wNudgeX").onclick=()=>{save("waterSnooze",Date.now()+2*36e5);$("wNudge").hidden=true;toast("I'll remind you again in 2 hours")};
+setInterval(()=>{if(!document.hidden&&S.ready)renderWaterNudge()},5*60*1000);
+
+/* ---------- favorites ---------- */
+const favIds=()=>Object.entries(S.foods.items).filter(([,f])=>f.fav).sort((a,b)=>(b[1].used||0)-(a[1].used||0)).map(([id])=>id);
+function setFav(id,on){const f=S.foods.items[id]; if(!f) return; f.fav=on; if(!on&&!favIds().length) S.favEdit=false; save("foods",S.foods); render();
+  toast(on?"Added to favorites ⭐":"Removed from favorites")}
+function favForEntry(e){
+  const id=Object.keys(S.foods.items).find(k=>S.foods.items[k].name===e.name);
+  if(id) return setFav(id,!S.foods.items[id].fav);
+  const nid=saveFood({name:e.name,serving:"as logged",p:+e.p||0,c:+e.c||0,f:+e.f||0,kcal:e.kcal??null}); setFav(nid,true);
+}
+const isFavName=n=>Object.values(S.foods.items).some(f=>f.fav&&f.name===n);
+function renderFavs(){
+  const ids=favIds();
+  if(!ids.length){$("favs").innerHTML=`<span class="fchip hint">☆ Star any food to pin it here</span>`;return}
+  $("favs").innerHTML=ids.map(id=>{const f=S.foods.items[id];
+    return `<button type="button" class="fchip${S.favEdit?" edit":""}" data-fav="${esc(id)}" aria-label="${S.favEdit?"Remove "+esc(f.name)+" from favorites":"Log "+esc(f.name)}">${S.favEdit?`<span class="x">×</span>`:"⭐"}<span class="fn">${esc(f.name)}</span><small>${kcalOf(f)}</small></button>`}).join("")
+    +`<button type="button" class="fchip tool" id="favEdit">${S.favEdit?"Done":"Edit"}</button>`;
+}
 function useFood(id,servings=1){
   const f=S.foods.items[id]; if(!f) return;
   f.used=(f.used||0)+1; save("foods",S.foods);
@@ -1035,17 +1152,32 @@ $("next").onclick=async()=>{if(S.date<todayKey()){S.date=shift(S.date,1);await g
 
 const addWater=async ev=>{const b=ev.target.closest("[data-ml]");if(!b)return;
   const d=await getDay(S.date);d.water.push(Math.round(+b.dataset.ml));saveDay(S.date);pour(b,"+"+b.textContent.replace(/[^\d.a-z ]/gi,"").trim());render()};
-$("waterBtns").onclick=addWater; $("qWater").onclick=addWater;
+$("waterBtns").onclick=addWater; $("qWater").onclick=addWater; $("wNudgeAdd").onclick=addWater;
+$("favs").onclick=ev=>{
+  if(ev.target.closest("#favEdit")){S.favEdit=!S.favEdit;renderFavs();return}
+  const b=ev.target.closest("[data-fav]"); if(!b) return;
+  if(S.favEdit){setFav(b.dataset.fav,false);return}
+  useFood(b.dataset.fav,1);
+  const nb=document.querySelector(`#favs [data-fav="${CSS.escape(b.dataset.fav)}"]`); if(nb){nb.classList.add("logged");setTimeout(()=>nb.classList.remove("logged"),700)}
+};
 $("qScan").onclick=()=>{
-  document.querySelector('#foodTabs [data-tab="scan"]').click();
-  $("hAdd").closest(".panel").scrollIntoView({behavior:calm?"auto":"smooth",block:"start"});
+  openAdd("scan");
   $("camBtn").click(); // starts the camera right away; falls back to photo/typing if it can't
 };
+function openAdd(tab){
+  $("addPanel").hidden=false;
+  document.querySelector(`#foodTabs [data-tab="${tab}"]`).click();
+  $("addPanel").scrollIntoView({behavior:calm?"auto":"smooth",block:"start"});
+}
+function closeAdd(){
+  $("addPanel").hidden=true; stopCam(); $("searchPick").innerHTML=""; $("searchResults").innerHTML=""; $("scanResult").innerHTML="";
+  $("searchMsg").textContent=SEARCH_HINT; MQ.list=[]; MQ.i=0;
+}
+$("addClose").onclick=closeAdd;
 $("qForm").onsubmit=ev=>{ev.preventDefault();
   const text=$("qIn").value.trim();
-  document.querySelector('#foodTabs [data-tab="search"]').click();
-  $("hAdd").closest(".panel").scrollIntoView({behavior:calm?"auto":"smooth",block:"start"});
-  if(!text){setTimeout(()=>$("sq").focus({preventScroll:true}),calm?0:350);return}
+  openAdd("search");
+  if(!text){$("qIn").focus();return}
   $("qIn").value=""; $("qIn").blur(); $("sq").value=text; $("searchForm").requestSubmit();
 };
 $("wUndo").onclick=async()=>{const d=await getDay(S.date);d.water.pop();saveDay(S.date);render()};
@@ -1058,8 +1190,45 @@ $("suppList").onclick=async ev=>{const b=ev.target.closest("[data-supp]");if(!b)
   if(d.supps[id]) delete d.supps[id]; else {d.supps[id]={dose:s?s.dose:"",at:S.date===todayKey()?now():""}; S.popSupp=id;}
   saveDay(S.date); render()};
 
-$("logList").onclick=async ev=>{const b=ev.target.closest("[data-del]");if(!b)return;
-  const d=await getDay(S.date);d.entries=d.entries.filter(e=>e.id!==b.dataset.del);saveDay(S.date);render()};
+function editHTML(e){
+  const v=x=>x==null||x===""?"":r1(+x);
+  return `<form class="item editing" data-edit="${e.id}" autocomplete="off">
+    <label class="f"><span class="lbl">Food</span><input name="n" value="${esc(e.name)}" required></label>
+    <div class="grid">
+      <label class="f"><span class="lbl">Amount ×</span><input name="x" type="number" min="0" step="0.25" value="1" inputmode="decimal"></label>
+      <label class="f"><span class="lbl p">Protein g</span><input name="p" type="number" min="0" step="0.1" value="${v(e.p)}" inputmode="decimal"></label>
+      <label class="f"><span class="lbl c">Carbs g</span><input name="c" type="number" min="0" step="0.1" value="${v(e.c)}" inputmode="decimal"></label>
+      <label class="f"><span class="lbl">Fat g</span><input name="f" type="number" min="0" step="0.1" value="${v(e.f)}" inputmode="decimal"></label>
+      <label class="f"><span class="lbl">kcal</span><input name="k" type="number" min="0" value="${e.kcal==null?"":Math.round(e.kcal)}" placeholder="auto" inputmode="numeric"></label>
+    </div>
+    <p class="hint">Change "Amount ×" to scale everything (2 = double, 0.5 = half), or edit any number directly.</p>
+    <div class="actions"><button class="primary" type="submit">Save</button><button type="button" class="chip ghost" data-edit-cancel>Cancel</button>
+      <button type="button" class="chip ghost" data-del="${e.id}" style="margin-left:auto;color:var(--warn)">Delete</button></div></form>`;
+}
+$("logList").addEventListener("input",ev=>{
+  const form=ev.target.closest("[data-edit]"); if(!form||ev.target.name!=="x") return;
+  const b=S.editBase, m=+ev.target.value; if(!(m>=0)) return;
+  form.p.value=r1(b.p*m); form.c.value=r1(b.c*m); form.f.value=r1(b.f*m); form.k.value=b.kcal==null?"":Math.round(b.kcal*m);
+});
+$("logList").addEventListener("submit",async ev=>{
+  const form=ev.target.closest("[data-edit]"); if(!form) return; ev.preventDefault();
+  const d=await getDay(S.date), e=d.entries.find(x=>x.id===form.dataset.edit); if(!e) return;
+  const m=+form.x.value||1; let name=form.n.value.trim()||e.name;
+  if(name===e.name&&m!==1){const pm=name.match(/^(\d+(?:\.\d+)?)× (.*)$/), n0=pm?+pm[1]:1, base=pm?pm[2]:name, n1=r1(n0*m); name=(n1!==1?n1+"× ":"")+base}
+  const num=x=>x===""?0:+x;
+  Object.assign(e,{name,p:num(form.p.value),c:num(form.c.value),f:num(form.f.value),kcal:form.k.value===""?null:+form.k.value});
+  S.editId=null; saveDay(S.date); render(); toast("Entry updated");
+});
+$("logList").onclick=async ev=>{
+  if(ev.target.closest("[data-edit-cancel]")){S.editId=null;render();return}
+  if(ev.target.closest("form.editing")&&!ev.target.closest("[data-del]")) return;
+  const it=ev.target.closest(".item"), delB=ev.target.closest("[data-del]"), starB=ev.target.closest("[data-star-entry]");
+  if(it&&!delB&&!starB){const d=await getDay(S.date), id=it.querySelector("[data-del]")?.dataset.del, e=d.entries.find(x=>x.id===id); if(!e) return;
+    S.editId=id; S.editBase={p:+e.p||0,c:+e.c||0,f:+e.f||0,kcal:e.kcal==null?null:+e.kcal}; render();
+    const f=document.querySelector(`[data-edit="${id}"]`); if(f){f.scrollIntoView({block:"nearest",behavior:calm?"auto":"smooth"}); f.x.focus({preventScroll:true}); f.x.select()} return}
+  const st=ev.target.closest("[data-star-entry]"); if(st){const d=await getDay(S.date),e=d.entries.find(x=>x.id===st.dataset.starEntry); if(e) favForEntry(e); return}
+  const b=ev.target.closest("[data-del]");if(!b)return;
+  const d=await getDay(S.date);d.entries=d.entries.filter(e=>e.id!==b.dataset.del);if(S.editId===b.dataset.del)S.editId=null;saveDay(S.date);render()};
 
 /* food tabs */
 $("foodTabs").onclick=ev=>{const b=ev.target.closest("[data-tab]");if(!b)return;
@@ -1067,7 +1236,7 @@ $("foodTabs").onclick=ev=>{const b=ev.target.closest("[data-tab]");if(!b)return;
   document.querySelectorAll("#foodTabs button").forEach(x=>x.setAttribute("aria-selected",x===b));
   ["search","manual","scan","saved"].forEach(t=>$("tab-"+t).hidden=t!==S.tab);
   if(S.tab==="saved")renderSaved();
-  if(S.tab==="search")$("sq").focus();
+  if(S.tab==="search"&&!$("searchResults").innerHTML)$("qIn").focus({preventScroll:true});
   if(S.tab!=="scan")stopCam();
 };
 
@@ -1076,12 +1245,13 @@ $("tab-manual").onsubmit=ev=>{ev.preventDefault();
   const name=$("mName").value.trim();if(!name)return;
   const e={name,p:+$("mP").value||0,c:+$("mC").value||0,f:+$("mF").value||0,kcal:$("mK").value===""?null:+$("mK").value};
   if($("mSave").checked)saveFood(e);
-  addEntry(e);ev.target.reset();
+  addEntry(e);ev.target.reset();closeAdd();
 };
 
 /* saved */
 $("savedFilter").oninput=renderSaved;
-$("savedList").onclick=ev=>{const b=ev.target.closest("[data-quick]");if(b)useFood(b.dataset.quick)};
+$("savedList").onclick=ev=>{const s=ev.target.closest("[data-star-saved]");if(s){setFav(s.dataset.starSaved,!S.foods.items[s.dataset.starSaved].fav);return}
+  const b=ev.target.closest("[data-quick]");if(b)useFood(b.dataset.quick)};
 
 /* ---------- food search ---------- */
 /* Approximate values from the chains' published US nutrition info. Chipotle items are per standard portion. */
@@ -1245,7 +1415,7 @@ function splitMeal(text){
 }
 const MQ={list:[],i:0};
 let lastResults=[], lastReq={amt:null,unit:null}, searchSeq=0;
-const SEARCH_HINT="Type what you ate, like \"2 nutty buddy\", \"slice of pizza\" or \"cup of tillamook ice cream\". The amount is worked out for you.";
+const SEARCH_HINT="Type what you ate in the bar at the top, like \"2 nutty buddy\", \"slice of pizza\" or \"cup of tillamook ice cream\". The amount is worked out for you.";
 function resHTML(r,i){return `<button type="button" class="res" data-ri="${i}"><span class="nm">${esc(r.name)}</span>
   <span class="sm">${esc(r.serving)}</span><span class="mac"><span class="p">${r1(r.p)}g P</span><br>${r.kcal??kcalOf(r)} kcal</span></button>`}
 function showResults(groups){
@@ -1318,12 +1488,15 @@ function openPick(r,isBest){
     ${r.src==="common"?`<p class="hint">Generic average. Brands vary, so pick a brand result if you see yours.</p>`:""}
     <div class="actions"><button class="primary" id="pkLog" type="button">Log it</button>
       <label class="hint" style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="pkSave" ${r.savedId?"disabled checked":""}> Save to my foods</label>
+      <button class="chip" id="pkFav" type="button" aria-pressed="false">☆ Favorite</button>
       <button class="chip ghost" id="pkClose" type="button">Cancel</button></div></div>`;
   const calc=()=>{const a=+$("pkAmt").value||0, u=$("pkUnit").value;
     if(u==="g"){const k=a/100;return {p:r1(r.per100.p*k),c:r1(r.per100.c*k),f:r1(r.per100.f*k),kcal:Math.round(r.per100.k*k),label:a+" g "}}
     return {p:r1(r.p*a),c:r1(r.c*a),f:r1(r.f*a),kcal:r.kcal!=null?Math.round(r.kcal*a):null,label:a!==1?r1(a)+"× ":""}};
   const show=()=>{const m=calc();$("pkMac").innerHTML=`<span class="p">${m.p}g protein</span><span class="c">${m.c}g carbs</span><span>${m.f}g fat</span><span>${m.kcal??kcalOf(m)} kcal</span>`};
   $("pkAmt").oninput=show;
+  let favOn=false;
+  $("pkFav").onclick=()=>{favOn=!favOn;$("pkFav").setAttribute("aria-pressed",favOn);$("pkFav").textContent=favOn?"★ Favorite":"☆ Favorite"};
   $("pkUnit").onchange=()=>{ if($("pkUnit").value==="g") $("pkAmt").value=Math.round((+$("pkAmt").value||1)*(r.grams||100)); else $("pkAmt").value=r1((+$("pkAmt").value||100)/(r.grams||100))||1; show()};
   show();
   $("pkClose").textContent=MQ.list.length&&MQ.i<MQ.list.length-1?"Skip":"Cancel";
@@ -1331,10 +1504,13 @@ function openPick(r,isBest){
   $("pkLog").onclick=()=>{const m=calc(); if(!(+$("pkAmt").value>0)) return;
     if($("pkSave").checked&&!r.savedId) saveFood({name:r.name,serving:r.serving,p:r.p,c:r.c,f:r.f,kcal:r.kcal});
     if(r.savedId){const f=S.foods.items[r.savedId]; if(f){f.used=(f.used||0)+1;save("foods",S.foods)}}
+    if(favOn){const one=$("pkUnit").value==="serv"&&+$("pkAmt").value===1;
+      const fid=one&&r.savedId?r.savedId:saveFood(one?{name:r.name,serving:r.serving,p:r.p,c:r.c,f:r.f,kcal:r.kcal}:{name:(m.label+r.name).trim(),serving:"as logged",p:m.p,c:m.c,f:m.f,kcal:m.kcal});
+      S.foods.items[fid].fav=true; save("foods",S.foods)}
     addEntry({name:m.label+r.name,p:m.p,c:m.c,f:m.f,kcal:m.kcal,src:r.src==="saved"?"saved":"search"});
     $("searchPick").innerHTML=""; $("searchResults").innerHTML=""; $("sq").value=""; lastReq={amt:null,unit:null};
     $("searchMsg").textContent=SEARCH_HINT;
-    if(!nextInMeal()&&$("hAdd").getBoundingClientRect().top<0) window.scrollTo({top:0,behavior:calm?"auto":"smooth"});
+    if(!nextInMeal()) closeAdd();
   };
   $("searchPick").scrollIntoView({block:"nearest",behavior:calm?"auto":"smooth"});
 }
@@ -1434,7 +1610,7 @@ async function showCode(code){
       <div class="macros"><span class="p">${r1(+f.p||0)}g protein</span><span class="c">${r1(+f.c||0)}g carbs</span><span>${r1(+f.f||0)}g fat</span><span>${kcalOf(f)} kcal</span></div>
       <div class="actions"><div class="stepper"><span class="lbl">Servings</span><div class="f"><input id="servIn" type="number" min="0.25" step="0.25" value="1" inputmode="decimal" aria-label="Servings"></div></div>
       <button class="primary" id="logScan">Log it</button></div></div>`;
-    $("logScan").onclick=()=>{useFood(id,+$("servIn").value||1);$("scanResult").innerHTML=""};
+    $("logScan").onclick=()=>{useFood(id,+$("servIn").value||1);closeAdd()};
     return;
   }
   let off=null;
@@ -1461,7 +1637,7 @@ async function showCode(code){
   $("newProd").onsubmit=ev=>{ev.preventDefault();
     const f={name:$("npName").value.trim(),serving:$("npServ").value.trim(),p:+$("npP").value||0,c:+$("npC").value||0,f:+$("npF").value||0,
       kcal:$("npK").value===""?null:+$("npK").value,code};
-    if(!f.name)return; saveFood(f,id); useFood(id,1); $("scanResult").innerHTML="";
+    if(!f.name)return; saveFood(f,id); useFood(id,1); closeAdd();
   };
 }
 
