@@ -549,6 +549,32 @@ details.panel[open] summary h3::after{content:" −"}
 .rlhead{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .rlhead .hint{margin:0;min-width:0}
 #recListWrap{display:flex;flex-direction:column;gap:12px}
+.rscale{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:2px 0 10px}
+.sstep{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:var(--bg)}
+.sstep button{border:0;background:transparent;width:36px;height:34px;font-size:18px;font-weight:700;color:var(--ink)}
+.sstep button:disabled{opacity:.3}
+.sstep b{min-width:28px;text-align:center;font-family:var(--mono);font-variant-numeric:tabular-nums}
+.sopts{display:flex;flex-wrap:wrap;gap:5px}
+.sopts .rtag{padding:4px 10px;font-size:12.5px}
+.rfz{border:1px solid color-mix(in srgb,var(--water) 40%,var(--line));background:color-mix(in srgb,var(--water) 7%,transparent);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+.rfz p{margin:0;font-size:14px;max-width:62ch}
+.frzsec{display:flex;flex-direction:column;gap:6px}
+.frzsec h4{margin:4px 0 0;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.frow{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;padding:8px 0;border-top:1px solid var(--line)}
+.frzsec h4+.frow{border-top:0}
+.frow .del{grid-row:auto;grid-column:auto}
+.fname{display:flex;align-items:center;gap:10px;border:0;background:none;text-align:left;padding:0;min-width:0;color:var(--ink)}
+.fname .si{font-size:20px;width:32px;height:32px;flex:none;display:grid;place-items:center;border-radius:8px;background:color-mix(in srgb,var(--mc) 14%,transparent)}
+.fname b{display:block;font-size:14.5px}
+.fname small{display:block;font-size:12px;color:var(--muted)}
+.fname small.late{color:var(--warn)}
+.shop{border:1px solid var(--line);border-radius:8px;padding:6px 12px 12px;display:flex;flex-direction:column}
+.shop h5{margin:10px 0 4px;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.shop ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+.shop label{display:flex;gap:10px;align-items:flex-start;padding:5px 0;font-size:14.5px;cursor:pointer}
+.shop input{width:18px;height:18px;margin-top:2px;accent-color:var(--good);flex:none}
+.shop input:checked+span{text-decoration:line-through;color:var(--muted)}
+.shop .chip{align-self:flex-start;margin-top:8px}
 .rfbox{display:flex;flex-direction:column;gap:12px;border:1px solid var(--line);border-radius:8px;padding:12px}
 .rsum{margin:0}
 #recFiltBtn[aria-expanded="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
@@ -906,6 +932,7 @@ details.panel[open] summary h3::after{content:" −"}
         <button type="button" class="rtag" data-rt="light" aria-pressed="false">Under 400 cal</button>
         <button type="button" class="rtag" data-rt="quick" aria-pressed="false">15 min or less</button>
         <button type="button" class="rtag" data-rt="prep" aria-pressed="false">Meal prep</button>
+        <button type="button" class="rtag" data-rt="freezer" aria-pressed="false">❄️ Freezer-friendly</button>
         <button type="button" class="rtag" data-rt="veg" aria-pressed="false">Vegetarian</button>
         <button type="button" class="rtag" data-rt="sweet" aria-pressed="false">Sweet</button>
         <button type="button" class="rtag" data-rt="saved" aria-pressed="false">♥ Saved</button>
@@ -919,6 +946,10 @@ details.panel[open] summary h3::after{content:" −"}
     </div>
 
     <div id="recDetail" hidden></div>
+  </section>
+  <section class="panel" id="frzPanel" aria-labelledby="hFrz">
+    <div class="ph"><h3 id="hFrz">Freezer plan</h3><span class="meta" id="frzMeta">Batch cook and freeze</span></div>
+    <div id="frzBody"></div>
   </section>
   <section class="panel" aria-labelledby="hMyRec">
     <div class="ph"><h3 id="hMyRec">My recipes</h3><button type="button" class="chip" id="recNew">+ New recipe</button></div>
@@ -1161,7 +1192,7 @@ details.panel[open] summary h3::after{content:" −"}
 
 <script>
 (() => {
-const APP_VERSION="3.13.0";
+const APP_VERSION="3.14.0";
 const REPO="kefirman9000/fuel-log";
 const $ = id => document.getElementById(id);
 const OZ=29.5735, LB=0.45359237, IN=2.54;
@@ -2770,7 +2801,7 @@ function openPick(r,isBest){
 let RECIPES=null, recLoad=null;
 const RF={mode:"browse",back:"browse",meal:"all",tags:new Set(),cuisine:"",pro:"",q:"",open:null,scroll:0};
 const MEALN={breakfast:"Breakfast",lunch:"Lunch",dinner:"Dinner",snack:"Snack"};
-const RTAGN={protein:"High protein",light:"Under 400 cal",veg:"Vegetarian",quick:"Quick",prep:"Meal prep",sweet:"Sweet"};
+const RTAGN={protein:"High protein",light:"Under 400 cal",veg:"Vegetarian",quick:"Quick",prep:"Meal prep",sweet:"Sweet",freezer:"Freezer-friendly"};
 const PRON={chicken:"Chicken",beef:"Beef",pork:"Pork",turkey:"Turkey",seafood:"Fish & seafood",eggs:"Eggs",dairy:"Yogurt & dairy",plant:"Plant-based"};
 const CUIS=["American","Mexican","Italian","Asian","Mediterranean","Indian"];
 const mealCol=m=>(MEALS.find(x=>x[0]===m)||[])[3]||"var(--line)";
@@ -2812,9 +2843,9 @@ function recFiltered(list,L,fav){
     &&[...RF.tags].every(t=>t==="fit"?L.kl!=null&&fitScore(r,L)>=0:t==="saved"?fav.has(r.id):r.tags.includes(t)));
 }
 const anyFilter=()=>RF.meal!=="all"||RF.tags.size||RF.cuisine||RF.pro;
-function cardHTML(r){return `<button type="button" class="scard" data-rid="${r.id}" style="--mc:${mealCol(r.meal)}">
+function cardHTML(r,st){return `<button type="button" class="scard" data-rid="${r.id}" style="--mc:${mealCol(r.meal)}">
   <span class="si" aria-hidden="true">${foodIcon(r.name)}</span><span class="sn">${esc(r.name)}</span>
-  <span class="sk"><b>${r.n.kcal}</b> ${CU()} · <span class="p">${Math.round(r.n.p)}g P</span></span><span class="st">${r.mins} min</span></button>`}
+  <span class="sk"><b>${r.n.kcal}</b> ${CU()} · <span class="p">${Math.round(r.n.p)}g P</span></span><span class="st">${st||r.mins+" min"}${!st&&r.fz?" · ❄️":""}</span></button>`}
 function rowHTML(r,extra){const fav=recFavs().has(r.id);
   return `<button type="button" class="rrow" data-rid="${r.id}" style="--mc:${mealCol(r.meal)}">
     <span class="si" aria-hidden="true">${foodIcon(r.name)}</span>
@@ -2833,8 +2864,10 @@ function renderBrowse(list,L,fav){
   if(L.kl!=null&&L.ate){right=right.filter(r=>fitScore(r,L)>=0).sort((a,b)=>fitScore(b,L)-fitScore(a,L))}
   else right=[...right].sort((a,b)=>b.n.p/b.n.kcal-a.n.p/a.n.kcal);
   const by=f=>list.filter(f), cnt=(k,v)=>list.filter(r=>r[k]===v).length;
+  const stash=frzStash().map(x=>({x,r:list.find(r=>r.id===x.id)})).filter(o=>o.r);
   $("recBrowse").innerHTML=
-    shelf(L.ate&&L.kl!=null?`${mn} ideas that fit`:`${mn} ideas for now`,right,{meal:now,tags:L.ate&&L.kl!=null?["fit"]:[]},L.ate&&L.kl!=null&&L.kl>0?`${Math.round(L.kl).toLocaleString()} ${CU()} left`:"")
+    (stash.length?`<section class="shelf"><div class="shead"><h4>❄️ In your freezer</h4><span class="ssub">Tap one to log a portion</span></div><div class="srow">${stash.map(o=>cardHTML(o.r,`${o.x.n} left`)).join("")}</div></section>`:"")
+    +shelf(L.ate&&L.kl!=null?`${mn} ideas that fit`:`${mn} ideas for now`,right,{meal:now,tags:L.ate&&L.kl!=null?["fit"]:[]},L.ate&&L.kl!=null&&L.kl>0?`${Math.round(L.kl).toLocaleString()} ${CU()} left`:"")
     +shelf("♥ Saved",by(r=>fav.has(r.id)),{tags:["saved"]})
     +`<section class="shelf"><div class="shead"><h4>Browse</h4></div>
       <div class="chiprow" aria-label="By cuisine">${CUIS.filter(c=>cnt("cuisine",c)).map(c=>`<button type="button" class="bchip" data-see='${JSON.stringify({cuisine:c})}'>${c} <small>${cnt("cuisine",c)}</small></button>`).join("")}</div>
@@ -2847,6 +2880,7 @@ function renderBrowse(list,L,fav){
     +shelf("High protein",by(r=>r.tags.includes("protein")).sort((a,b)=>b.n.p-a.n.p),{tags:["protein"]},"25 g+ per meal")
     +shelf("Ready in 15 minutes",by(r=>r.tags.includes("quick")),{tags:["quick"]})
     +shelf("Meal prep",by(r=>r.tags.includes("prep")),{tags:["prep"]},"Cook once, eat all week")
+    +shelf("❄️ Freezer-friendly",by(r=>r.fz),{tags:["freezer"]},"Batch cook, freeze, reheat")
     +shelf("Under 400 calories",by(r=>r.tags.includes("light")&&r.meal!=="snack"),{tags:["light"]})
     +shelf("Vegetarian",by(r=>r.tags.includes("veg")),{tags:["veg"]});
 }
@@ -2857,7 +2891,8 @@ function renderList(list,L,fav){
     terms=ingTerms(q);
     if(terms.length>=2) ingMode=true;
     else{const ws=qwords(q), hit=rs.filter(r=>{const toks=toksOf(r.name+" "+r.ing.join(" ")); return ws.every(w=>toks.some(x=>tokSame(w,x))||exactHit(w,toks)||wordHit(w,toks))});
-      if(!hit.length&&ws.length>=2){ingMode=true; terms=ws.map(w=>({label:w,ws:[w]}))} else rs=hit}
+      if(!hit.length&&ws.length>=2){ingMode=true; terms=ws.map(w=>({label:w,ws:[w]}))}
+      else{const inName=r=>{const t=toksOf(r.name); return ws.filter(w=>t.some(x=>tokSame(w,x))).length}; rs=[...hit].sort((a,b)=>inName(b)-inName(a))}}
   }
   let extras={};
   if(ingMode){
@@ -2888,7 +2923,8 @@ function recBody(r){
       <button type="button" class="chip heart" data-rfav="${r.id}" aria-pressed="${fav}">${fav?"♥ Saved":"♡ Save"}</button>
       <button type="button" class="chip ghost" data-rsave="${r.id}">Add to My foods</button>
     </div>
-    <div><h4>Ingredients</h4><ul>${r.ing.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>
+    ${freezerBox(r)}
+    <div><h4>Ingredients</h4>${scaleHTML(r)}<ul id="ringl-${r.id}">${ingHTML(r)}</ul></div>
     <div><h4>Steps</h4><ol>${r.steps.map(x=>`<li>${esc(x)}</li>`).join("")}</ol></div>
     ${r.tip?`<p class="rtip">${esc(r.tip)}</p>`:""}
   </div>`;
@@ -2917,7 +2953,7 @@ async function renderRecipes(){
   if($("recCuisine").options.length<2){
     $("recCuisine").innerHTML=`<option value="">Any</option>`+CUIS.map(c=>`<option>${c}</option>`).join("");
     $("recPro").innerHTML=`<option value="">Any</option>`+Object.entries(PRON).map(([k,v])=>`<option value="${k}">${v}</option>`).join("")}
-  markRecFilters();
+  markRecFilters(); renderFreezer(list);
   const L=dayLeft(), fav=recFavs(), today=S.date===todayKey();
   if(L.kl!=null&&L.ate){$("recLeft").hidden=false;
     $("recLeft").innerHTML=L.kl>0?`You have <b>${Math.round(L.kl).toLocaleString()} ${CU()}</b>${L.pl>0?` and <b>${Math.round(L.pl)} g protein</b>`:""} left ${today?"today":"on "+esc(niceDate(S.date))}.`
@@ -2959,6 +2995,156 @@ $("view-recipes").addEventListener("click",async ev=>{
     saveFood({name:r.name,serving:"1 serving",p:n.p,c:n.c,f:n.f,kcal:n.kcal,fi:n.fi,su:n.su,na:n.na});
     toast("Added to My foods. Type its name in the bar to log it.")}
 });
+
+/* ---- scaling: "Making 2 servings" rewrites the ingredient amounts; nutrition per serving doesn't change ---- */
+const FRAC=[[1/8,"1/8"],[1/4,"1/4"],[1/3,"1/3"],[1/2,"1/2"],[2/3,"2/3"],[3/4,"3/4"]];
+function fmtQty(x){
+  if(!(x>0)) return "0"; if(x>=10) return String(Math.round(x));
+  let w=Math.floor(x+1e-9), f=x-w;
+  if(f<.07) return String(w); if(f>.93) return String(w+1);
+  const b=FRAC.reduce((a,c)=>Math.abs(c[0]-f)<Math.abs(a[0]-f)?c:a);
+  return w?w+" "+b[1]:b[1];
+}
+function parseQ(m){m=m.trim(); let x; if((x=m.match(/^(\d+)\s+(\d+)\/(\d+)$/))) return +x[1]+x[2]/x[3]; if((x=m.match(/^(\d+)\/(\d+)$/))) return x[1]/x[2]; return +m}
+const QTY_RE=/(\d+\s+\d+\/\d+|\d+\/\d+|\d*\.\d+|\d+)(\s*-?\s*)([a-zA-Z]+)/g;
+const PLU={can:"cans",cup:"cups",clove:"cloves",slice:"slices",scoop:"scoops",link:"links",stalk:"stalks",fillet:"fillets",pita:"pitas",tortilla:"tortillas",egg:"eggs",banana:"bananas",block:"blocks",head:"heads",bunch:"bunches",bag:"bags"};
+const SING=Object.fromEntries(Object.entries(PLU).map(([a,b])=>[b,a]));
+const WHOLE=new Set(["large","medium","small","egg","eggs","onion","red","bell","banana","bananas","avocado","apple","lemon","lime","cucumber","carrot","carrots","sweet","tomatoes","tomato","whole","corn","hard","salmon","tilapia","cod","sirloin"]);
+/* Scales one amount and keeps it readable: 1/6 lb becomes 3 oz, 1/8 cup becomes 2 tbsp, whole things round to halves. */
+function scaleAmt(v,unit){
+  const u=unit.toLowerCase();
+  if(u==="lb"||u==="lbs"){if(v<1) return [fmtQty(Math.max(.5,Math.round(v*16*2)/2)),"oz"]; return [fmtQty(Math.round(v*4)/4),"lb"]}
+  if(u==="cup"||u==="cups"){if(v<.25){const tb=v*16; return tb<1?[fmtQty(Math.max(.25,Math.round(tb*3*4)/4)),"tsp"]:[fmtQty(Math.round(tb*2)/2),"tbsp"]} const c=v>=1?Math.round(v*4)/4:v; return [fmtQty(c),c>1?"cups":"cup"]}
+  if(u==="tbsp"){if(v<1) return [fmtQty(Math.max(.25,Math.round(v*3*4)/4)),"tsp"]; if(v>=4) return scaleAmt(v/16,"cup"); return [fmtQty(Math.round(v*2)/2),"tbsp"]}
+  if(u==="tsp"){if(v>=3) return scaleAmt(v/3,"tbsp"); return [fmtQty(Math.max(.125,v)),"tsp"]}
+  if(u==="oz") return [fmtQty(Math.round(v*2)/2),"oz"];
+  if(WHOLE.has(u)||PLU[u]||SING[u]){const r=/^(eggs?|large|medium|small)$/.test(u)&&v>=.75?Math.max(1,Math.round(v)):v>=1?Math.round(v*2)/2:v; const base=SING[u]||u; return [fmtQty(r),PLU[base]&&r>1?PLU[base]:(PLU[u]||SING[u])?base:unit]}
+  return [fmtQty(v),unit];
+}
+/* Amounts in parentheses ("(6 oz each)", "(8 inch)") describe one item, so they stay as they are. */
+function scaleLine(t,k){
+  if(k===1) return t;
+  const out=t.split(/(\([^)]*\))/).map(seg=>seg.startsWith("(")?seg:seg.replace(QTY_RE,(m,num,sp,unit)=>{const [q,u]=scaleAmt(parseQ(num)*k,unit); return q+(sp||" ")+u})).join("");
+  return fixNouns(out);
+}
+const NOUN={fillet:"fillets",tortilla:"tortillas",clove:"cloves",pita:"pitas",egg:"eggs",banana:"bananas",link:"links",slice:"slices",stalk:"stalks",pepper:"peppers",potato:"potatoes",
+  tomato:"tomatoes",onion:"onions",carrot:"carrots",lemon:"lemons",lime:"limes",avocado:"avocados",cucumber:"cucumbers",apple:"apples",zucchini:"zucchini",breast:"breasts",thigh:"thighs",muffin:"muffins",cake:"cakes"};
+const NOUN_PL=Object.fromEntries(Object.entries(NOUN).map(([a,b])=>[b,a]));
+const MEASURE=/^(cans?|cups?|tbsp|tsp|lbs?|oz|blocks?|bags?|heads?|bunch(es)?|pinch|handful|scoops?|g|ml)$/i;
+/* Makes the noun after an amount agree with it: "1 salmon fillets" -> "1 salmon fillet", "2 onion" -> "2 onions". Nouns after a measure ("1 can diced tomatoes") are left alone. */
+function fixNouns(t){
+  return t.replace(/(^|[\s,])(\d+\s+\d+\/\d+|\d+\/\d+|\d*\.\d+|\d+)((?:\s+[A-Za-z-]+){1,3})/g,(m,a,num,rest)=>{
+    const ws=rest.trim().split(/\s+/); if(MEASURE.test(ws[0])) return m;
+    const many=parseQ(num)>1, i=ws.findIndex(w=>NOUN[w.toLowerCase()]||NOUN_PL[w.toLowerCase()]); if(i<0) return m;
+    const lw=ws[i].toLowerCase(); ws[i]=many?(NOUN[lw]||lw):(NOUN_PL[lw]||lw);
+    return a+num+" "+ws.join(" ")});
+}
+const RMAKE={};
+const makeN=r=>RMAKE[r.id]||r.serves;
+function ingHTML(r){const k=makeN(r)/r.serves; return r.ing.map(x=>`<li>${esc(scaleLine(x,k))}</li>`).join("")}
+function scaleHTML(r){
+  const n=makeN(r), opts=[...new Set([1,2,r.serves,r.serves*2,r.serves*3])].filter(x=>x<=48).sort((a,b)=>a-b);
+  return `<div class="rscale" id="rscale-${r.id}">
+    <span class="lbl">Making</span>
+    <span class="sstep"><button type="button" data-rsc="-1" aria-label="Fewer servings"${n<=1?" disabled":""}>−</button><b>${n}</b><button type="button" data-rsc="1" aria-label="More servings"${n>=48?" disabled":""}>+</button></span>
+    <span class="hint">serving${n>1?"s":""}</span>
+    <span class="sopts">${opts.map(o=>`<button type="button" class="rtag" data-rsn="${o}" aria-pressed="${o===n}">${o===1?"Just me":o===r.serves?"Original":o===r.serves*2?"Double":o===r.serves*3?"Triple":o}${o!==r.serves&&o!==1?"":""}</button>`).join("")}</span>
+    ${n!==r.serves?`<p class="rnote" style="flex-basis:100%">Amounts scaled from the original ${r.serves} serving${r.serves>1?"s":""}. Nutrition per serving stays the same.</p>`:""}
+  </div>`;
+}
+
+/* ---- freezer plan: pick recipes and portions, shop from one list, then log portions from your freezer ---- */
+const frzPlan=()=>load("frzPlan")||[], frzStash=()=>load("frzStash")||[];
+function addMonths(k,m){const d=parseKey(k); d.setMonth(d.getMonth()+m); return keyOf(d)}
+function freezerBox(r){
+  if(!r.fz) return "";
+  const inPlan=frzPlan().find(p=>p.id===r.id), st=frzStash().find(s=>s.id===r.id);
+  return `<div class="rfz"><p><b>❄️ Freezes well</b> for up to ${r.fz.m} month${r.fz.m>1?"s":""}. ${esc(r.fz.how)}</p>
+    <div class="ract">${inPlan?`<button type="button" class="chip" data-goto-frz>In your freezer plan (${inPlan.n}) →</button>`
+      :`<button type="button" class="chip" data-fzadd="${r.id}">+ Add to freezer plan</button>`}
+    ${st?`<button type="button" class="primary" data-fzlog="${r.id}">Log one from the freezer (${st.n} left)</button>`:""}</div></div>`;
+}
+const SHOP_CATS=[["Produce",/\b(onions?|peppers?|garlic|tomato(?!es, canned)|tomatoes|spinach|broccoli|carrots?|celery|potato(es)?|zucchini|lettuce|romaine|cabbage|avocados?|bananas?|berries|blueberries|strawberries|raspberries|lemons?|limes?|cilantro|parsley|ginger|asparagus|green beans|cucumbers?|mushrooms|apples?|kale|green onions?|dill|basil|snap peas)\b/i],
+  ["Meat & fish",/\b(chicken|beef|turkey|pork|salmon|shrimp|cod|tilapia|sausage|steak|sirloin|tuna|bacon)\b/i],
+  ["Dairy & eggs",/\b(eggs?|milk|yogurt|cheese|cheddar|feta|mozzarella|parmesan|cottage|butter|tzatziki|cotija)\b/i]];
+function shopCat(t){if(/\bcans?\b|canned|dry |dried|frozen|broth|sauce|salsa|powder|seasoning|oil\b|honey|syrup|flour|crumbs/i.test(t)) return "Pantry & frozen"; for(const [c,re] of SHOP_CATS) if(re.test(t)) return c; return "Pantry & frozen"}
+function shopList(list){
+  const map=new Map();
+  frzPlan().forEach(p=>{const r=list.find(x=>x.id===p.id); if(!r) return; const k=p.n/r.serves;
+    r.ing.forEach(t=>{
+      const m=t.match(/^(\d+\s+\d+\/\d+|\d+\/\d+|\d*\.\d+|\d+)\s+(.*)$/);
+      if(!m||/\b(each|and|,)\b.*\d/.test(m[2])){const s=scaleLine(t,k), key="x|"+norm(s); if(!map.has(key)) map.set(key,{text:s}); return}
+      const rest=m[2], key=norm(rest.split(",")[0]), q=parseQ(m[1])*k, e=map.get(key);
+      if(e&&e.q!=null) e.q+=q; else map.set(key,{q,rest})});
+  });
+  const out={}; [...map.values()].forEach(e=>{const text=e.q!=null?scaleLine("1 "+e.rest,e.q):e.text; (out[shopCat(text)]=out[shopCat(text)]||[]).push(text)});
+  return ["Produce","Meat & fish","Dairy & eggs","Pantry & frozen"].filter(c=>out[c]).map(c=>[c,out[c].sort()]);
+}
+function renderFreezer(list){
+  const plan=frzPlan(), stash=frzStash(), byId=id=>list.find(r=>r.id===id), today=todayKey();
+  const tot=plan.reduce((s,p)=>s+p.n,0), portions=stash.reduce((s,x)=>s+x.n,0);
+  $("frzMeta").textContent=portions?`${portions} portion${portions>1?"s":""} in your freezer`:"Batch cook and freeze";
+  let h="";
+  if(!plan.length&&!stash.length) h=`<p class="hint">Pick freezer-friendly recipes, choose how many portions of each, and get one combined shopping list. After you cook, the portions go into your freezer stash so you can log one in a tap.</p>
+    <button type="button" class="chip" data-see='{"tags":["freezer"]}'>See ${list.filter(r=>r.fz).length} freezer-friendly recipes →</button>`;
+  if(plan.length){
+    h+=`<div class="frzsec"><h4>This batch</h4>${plan.map(p=>{const r=byId(p.id); if(!r) return "";
+      return `<div class="frow" style="--mc:${mealCol(r.meal)}"><button type="button" class="fname" data-rid="${r.id}"><span class="si" aria-hidden="true">${foodIcon(r.name)}</span><span><b>${esc(r.name)}</b><small>${r.n.kcal} ${CU()} · ${Math.round(r.n.p)}g P per portion · keeps ${r.fz?r.fz.m:"?"} mo</small></span></button>
+        <span class="sstep"><button type="button" data-fzn="${r.id}|-1" aria-label="Fewer portions"${p.n<=1?" disabled":""}>−</button><b>${p.n}</b><button type="button" data-fzn="${r.id}|1" aria-label="More portions">+</button></span>
+        <button type="button" class="del" data-fzrm="${r.id}" aria-label="Remove ${esc(r.name)}">×</button></div>`}).join("")}
+      <p class="hint">${tot} portion${tot>1?"s":""} from ${plan.length} recipe${plan.length>1?"s":""}. Amounts in the list are scaled to these portions.</p>
+      <div class="ract"><button type="button" class="secondary" id="frzShopBtn" aria-expanded="${!!S.frzShop}">${S.frzShop?"Hide shopping list":"Shopping list"}</button>
+        <button type="button" class="primary" id="frzCooked">${S.frzSure?"Tap again to confirm":"Mark as cooked"}</button>
+        <button type="button" class="chip ghost" data-see='{"tags":["freezer"]}'>+ Add more</button></div>`;
+    if(S.frzShop){const ck=load("frzChecks")||{};
+      h+=`<div class="shop" id="frzShop">${shopList(list).map(([c,items])=>`<h5>${c}</h5><ul>${items.map(t=>`<li><label><input type="checkbox" data-fzck="${esc(t)}"${ck[t]?" checked":""}> <span>${esc(t)}</span></label></li>`).join("")}</ul>`).join("")}
+        <button type="button" class="chip ghost" id="frzCopy">Copy list</button></div>`}
+    h+=`</div>`;
+  }
+  if(stash.length){
+    h+=`<div class="frzsec"><h4>In your freezer</h4>${stash.map(x=>{const r=byId(x.id); if(!r) return ""; const by=addMonths(x.made,r.fz?r.fz.m:3), late=by<today;
+      return `<div class="frow" style="--mc:${mealCol(r.meal)}"><button type="button" class="fname" data-rid="${r.id}"><span class="si" aria-hidden="true">${foodIcon(r.name)}</span><span><b>${esc(r.name)}</b><small class="${late?"late":""}">${x.n} left · ${late?"past its best since":"best by"} ${parseKey(by).toLocaleDateString(undefined,{month:"short",day:"numeric"})}</small></span></button>
+        <button type="button" class="chip" data-fzlog="${r.id}">Log one</button>
+        <button type="button" class="del" data-fzdec="${r.id}" aria-label="Remove one portion without logging">−</button></div>`}).join("")}</div>`;
+  }
+  $("frzBody").innerHTML=h;
+}
+function frzSet(plan){save("frzPlan",plan); S.frzSure=false}
+async function frzLog(id){
+  const r=(RECIPES||[]).find(x=>x.id===id), st=frzStash(), i=st.findIndex(x=>x.id===id); if(!r||i<0) return;
+  const n=r.n; await addEntry({name:r.name,p:n.p,c:n.c,f:n.f,kcal:n.kcal,fi:n.fi,su:n.su,na:n.na,src:"freezer"});
+  st[i].n--; if(st[i].n<=0) st.splice(i,1); save("frzStash",st); renderRecipes();
+}
+$("view-recipes").addEventListener("click",async ev=>{
+  const t=ev.target, list=RECIPES||[];
+  const sc=t.closest("[data-rsc],[data-rsn]");
+  if(sc&&RF.open){const r=list.find(x=>x.id===RF.open); if(!r) return;
+    RMAKE[r.id]=Math.max(1,Math.min(48,sc.dataset.rsn?+sc.dataset.rsn:makeN(r)+ +sc.dataset.rsc));
+    $("rscale-"+r.id).outerHTML=scaleHTML(r); $("ringl-"+r.id).innerHTML=ingHTML(r); return}
+  const add=t.closest("[data-fzadd]");
+  if(add){const r=list.find(x=>x.id===add.dataset.fzadd); if(!r) return; const p=frzPlan();
+    if(!p.find(x=>x.id===r.id)) p.push({id:r.id,n:Math.max(makeN(r),r.serves)}); frzSet(p);
+    toast(`Added to your freezer plan (${Math.max(makeN(r),r.serves)} portions)`); renderRecipes(); return}
+  if(t.closest("[data-goto-frz]")){RF.open=null; RF.mode=RF.back; await renderRecipes(); $("frzPanel").scrollIntoView({behavior:calm?"auto":"smooth"}); return}
+  const fn=t.closest("[data-fzn]");
+  if(fn){const [id,d]=fn.dataset.fzn.split("|"), p=frzPlan(), x=p.find(y=>y.id===id); if(x){x.n=Math.max(1,Math.min(99,x.n+ +d)); frzSet(p); renderFreezer(list)} return}
+  const rm=t.closest("[data-fzrm]");
+  if(rm){frzSet(frzPlan().filter(y=>y.id!==rm.dataset.fzrm)); renderFreezer(list); return}
+  if(t.closest("#frzShopBtn")){S.frzShop=!S.frzShop; renderFreezer(list); return}
+  if(t.closest("#frzCooked")){
+    if(!S.frzSure){S.frzSure=true; renderFreezer(list); setTimeout(()=>{if(S.frzSure){S.frzSure=false; renderFreezer(RECIPES||[])}},4000); return}
+    const st=frzStash(), plan=frzPlan(), today=todayKey(); let n=0;
+    plan.forEach(p=>{n+=p.n; const e=st.find(x=>x.id===p.id); if(e){e.n+=p.n; e.made=today} else st.push({id:p.id,n:p.n,made:today})});
+    save("frzStash",st); frzSet([]); save("frzChecks",{}); S.frzShop=false;
+    toast(`${n} portions added to your freezer`); renderFreezer(list); return}
+  if(t.closest("#frzCopy")){
+    const txt=shopList(list).map(([c,items])=>c+"\n"+items.map(x=>"- "+x).join("\n")).join("\n\n");
+    navigator.clipboard.writeText(txt).then(()=>toast("Shopping list copied")).catch(()=>{const sel=getSelection(), rg=document.createRange(); rg.selectNodeContents($("frzShop")); sel.removeAllRanges(); sel.addRange(rg); toast("Selected. Copy it from the menu.")}); return}
+  const lg=t.closest("[data-fzlog]"); if(lg){frzLog(lg.dataset.fzlog); return}
+  const dec=t.closest("[data-fzdec]");
+  if(dec){const st=frzStash(), i=st.findIndex(x=>x.id===dec.dataset.fzdec); if(i>=0){st[i].n--; if(st[i].n<=0) st.splice(i,1); save("frzStash",st); renderFreezer(list)} return}
+});
+$("view-recipes").addEventListener("change",ev=>{const c=ev.target.closest("[data-fzck]"); if(!c) return; const ck=load("frzChecks")||{}; if(c.checked) ck[c.dataset.fzck]=1; else delete ck[c.dataset.fzck]; save("frzChecks",ck)});
 
 /* Your own recipes: one ingredient per line, matched to foods, saved to My foods with nutrition per serving. */
 let RB={lines:[],editId:null};

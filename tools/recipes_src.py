@@ -418,3 +418,43 @@ META = {
 for _r in RECIPES:
     if _r["id"] in META:
         _r["cuisine"], _r["pro"], _r["sweet"] = META[_r["id"]]
+
+# Freezer-friendly recipes: (months it keeps, how to freeze and reheat)
+FREEZE = {
+ "breakfast-burritos": (3, "Wrap each burrito in foil and freeze. Unwrap and microwave 2 to 2 1/2 minutes, turning once."),
+ "egg-muffins": (2, "Freeze on a tray, then bag. Microwave 60 to 90 seconds."),
+ "protein-pancakes": (2, "Freeze flat with parchment between pancakes. Reheat in the toaster or microwave 45 seconds."),
+ "egg-sausage-muffin": (2, "Wrap each sandwich in parchment and freeze. Microwave 90 seconds wrapped in a paper towel."),
+ "chicken-burrito-bowl": (2, "Freeze the chicken, rice, beans and corn in containers. Add the lettuce, salsa and avocado after reheating."),
+ "lentil-soup": (3, "Cool, then freeze in portions. Reheat on the stove or microwave 3 to 4 minutes, stirring halfway."),
+ "black-bean-soup": (3, "Freeze in portions. Reheat until steaming and add the yogurt after."),
+ "chicken-noodle-soup": (3, "Freeze the soup without the noodles. Add freshly cooked noodles when you reheat."),
+ "turkey-chili": (3, "Freeze in portions. Reheat from frozen on the stove, or thaw overnight and microwave."),
+ "turkey-meatballs": (3, "Freeze the meatballs in sauce. Cook pasta fresh when you reheat."),
+ "stuffed-peppers": (3, "Freeze before the cheese goes on. Bake from frozen at 375°F (190°C) for 40 to 45 minutes, adding cheese at the end."),
+ "chickpea-curry": (3, "Freeze the curry in portions. Make rice fresh or freeze it separately."),
+ "lighter-tikka-masala": (3, "Freeze the curry in portions with or without rice. Microwave 3 to 4 minutes, stirring halfway."),
+ "lighter-bolognese": (3, "Freeze the sauce. Cook pasta fresh when you reheat."),
+ "lentil-bolognese": (3, "Freeze the sauce. Cook pasta fresh when you reheat."),
+ "red-lentil-dal": (3, "Freeze in portions. Add a splash of water when reheating, since it thickens."),
+ "salsa-verde-pork": (3, "Freeze the shredded pork in its sauce. Reheat and serve over rice and beans."),
+ "beef-broccoli": (2, "Freeze with the rice in portions. The broccoli softens a little after freezing."),
+ "pineapple-teriyaki": (2, "Freeze with the rice in portions. Microwave 3 minutes."),
+ "kung-pao-chicken": (2, "Freeze without the peanuts, with the rice in portions. Add the peanuts after reheating."),
+ "baked-chicken-parm": (2, "Freeze the cooked chicken with sauce and cheese. Bake from frozen at 375°F (190°C) for 25 minutes."),
+ "sheet-pan-chicken": (2, "Freeze in portions. Reheat in the oven or microwave. The vegetables soften a little."),
+ "sausage-sheet-pan": (2, "Freeze in portions. Reheat in a hot oven or skillet to crisp the potatoes back up."),
+ "egg-roll-bowl": (2, "Freeze in portions. Microwave 2 to 3 minutes."),
+ "greek-turkey-burgers": (3, "Freeze the cooked patties with parchment between them. Reheat in a pan or microwave. Add the tzatziki and vegetables fresh."),
+ "chicken-fajitas": (2, "Freeze the chicken and pepper filling. Warm tortillas and add salsa and yogurt fresh."),
+ "lean-beef-tacos": (3, "Freeze the seasoned beef. Add the toppings fresh."),
+ "taco-lettuce-wraps": (3, "Freeze the seasoned turkey. Add the lettuce and toppings fresh."),
+ "protein-bites": (3, "Freeze in a bag. Thaw 10 minutes, or eat straight from the freezer."),
+ "banana-oat-cookies": (3, "Freeze in a bag. Thaw 15 minutes or warm 15 seconds."),
+ "date-energy-balls": (3, "Freeze in a bag. Thaw 10 minutes."),
+ "berry-yogurt-bark": (2, "Keep it frozen. Eat straight from the freezer."),
+ "frozen-banana-bites": (1, "Keep them frozen. Eat straight from the freezer."),
+}
+for _r in RECIPES:
+    if _r["id"] in FREEZE:
+        _r["freeze"] = FREEZE[_r["id"]]

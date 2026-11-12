@@ -8,7 +8,9 @@ marked None are not counted.
 """
 import json, os, sys
 sys.path.insert(0, os.path.dirname(__file__))
-from recipes_src import RECIPES
+from recipes_src import RECIPES, FREEZE
+unknown = set(FREEZE) - {r["id"] for r in RECIPES}
+assert not unknown, f"FREEZE has unknown recipe ids: {unknown}"
 
 root = os.path.join(os.path.dirname(__file__), "..")
 foods = {r[0]: r for r in json.load(open(os.path.join(root, "foods.json")))["foods"]}
@@ -33,10 +35,11 @@ for r in RECIPES:
     if r["mins"] <= 15: tags.append("quick")
     if r["serves"] >= 4: tags.append("prep")
     if r.get("sweet"): tags.append("sweet")
+    if r.get("freeze"): tags.append("freezer")
     if not r.get("cuisine") or not r.get("pro"):
         missing.append((r["id"], "cuisine/pro"))
     out.append({k: r[k] for k in ("id", "name", "meal", "mins", "serves", "cuisine", "pro") if k in r} |
-               {"ing": [i[0] for i in r["ing"]], "ik": [i for i, x in enumerate(r["ing"]) if x[1]], "steps": r["steps"], **({"tip": r["tip"]} if r.get("tip") else {}), "n": n, "tags": tags})
+               {"ing": [i[0] for i in r["ing"]], "ik": [i for i, x in enumerate(r["ing"]) if x[1]], "steps": r["steps"], **({"tip": r["tip"]} if r.get("tip") else {}), **({"fz": {"m": r["freeze"][0], "how": r["freeze"][1]}} if r.get("freeze") else {}), "n": n, "tags": tags})
 if missing:
     raise SystemExit("Not in foods.json:\n" + "\n".join(f"  {a}: {b}" for a, b in missing))
 json.dump({"source": "Original Fuel Log recipes. Nutrition computed from USDA SR26 and FNDDS values in foods.json; salt and spices not counted.",
