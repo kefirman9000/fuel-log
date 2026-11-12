@@ -1210,7 +1210,7 @@ details.panel[open] summary h3::after{content:" −"}
 
 <script>
 (() => {
-const APP_VERSION="3.15.0";
+const APP_VERSION="3.15.1";
 const REPO="kefirman9000/fuel-log";
 const $ = id => document.getElementById(id);
 const OZ=29.5735, LB=0.45359237, IN=2.54;
@@ -2070,9 +2070,42 @@ function setView(v){
   $("datebar").style.visibility=v==="today"?"visible":"hidden";
   if(v!=="today") stopCam();
   if(v==="me") renderMe(); else if(v==="history"){render();renderHistory()} else if(v==="recipes") renderRecipes(); else render();
-  window.scrollTo({top:0});
+  window.scrollTo({top:0}); navSync();
 }
-$("nav").onclick=ev=>{const b=ev.target.closest("[data-view]");if(b)setView(b.dataset.view)};
+/* ---------- back button: every screen is a history entry, so the phone's back button moves through the app
+   (recipe -> results -> Recipes -> Today) instead of leaving it ---------- */
+const NAV={popping:false,after:null,stack:[{k:"today",d:0}]};
+try{history.replaceState({k:"today",d:0},"")}catch(e){}
+const rfSnap=()=>({meal:RF.meal,tags:[...RF.tags],cuisine:RF.cuisine,pro:RF.pro,q:RF.q});
+function navState(){const st={k:S.view}; if(S.view==="recipes"){st.rm=RF.mode; st.rf=rfSnap(); if(RF.mode==="detail"){st.rid=RF.open; st.back=RF.back}} if(!$("addPanel").hidden) st.add=1; return st}
+const navDepth=st=>st.k==="today"?(st.add?1:0):st.k!=="recipes"?1:st.rm==="detail"?3:st.rm==="list"?2:1;
+const sameScreen=(a,b)=>!!a&&!!b&&a.k===b.k&&(a.rm||"")===(b.rm||"")&&(a.rid||"")===(b.rid||"")&&!!a.add===!!b.add&&(a.rm!=="list"||JSON.stringify(a.rf)===JSON.stringify(b.rf));
+function navSync(){
+  if(NAV.popping) return;
+  const cur=history.state||NAV.stack[NAV.stack.length-1], next=navState(), d=cur.d||0;
+  if(sameScreen(cur,next)||(cur.k===next.k&&cur.rm==="list"&&next.rm==="list")){next.d=d; next.scroll=cur.scroll; history.replaceState(next,""); NAV.stack[d]=next; return}
+  if(navDepth(next)>navDepth(cur)){next.d=d+1; history.pushState(next,""); NAV.stack.length=d+1; NAV.stack.push(next); return}
+  // going back up to the screen we came from: use the real back step so the history stays in order
+  const prev=NAV.stack[d-1]; if(d>0&&prev&&prev.k===next.k&&(prev.rm||"")===(next.rm||"")&&(prev.rid||"")===(next.rid||"")&&!!prev.add===!!next.add){history.back(); return}
+  next.d=d; history.replaceState(next,""); NAV.stack[d]=next;
+}
+/* Bottom tabs go back to Today first, so back from any tab lands on Today and back from Today leaves the app. */
+function goTab(v){const d=(history.state&&history.state.d)||0; if(d>0){NAV.after=v; history.go(-d); return} setView(v)}
+addEventListener("popstate",ev=>{
+  const st=ev.state||{k:"today",d:0};
+  NAV.stack.length=(st.d||0)+1; NAV.stack[st.d||0]=st;
+  if(NAV.after){const v=NAV.after; NAV.after=null; if(!$("addPanel").hidden){NAV.popping=true; closeAdd(); NAV.popping=false} setView(v); return}
+  NAV.popping=true;
+  try{
+    if(!st.add&&!$("addPanel").hidden) closeAdd();
+    if(st.k==="recipes"){const f=st.rf||{}; RF.meal=f.meal||"all"; RF.tags=new Set(f.tags||[]); RF.cuisine=f.cuisine||""; RF.pro=f.pro||""; RF.q=f.q||"";
+      RF.mode=st.rm||"browse"; RF.open=st.rm==="detail"?st.rid:null; if(st.back) RF.back=st.back}
+    if(S.view!==(st.k||"today")) setView(st.k||"today");
+    else if(st.k==="recipes") renderRecipes().then(()=>window.scrollTo({top:st.scroll||0}));
+    if(st.add&&$("addPanel").hidden) openAdd("search");
+  }finally{NAV.popping=false}
+});
+$("nav").onclick=ev=>{const b=ev.target.closest("[data-view]");if(b)goTab(b.dataset.view)};
 document.addEventListener("click",ev=>{const b=ev.target.closest("[data-goto]");if(b)setView(b.dataset.goto)});
 
 async function goDay(n){
@@ -2110,11 +2143,11 @@ function openAdd(tab){
   $("addPanel").hidden=false;
   document.querySelector(`#foodTabs [data-tab="${tab}"]`).click();
   const q=document.querySelector(".quick"), y=$("addPanel").getBoundingClientRect().top+scrollY-q.offsetHeight-16;
-  window.scrollTo({top:Math.max(0,y),behavior:calm?"auto":"smooth"});
+  window.scrollTo({top:Math.max(0,y),behavior:calm?"auto":"smooth"}); navSync();
 }
 function closeAdd(){
   $("addPanel").hidden=true; stopCam(); $("searchPick").innerHTML=""; $("searchResults").innerHTML=""; $("scanResult").innerHTML="";
-  $("searchMsg").textContent=SEARCH_HINT; MQ.list=[]; MQ.i=0; S.clarify=false; S.pendingMeal=null;
+  $("searchMsg").textContent=SEARCH_HINT; MQ.list=[]; MQ.i=0; S.clarify=false; S.pendingMeal=null; navSync();
 }
 $("addClose").onclick=closeAdd;
 $("qIn").addEventListener("input",()=>{const f=document.querySelector(".qfield"); f.classList.toggle("has",!!$("qIn").value.trim()); f.classList.remove("nudge")});
@@ -2987,14 +3020,16 @@ async function renderRecipes(){
   else $("recLeft").hidden=true;
   if(RF.mode==="detail"&&RF.open){const r=list.find(x=>x.id===RF.open); if(r){
     $("recBrowse").hidden=true; $("recListWrap").hidden=true; $("recDetail").hidden=false; $("recForm").hidden=true; $("recQHint").hidden=true; $("recLeft").hidden=true;
-    $("recMeta").textContent=""; renderDetail(r); return}}
+    $("recMeta").textContent=""; renderDetail(r); navSync(); return}}
   RF.mode=RF.q.trim()||anyFilter()?"list":"browse";
   $("recDetail").hidden=true; $("recForm").hidden=false;
   $("recBrowse").hidden=RF.mode!=="browse"; $("recListWrap").hidden=RF.mode!=="list";
   $("recQHint").hidden=!!RF.q.trim();
   if(RF.mode==="browse"){$("recMeta").textContent=`${list.length} recipes`; renderBrowse(list,L,fav)} else renderList(list,L,fav);
+  navSync();
 }
-function openRecipe(id){RF.back=RF.mode==="list"?"list":"browse"; RF.scroll=scrollY; RF.open=id; RF.mode="detail";
+function openRecipe(id){RF.back=RF.mode==="list"?"list":"browse"; RF.scroll=scrollY;
+  try{const st=history.state; if(st){st.scroll=scrollY; history.replaceState(st,"")}}catch(e){} RF.open=id; RF.mode="detail";
   renderRecipes().then(()=>{const v=$("view-recipes"); window.scrollTo({top:Math.max(0,v.getBoundingClientRect().top+scrollY-90)})})}
 $("recMeal").onclick=ev=>{const b=ev.target.closest("[data-meal]"); if(!b) return; RF.meal=b.dataset.meal; renderRecipes()};
 $("recTags").onclick=ev=>{const b=ev.target.closest("[data-rt]"); if(!b) return; const t=b.dataset.rt; RF.tags.has(t)?RF.tags.delete(t):RF.tags.add(t); renderRecipes()};
