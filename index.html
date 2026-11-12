@@ -854,9 +854,11 @@ details.panel[open] summary h3::after{content:" −"}
   </section>
 
   <details class="panel">
-    <summary class="ph"><h3>Food search</h3><span class="meta">Where lookups come from</span></summary>
-    <p class="hint">Searches check your saved foods, a built-in list of common restaurant items, the USDA FoodData Central database (brand-name and generic foods), and Open Food Facts. USDA's shared demo key allows about 30 searches an hour. For more, get a free key at api.data.gov/signup and paste it here.</p>
+    <summary class="ph"><h3>Food search</h3><span class="meta">Sources, learning and saved results</span></summary>
+    <p class="hint">Searches check what you've taught it, your saved foods, about 3,200 built-in everyday foods (USDA), common restaurant items, the USDA FoodData Central database (brand-name and generic foods), and Open Food Facts. USDA's shared demo key allows about 30 searches an hour. For more, get a free key at api.data.gov/signup and paste it here.</p>
     <div class="actions"><div class="f" style="flex:1;min-width:200px"><input id="fdcKey" placeholder="USDA API key (optional)" aria-label="USDA API key"></div><button class="secondary" id="fdcSave" type="button">Save key</button></div>
+    <p class="hint" id="learnInfo"></p>
+    <div class="actions"><button class="secondary" id="learnClear" type="button">Forget learned matches</button><button class="secondary" id="cacheClear" type="button">Clear saved search results</button></div>
   </details>
 
   <details class="panel">
@@ -965,7 +967,7 @@ details.panel[open] summary h3::after{content:" −"}
 
 <script>
 (() => {
-const APP_VERSION="3.7.0";
+const APP_VERSION="3.8.0";
 const REPO="kefirman9000/fuel-log";
 const $ = id => document.getElementById(id);
 const OZ=29.5735, LB=0.45359237, IN=2.54;
@@ -1323,7 +1325,11 @@ function renderSuppManage(){
 function renderEntryMode(){document.querySelectorAll("#entryModeOpts [data-em]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.em===entryMode()))}
 $("entryModeOpts").onclick=ev=>{const b=ev.target.closest("[data-em]");if(!b)return;S.settings.entryMode=b.dataset.em;saveSettings();renderEntryMode();
   toast(b.dataset.em==="auto"?"Foods go straight in when the app is sure":"You'll check each food before it's logged")};
-function renderMe(){renderEntryMode();fillProfile();renderPlan();renderSuppManage();renderBadges();$("verMeta").textContent="Version "+APP_VERSION}
+function renderLearnInfo(){const n=Object.keys(learned()).length, c=Object.keys(load("fcache")||{}).length;
+  $("learnInfo").textContent=`The app has learned ${n} phrase${n===1?"":"s"} from your picks and corrections, and remembers ${c} online search${c===1?"":"es"} so they work offline. It also has ${DBF.length.toLocaleString()} common foods built in from USDA data.`}
+$("learnClear").onclick=()=>{save("learn",{});renderLearnInfo();toast("Learned matches cleared")};
+$("cacheClear").onclick=()=>{save("fcache",{});renderLearnInfo();toast("Saved search results cleared")};
+function renderMe(){renderEntryMode();renderLearnInfo();fillProfile();renderPlan();renderSuppManage();renderBadges();$("verMeta").textContent="Version "+APP_VERSION}
 
 /* ---------- actions ---------- */
 function toast(msg){const t=$("toast"); if(t.classList.contains("act")&&t.classList.contains("show")) return;
@@ -1890,6 +1896,8 @@ $("logList").addEventListener("submit",async ev=>{
   if(name===e.name&&m!==1){const pm=name.match(/^(\d+(?:\.\d+)?)× (.*)$/), n0=pm?+pm[1]:1, base=pm?pm[2]:name, n1=r1(n0*m); name=(n1!==1?n1+"× ":"")+base}
   const num=x=>x===""?0:+x;
   Object.assign(e,{name,meal:form.meal.value,p:num(form.p.value),c:num(form.c.value),f:num(form.f.value),kcal:form.k.value===""?null:+form.k.value});
+  if(e.q&&e.qa){const n=e.qa*m; e.qa=n; const per=x=>x==null?null:r1(x/n);
+    learnPick(e.q,{name:e.name.replace(/^\d+(?:\.\d+)?× /,""),serving:"1 serving (your correction)",p:per(e.p),c:per(e.c),f:per(e.f),kcal:e.kcal==null?null:Math.round(e.kcal/n)})}
   S.editId=null; saveDay(S.date); render(); toast("Entry updated");
 });
 $("logList").onclick=async ev=>{
@@ -1962,7 +1970,7 @@ const LOCAL=[
 const COMMON=[
   ["Ice cream, vanilla","1 cup (132 g)",132,4.6,31,14.5,273],["Frozen yogurt","1 cup (174 g)",174,6,38,6,221],
   ["White rice, cooked","1 cup (158 g)",158,4.3,45,.4,205],["Brown rice, cooked","1 cup (195 g)",195,4.5,46,1.6,218],
-  ["Pasta, cooked","1 cup (140 g)",140,8,43,1.3,220],["Oatmeal, cooked","1 cup (234 g)",234,5.9,28,3.6,166],
+  ["Pasta, cooked (spaghetti, penne, macaroni)","1 cup (140 g)",140,8,43,1.3,220],["Oatmeal, cooked","1 cup (234 g)",234,5.9,28,3.6,166],
   ["Chicken breast, cooked","4 oz (112 g)",112,35,0,4,187],["Ground beef 80/20, cooked","4 oz (112 g)",112,29,0,20,307],
   ["Salmon, cooked","4 oz (112 g)",112,25,0,14,233],["Tuna, canned in water","1 can drained (113 g)",113,26,0,1,120],
   ["Egg, large","1 egg (50 g)",50,6.3,.4,4.8,72],["Bacon","1 slice (8 g)",8,3,.1,3.3,43],
@@ -1975,7 +1983,9 @@ const COMMON=[
   ["Pizza, cheese","1 slice (107 g)",107,12,36,10,285],["Pizza, pepperoni","1 slice (111 g)",111,13,36,13,313],["Orange juice","1 cup (248 g)",248,1.7,26,.5,112],
   ["Cola soda","1 can (12 fl oz)",368,0,39,0,140],["Coffee, black","1 cup (240 g)",240,.3,0,0,2],["Coffee with milk","1 cup (250 g)",250,1,1.5,1,22],["Coffee with cream","1 cup with 1 tbsp half and half",255,.5,1,3.5,42],
   ["Coffee with sugar","1 cup with 1 tsp sugar",244,.3,4.2,0,18],["Coffee with cream and sugar","1 cup",259,.5,5,3.5,58],["Tea with honey","1 cup with 1 tbsp honey",261,0,17,0,64],
-  ["Diet soda","1 can (12 fl oz)",355,0,0,0,0],["Sports drink","20 fl oz bottle",591,0,34,0,140],["Granola bar","1 bar (24 g)",24,2,16,4,110],["Mozzarella sticks, fried (appetizer)","1 stick (30 g)",30,4.5,8,5.2,95],["Mini Babybel cheese","1 piece (21 g)",21,5,0,6,70],["Protein bar","1 bar (60 g)",60,20,23,8,230],["Cream cheese","2 tbsp (29 g)",29,1.7,1.6,9.8,99],
+  ["Diet soda","1 can (12 fl oz)",355,0,0,0,0],["Sports drink","20 fl oz bottle",591,0,34,0,140],["Granola bar","1 bar (24 g)",24,2,16,4,110],["Steak, sirloin, cooked","4 oz (113 g)",113,34,0,7.3,207],["Turkey sandwich","1 sandwich",150,22,32,11,320],["Ham sandwich","1 sandwich",155,18,34,15,350],
+  ["Grilled cheese sandwich","1 sandwich",120,15,30,24,390],["Peanut butter and jelly sandwich","1 sandwich",110,12,43,18,376],["Chicken sandwich (grilled)","1 sandwich",200,30,38,9,350],
+  ["Chili with beans (chili con carne)","1 cup (253 g)",253,15,30,14,287],["Chili, no beans","1 cup (247 g)",247,17,12,17,270],["Mozzarella sticks, fried (appetizer)","1 stick (30 g)",30,4.5,8,5.2,95],["Mini Babybel cheese","1 piece (21 g)",21,5,0,6,70],["Protein bar","1 bar (60 g)",60,20,23,8,230],["Cream cheese","2 tbsp (29 g)",29,1.7,1.6,9.8,99],
   ["Butter","1 tbsp (14 g)",14,.1,0,11.5,102],["Toast, white","1 slice (28 g)",28,2.6,14,1,75],["French fries","1 medium (117 g)",117,4,48,17,365],
   ["Sausage patty","1 patty (27 g)",27,5,.3,8,96],["Pancake","1 pancake (38 g)",38,2.4,11,3.5,86],["Hard-boiled egg","1 egg (50 g)",50,6.3,.6,5.3,78],["Beer, regular","1 can (12 fl oz)",356,1.6,12.6,0,153],
 ].map(([name,serving,g,p,c,f,k])=>({name,serving,g,v:[p,c,f,k],common:true}));
@@ -1992,7 +2002,9 @@ const SNACKS=[
 const UNITS={cup:"cup",cups:"cup",c:"cup",tbsp:"tbsp",tablespoon:"tbsp",tablespoons:"tbsp",tbs:"tbsp",tsp:"tsp",teaspoon:"tsp",teaspoons:"tsp",
   oz:"oz",ounce:"oz",ounces:"oz",g:"g",gram:"g",grams:"g",lb:"lb",lbs:"lb",pound:"lb",slice:"slice",slices:"slice",piece:"piece",pieces:"piece",strip:"slice",strips:"slice",pc:"piece",pcs:"piece",
   scoop:"scoop",scoops:"scoop",bowl:"bowl",bowls:"bowl",bar:"bar",bars:"bar",serving:"serving",servings:"serving",can:"can",cans:"can",bottle:"bottle",bottles:"bottle",
-  glass:"glass",glasses:"glass",ml:"ml",milliliter:"ml",milliliters:"ml",l:"l",liter:"l",liters:"l",litre:"l",litres:"l",handful:"handful",plate:"plate",container:"container",pint:"pint",pints:"pint",egg:"egg",eggs:"egg"};
+  glass:"glass",glasses:"glass",mug:"mug",mugs:"mug",spoonful:"spoonful",spoonfuls:"spoonful",spoon:"spoonful",splash:"splash",shot:"shot",shots:"shot",dash:"dash",pinch:"pinch",
+  handfuls:"handful",plates:"plate",plateful:"plate",bowlful:"bowl",ml:"ml",milliliter:"ml",milliliters:"ml",l:"l",liter:"l",liters:"l",litre:"l",litres:"l",handful:"handful",plate:"plate",container:"container",pint:"pint",pints:"pint",egg:"egg",eggs:"egg"};
+const SIZES=new Set(["small","medium","large","big","little","mini","jumbo","regular","huge","xl"]);
 const WORDNUM={a:1,an:1,one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10,eleven:11,twelve:12,dozen:12,couple:2,few:3,quarter:.25,half:.5,"½":.5,"¼":.25,"¾":.75};
 const toNum=w=>{if(/^\d+(\.\d+)?$/.test(w))return +w; if(/^\d+\/\d+$/.test(w)){const[a,b]=w.split("/").map(Number);return b?a/b:null} return WORDNUM[w]??null};
 function parseQuery(raw){
@@ -2001,12 +2013,54 @@ function parseQuery(raw){
   if(t.length>1&&toNum(t[0])!=null){amt=toNum(t[0]);t.shift();
     if(t.length>1&&/^\d+\/\d+$/.test(t[0])){amt+=toNum(t[0]);t.shift()}
     if(t[0]==="and"&&t[1]==="a"&&t[2]==="half"){amt+=.5;t.splice(0,3)}}
+  let size=null;
+  const takeSize=()=>{if(t[0]==="big"&&/^(mac|breakfast)/.test(t[1]||"")) return; if(t.length>1&&(t[0]==="extra"||t[0]==="x")&&/^(large|big)$/.test(t[1])){size="extra large";t.splice(0,2);return}
+    if(t.length>1&&SIZES.has(t[0])){size=t[0];t.shift()}};
+  takeSize();
   if(t.length>1&&UNITS[t[0]]&&UNITS[t[0]]!=="egg"){unit=UNITS[t[0]];t.shift();if(amt==null)amt=1}
+  if(!size){while(t.length>1&&t[0]==="of") t.shift(); takeSize()}
   while(t.length>1&&["of","some","the","my","side","order","bit"].includes(t[0])) t.shift();
   const mx=t.length>1&&t[t.length-1].match(/^(?:x|×)(\d+(?:\.\d+)?)$/); if(mx&&amt==null){amt=+mx[1];t.pop()}
   const q=spellFix(applyAlias(t.join(" ").trim()));
-  return {amt,unit,q:q||raw.trim()};
+  return {amt,unit,size,q:q||raw.trim()};
 }
+/* ---------- built-in USDA foods: ~3,200 everyday foods from SR26 (public domain), loaded from foods.json ---------- */
+let DBF=[];
+const CHAIN_RE=/^(McDonald's|Burger King|Wendy's|Taco Bell|Pizza Hut|Domino's|Papa John's|Little Caesars|Kfc|Popeyes|Subway|Denny's|Applebee's|Olive Garden|Cracker Barrel|Carrabba's|On The Border|T\.G\.I\. Friday's|Dairy Queen|Arby's|Sonic|Jack In The Box|Starbucks|Chick-Fil-A|Chick-fil-A|Restaurant, (?:Chinese|Italian|Mexican|Latino|family style))/i;
+const fmtAmt=a=>a===.5?"1/2":a===.25?"1/4":a===.75?"3/4":a===1/3||String(a).startsWith("0.33")?"1/3":String(r1(a));
+function defMeasure(ms){
+  if(!ms||!ms.length) return null;
+  const pri=[/^(medium|large|small|extra large)\b/,/^(slice|piece|item|serving|sandwich|burger|patty|bar|cookie|link|strip|fillet|container|bagel|muffin|pancake|waffle|tortilla|taco|burrito|egg|order|pizza|cone|bun|roll|biscuit|donut|doughnut|wrap|breast|thigh|drumstick|wing|stick|packet|pouch|can|bottle|fruit)/,/^cup\b/,/^tbsp/,/^oz/];
+  for(const re of pri){const m=ms.find(x=>re.test(x[1].toLowerCase())); if(m) return m}
+  return ms[0];
+}
+async function loadDB(){
+  try{const r=await fetch("foods.json"); if(!r.ok) return; const j=await r.json();
+    DBF=j.foods.map(([name,alias,k,p,c,f,fi,su,na,ms])=>{const dm=defMeasure(ms), g=dm?dm[2]:100, q=g/100, ch=name.match(CHAIN_RE);
+      const o={name,key:name+" "+(alias||""),serving:dm?`${fmtAmt(dm[0])} ${dm[1]} (${Math.round(g)} g)`:"100 g",g,v:[r1(p*q),r1(c*q),r1(f*q),Math.round(k*q)],
+        per100:{p,c,f,k,fi,su,na},measures:ms,db:true,chain:ch?norm(ch[1]).split(" ")[0]:null};
+      if(fi!=null) o.fi=r1(fi*q); if(su!=null) o.su=r1(su*q); if(na!=null) o.na=Math.round(na*q); return o});
+    VOCAB=null;
+  }catch(e){}
+}
+
+/* ---------- learned matches: what you picked or corrected for a phrase is used next time ---------- */
+const learnKey=q=>norm(q).split(" ").filter(w=>w.length>1&&!STOP.has(w)).join(" ");
+function learned(){return load("learn")||{}}
+function learnPick(q,r){
+  if(!q||!r) return; const L=learned(), k=learnKey(q); if(!k) return;
+  const keep=["name","serving","p","c","f","kcal","fi","su","na","per100","grams","measures"];
+  L[k]=Object.fromEntries(keep.filter(x=>r[x]!=null).map(x=>[x,r[x]])); L[k].t=Date.now();
+  const keys=Object.keys(L); if(keys.length>400){keys.sort((a,b)=>L[a].t-L[b].t).slice(0,keys.length-400).forEach(x=>delete L[x])}
+  save("learn",L);
+}
+
+/* ---------- remembered online results: repeat searches are instant and work offline ---------- */
+function cacheGet(k){const C=load("fcache")||{}, e=C[k]; return e&&Date.now()-e.t<60*864e5?e.items:null}
+function cachePut(k,items){const C=load("fcache")||{}; C[k]={t:Date.now(),items:items.slice(0,10)};
+  const keys=Object.keys(C); if(keys.length>200){keys.sort((a,b)=>C[a].t-C[b].t).slice(0,keys.length-200).forEach(x=>delete C[x])}
+  try{localStorage.setItem("fuel:fcache",JSON.stringify(C))}catch(e){try{localStorage.removeItem("fuel:fcache")}catch(_){}}}
+
 /* "2/3 cup (88 g)" -> {qty:.667, unit:"cup"} */
 function servInfo(s){
   const m=String(s||"").toLowerCase().match(/^\s*(\d+\s+\d+\/\d+|\d+\/\d+|\d+(?:\.\d+)?)\s*([a-z]+)/); if(!m) return null;
@@ -2035,11 +2089,12 @@ const ALIAS=[[/\bdiet (coke|pepsi|soda)\b/,"diet soda"],[/\b(coke|pepsi|coca col
   [/\b(chick ?fil ?a|chickfila|cfa)\b/,"chick-fil-a"],[/\bza\b/,"pizza"],[/\b(sammy|sammich|sando)\b/,"sandwich"],[/\b(java|cup of joe|joe)\b/,"coffee"],
   [/\b(h2o|agua)\b/,"water"],[/\bstarbs\b/,"starbucks"],[/\b(nuggies|nugs)\b/,"nuggets"],[/\bfroyo\b/,"frozen yogurt"],[/\b(avo)\b/,"avocado"],[/\bspuds?\b/,"potato"],
   [/\b(polly ?-?o|pollyo|polly)\b/,"polly-o"],[/\bpolly-o (?:mozz\w* )?(?:string )?(?:cheese )?(?:sticks?)?\b/,"polly-o string cheese "],
-  [/\b(babybel|baby bel)\b/,"babybel cheese"],[/\b(laughing cow)\b/,"laughing cow cheese"],[/\bhamburgers?\b/,"burger"],[/\bbrekkie\b/,"breakfast"],[/\bpbr\b/,"beer"]];
+  [/\b(babybel|baby bel)\b/,"babybel cheese"],[/\b(laughing cow)\b/,"laughing cow cheese"],[/\b(big mac|mc ?(?:chicken|muffin|flurry|rib|double|nuggets?|griddles?)|quarter pounder|filet-o-fish|egg mcmuffin)\b/,"mcdonald's $1"],[/\bwhopper\b/,"burger king whopper"],[/\bgrilled cheese\b(?! sandwich)/,"grilled cheese sandwich"],
+  [/\b(frosty|baconator)\b/,"wendy's $1"],[/\b(crunchwrap|chalupa|gordita|doritos locos)\b/,"taco bell $1"],[/\bmcdonald's mcdonald's\b/,"mcdonald's"],[/\bhamburgers?\b/,"burger"],[/\bbrekkie\b/,"breakfast"],[/\bpbr\b/,"beer"]];
 /* Fix misspelled words before searching online ("mozzerella" -> "mozzarella"), using known food words and brands. */
 const EXTRA_WORDS="mozzarella cheddar parmesan provolone swiss american ricotta feta gouda brie string cheese sticks yogurt oatmeal cereal granola cheerios frosted flakes waffles waffle pancakes sausage ham turkey salami pepperoni hotdog bratwurst burrito quesadilla nachos tortilla chips doritos cheetos pringles pretzels crackers goldfish ritz oreo oreos cookies cookie brownie muffin croissant donut doughnut bagel english biscuit biscuits sandwich burger cheeseburger wings tenders nuggets spaghetti lasagna macaroni ravioli noodles ramen sushi teriyaki curry salmon shrimp tilapia steak pork chicken broccoli spinach lettuce cucumber tomato potato potatoes sweet carrots celery peppers onion onions mushrooms avocado guacamole salsa hummus almonds cashews peanuts walnuts pistachios raisins strawberries blueberries raspberries grapes watermelon pineapple mango peach pear cherries banana bananas apple apples orange oranges smoothie milkshake latte cappuccino espresso frappuccino gatorade powerade monster lemonade kombucha protein whey casein creatine jerky popcorn edamame tofu quinoa couscous lentils chickpeas beans rice pasta bread toast butter honey syrup jelly nutella ketchup mayonnaise mustard ranch dressing gravy soup chili stew salad wrap pita naan pizza calzone cupcake cheesecake pie cream gelato sherbet popsicle chocolate vanilla caramel cinnamon pudding applesauce coffee milk water juice soda beer wine tillamook kraft sargento chobani fage oikos yoplait dannon quest clif kind fairlife kelloggs nabisco hostess debbie nutty buddy tombstone digiorno totinos lunchables starbucks dunkin wendys chipotle subway popeyes arbys panera babybel".split(" ");
 let VOCAB=null;
-function vocab(){if(VOCAB) return VOCAB; VOCAB=new Set(EXTRA_WORDS); [...LOCAL,...COMMON,...SNACKS].forEach(x=>norm(x.name).split(" ").forEach(w=>{if(w.length>2) VOCAB.add(w)})); return VOCAB}
+function vocab(){if(VOCAB) return VOCAB; VOCAB=new Set(EXTRA_WORDS); [...LOCAL,...COMMON,...SNACKS,...DBF].forEach(x=>norm(x.name).split(" ").forEach(w=>{if(w.length>2) VOCAB.add(w)})); return VOCAB}
 function spellFix(q){
   const V=vocab();
   return q.split(" ").map(w=>{const n=w.toLowerCase(); if(n.length<5||V.has(n)||/\d/.test(n)||V.has(n.replace(/e?s$/,""))) return w;
@@ -2047,7 +2102,7 @@ function spellFix(q){
     for(const v of V){if(Math.abs(v.length-n.length)>max) continue; const d=typoDist(n,v,max); if(d<bd){bd=d;best=v; if(d===1&&max===1) break}}
     return best&&bd<=max?best:w}).join(" ");
 }
-function applyAlias(q){let s=" "+q.toLowerCase()+" "; ALIAS.forEach(([re,to])=>{s=s.replace(re,to)}); return s.replace(/\s+/g," ").trim()}
+function applyAlias(q){if(/^\s*chickens?\s*$/i.test(q)) q="chicken breast"; let s=" "+q.toLowerCase()+" "; ALIAS.forEach(([re,to])=>{s=s.replace(re,to)}); return s.replace(/\s+/g," ").trim()}
 
 /* Clean everyday phrasing: "I had a couple eggs for breakfast" -> "2 eggs", meal = breakfast */
 function cleanText(raw){
@@ -2102,19 +2157,28 @@ function understand(raw){
   }
   return out;
 }
-const hits=(words,name)=>{const toks=norm(name).split(" ");return words.filter(w=>wordHit(w,toks)).length};
+const exactHit=(w,toks)=>toks.some(t=>t===w||t===w.replace(/e?s$/,"")||t.replace(/e?s$/,"")===w||(w.length>=4&&t.startsWith(w)));
+const hits=(words,name)=>{const toks=norm(name).split(" ");return words.reduce((s,w)=>s+(exactHit(w,toks)?1:wordHit(w,toks)?.9:0),0)};
 function localMatches(q){
   const words=qwords(q); if(!words.length) return [];
   const score=n=>hits(words,n);
   const need=Math.min(2,words.length);
+  const out=[];
+  const L=learned()[learnKey(q)];
+  if(L) out.push({...L,src:"learned"});
   const saved=Object.entries(S.foods.items).map(([id,f])=>({id,f,s:score(f.name)})).filter(x=>x.s>=need).sort((a,b)=>b.s-a.s).slice(0,4)
-    .map(({id,f})=>({name:f.name,serving:f.serving||"1 serving",p:+f.p||0,c:+f.c||0,f:+f.f||0,kcal:kcalOf(f),src:"saved",savedId:id}));
+    .map(({id,f})=>({name:f.name,serving:f.serving||"1 serving",p:+f.p||0,c:+f.c||0,f:+f.f||0,kcal:kcalOf(f),...extras(f),src:"saved",savedId:id}));
   const pool=[...LOCAL,...COMMON,...SNACKS];
   let loc=pool.map(x=>({x,s:score(x.name)})).filter(o=>o.s>=need);
   if(!loc.length&&words.length>2) loc=pool.map(x=>({x,s:score(x.name)})).filter(o=>o.s>=1&&o.x.common);
-  loc=loc.sort((a,b)=>b.s-a.s).slice(0,6).map(({x})=>({name:x.name,serving:x.serving,p:x.v[0],c:x.v[1],f:x.v[2],kcal:x.v[3],
+  loc=loc.sort((a,b)=>b.s-a.s).slice(0,6).map(({x})=>({name:x.name,serving:x.serving,p:x.v[0],c:x.v[1],f:x.v[2],kcal:x.v[3],fi:x.fi,
     src:x.common?"common":"restaurant",grams:x.g||null,per100:x.g?{p:x.v[0]/x.g*100,c:x.v[1]/x.g*100,f:x.v[2]/x.g*100,k:x.v[3]/x.g*100}:null}));
-  return [...saved,...loc];
+  // built-in USDA list: everything with all the words, shortest (most generic) names first
+  const qn=" "+norm(q)+" ";
+  const db=DBF.filter(x=>!x.chain||qn.includes(" "+x.chain+" ")).map(x=>({x,s:score(x.key)})).filter(o=>o.s>=Math.max(need,words.length))
+    .sort((a,b)=>(a.x.name.length/40+oddPenalty(q,a.x.name)*10)-(b.x.name.length/40+oddPenalty(q,b.x.name)*10)).slice(0,8)
+    .map(({x})=>({name:x.name,key:x.key,serving:x.serving,p:x.v[0],c:x.v[1],f:x.v[2],kcal:x.v[3],fi:x.fi,su:x.su,na:x.na,src:"USDA built-in",grams:x.g,per100:x.per100,measures:x.measures,chain:x.chain}));
+  return [...out,...saved,...loc,...db];
 }
 const titleCase=s=>s?s.toLowerCase().replace(/\b\w/g,c=>c.toUpperCase()):s;
 async function getJSON(url,ms=10000){
@@ -2123,6 +2187,11 @@ async function getJSON(url,ms=10000){
   catch(e){clearTimeout(t); return {status:"fail"}}
 }
 async function searchFDC(q){
+  const ck="fdc|"+learnKey(q), hit=cacheGet(ck); if(hit) return {status:"ok",items:hit,cached:true};
+  if(navigator.onLine===false) return {status:"fail",items:[]};
+  const r=await searchFDCnet(q); if(r.status==="ok"&&r.items.length) cachePut(ck,r.items); return r;
+}
+async function searchFDCnet(q){
   const key=S.settings.fdcKey||"DEMO_KEY";
   const res=await getJSON("https://api.nal.usda.gov/fdc/v1/foods/search?api_key="+encodeURIComponent(key)+"&pageSize=15&query="+encodeURIComponent(q));
   if(res.status!=="ok") return {status:res.status,items:[]};
@@ -2157,6 +2226,11 @@ function offItem(p){
     per100:{p:+n.proteins_100g||0,c:+n.carbohydrates_100g||0,f:+n.fat_100g||0,k:n["energy-kcal_100g"],fi:n.fiber_100g,su:n.sugars_100g,na:n.sodium_100g!=null?n.sodium_100g*1000:undefined}};
 }
 async function searchOFF(q){
+  const ck="off|"+learnKey(q), hit=cacheGet(ck); if(hit) return {status:"ok",items:hit,cached:true};
+  if(navigator.onLine===false) return {status:"fail",items:[]};
+  const r=await searchOFFnet(q); if(r.status==="ok"&&r.items.length) cachePut(ck,r.items); return r;
+}
+async function searchOFFnet(q){
   const fields="product_name,brands,serving_size,serving_quantity,nutriments,code";
   let res=await getJSON("https://search.openfoodfacts.org/search?page_size=10&fields="+fields+"&q="+encodeURIComponent(q));
   let list=res.status==="ok"?(res.data.hits||[]):null;
@@ -2167,13 +2241,21 @@ async function searchOFF(q){
 }
 /* Pick the one result that best fits the words typed. Generic foods win when the words are generic ("pizza");
    a brand result wins when a brand word is present ("tombstone pizza"), because generic names don't contain it. */
+const ODD=["meatless","vegetarian","veggie","vegan","bits","with","cakes","chips","crackers","bar","bars","pudding","noodles","soup","salad","sandwich","pie","cookies","candies","dessert","chilies","peppers","leaves","seeds","seed","oil","flour","juice","sauce","powder","paste","dehydrated","dry","uncooked","frozen","canned","stems","peel","pickled","syrup","raw","unprepared","concentrate","imitation","substitute","glutinous","spinach","whole-wheat","whole","lowfat","nonfat","diet","reduced","light","sweetened","unsweetened","salted","unsalted","candied","dried"];
+/* The main food in a name is the last word of its first part: "White rice, cooked" -> rice; "Rice cakes" -> cakes. */
+function headBonus(q,name){const qt=norm(q).split(" ").filter(w=>w.length>1&&!STOP.has(w)&&!PREP.has(w)), last=qt[qt.length-1]; if(!last) return 0;
+  const seg=norm(String(name).split(/[,(]/)[0]).split(" "), head=seg[seg.length-1]; return head===last||head===last.replace(/e?s$/,"")||head.replace(/e?s$/,"")===last?.05:0}
+/* Cooking or size words you typed that also appear in the name are a good sign ("grilled cheese" -> Grilled cheese sandwich). */
+function prepBonus(q,name){const nt=new Set(norm(name).split(" ")); return norm(q).split(" ").filter(w=>PREP.has(w)&&nt.has(w)).length*.04}
+function oddPenalty(q,name){const qt=new Set(norm(q).split(" ")); return norm(name).split(" ").filter(w=>ODD.includes(w)&&!qt.has(w)).length*.04}
 function bestMatch(q,all){
   const words=qwords(q); if(!words.length) return null;
-  const bonus={saved:.3,common:.05,"USDA brand":.02,restaurant:0};
+  const bonus={learned:.6,saved:.3,common:.05,"USDA built-in":.03,"USDA brand":.02,restaurant:0};
   // chain menu items only count when the chain is named ("chick-fil-a sandwich", not just "sandwich")
-  const qn=" "+norm(q)+" ", chainOk=r=>r.src!=="restaurant"||qn.includes(" "+norm(r.name).split(" ")[0]+" ");
-  const scored=all.filter(chainOk).map(r=>({r,s:hits(words,r.name)/words.length}));
-  const full=scored.filter(x=>x.s>=.99).map(x=>({r:x.r,s:x.s+(bonus[x.r.src]||0)-.01*Math.max(0,norm(x.r.name).split(" ").length-words.length)}));
+  const qn=" "+norm(q)+" ", chainOk=r=>r.chain?qn.includes(" "+r.chain+" "):(r.src!=="restaurant"||qn.includes(" "+norm(r.name).split(" ")[0]+" "));
+  const scored=all.filter(chainOk).map(r=>({r,s:r.src==="learned"?1:hits(words,r.key||r.name)/words.length}));
+  const anyExact=scored.some(x=>x.s>=.99);
+  const full=scored.filter(x=>x.s>=(anyExact?.99:.85)).map(x=>({r:x.r,s:x.s+(bonus[x.r.src]||0)-.01*Math.max(0,norm(x.r.name).split(" ").length-words.length)-oddPenalty(q,x.r.name)+headBonus(q,x.r.name)+prepBonus(q,x.r.name)}));
   full.sort((a,b)=>b.s-a.s); if(full[0]) return {r:full[0].r,exact:true,alt:full[1]&&full[1].s>=full[0].s-.03?full[1].r:null};
   // nothing has every word (e.g. the brand wasn't found): fall back to the closest generic food
   const part=scored.filter(x=>x.r.src==="common"&&x.s>=.5).sort((a,b)=>b.s-a.s);
@@ -2198,13 +2280,17 @@ const MQ={list:[],i:0};
 const entryMode=()=>S.settings.entryMode||"auto";
 /* Sure enough to log without asking? Needs a match containing every word typed, a calorie value, and an amount we could work out.
    Built-in and saved foods count as sure; database results need at least two matching words ("tombstone pizza", not just "burger"). */
+const VAGUE=new Set(["sandwich","salad","soup","smoothie","cereal","snack","wrap","drink","shake","meal","dessert","bar","sub","burger","cake","casserole","stir fry","bowl","juice"]);
 function isSure(best,pq,st){
   if(!best||!best.exact) return false;
   const r=best.r; if(r.kcal==null&&!(r.per100&&r.per100.k!=null)) return false;
   if(/Couldn't convert/.test(st.note)) return false;
   // two equally good matches with very different calories (e.g. "a sandwich") -> ask
-  if(best.alt&&best.alt.kcal!=null&&r.kcal!=null&&Math.abs(best.alt.kcal-r.kcal)>150&&Math.max(best.alt.kcal,r.kcal)/Math.max(1,Math.min(best.alt.kcal,r.kcal))>1.6) return false;
-  if(["saved","common","restaurant"].includes(r.src)) return true;
+  if(best.alt){const a=best.alt, both=a.per100&&r.per100&&a.per100.k!=null&&r.per100.k!=null, ka=both?a.per100.k:a.kcal, kr=both?r.per100.k:r.kcal;
+    if(ka!=null&&kr!=null&&Math.abs(ka-kr)>150&&Math.max(ka,kr)/Math.max(1,Math.min(ka,kr))>1.6) return false}
+  // one vague word ("a sandwich", "salad", "soup") could be almost anything: ask
+  const qw=qwords(pq.q); if(qw.length===1&&VAGUE.has(qw[0].replace(/e?s$/,""))&&r.src!=="learned"&&r.src!=="saved") return false;
+  if(["learned","saved","common","restaurant","USDA built-in"].includes(r.src)) return true;
   return qwords(pq.q).length>=2;
 }
 async function handleTyped(text){
@@ -2239,9 +2325,9 @@ async function autoLog(parts,meal,done=[],labels=[]){
   try{
     for(const part of parts){
       const pq=parseQuery(part); if(!pq.q) continue;
-      lastReq={amt:pq.amt,unit:pq.unit};
+      lastReq={amt:pq.amt,unit:pq.unit,size:pq.size};
       let pool=localMatches(pq.q), best=bestMatch(pq.q,pool);
-      if(!(best&&isSure(best,pq,startAmount(best.r)))&&navigator.onLine!==false){
+      if(!(best&&isSure(best,pq,startAmount(best.r)))){
         const [f,o]=await Promise.all([searchFDC(pq.q),searchOFF(pq.q)]); pool=[...pool,...f.items,...o.items]; best=bestMatch(pq.q,pool);
       }
       let st=best?startAmount(best.r):null, generic=null;
@@ -2252,7 +2338,7 @@ async function autoLog(parts,meal,done=[],labels=[]){
       if(best&&isSure(best,pq,st)){
         const r=best.r, m=macrosFor(r,st.amt,st.mode);
         if(r.savedId){const f=S.foods.items[r.savedId]; if(f){f.used=(f.used||0)+1;save("foods",S.foods)}}
-        const id=await addEntry({name:(m.label+r.name).trim(),p:m.p,c:m.c,f:m.f,kcal:m.kcal,...extras(m),...(meal?{meal}:{}),src:r.src==="saved"?"saved":"auto"},true);
+        const id=await addEntry({name:(m.label+r.name).trim(),p:m.p,c:m.c,f:m.f,kcal:m.kcal,...extras(m),...(meal?{meal}:{}),src:r.src==="saved"?"saved":"auto",q:pq.q,qa:st.mode==="serv"?st.amt:undefined},true);
         logged.push({id,name:(m.label+r.name).trim(),p:m.p}); done.push({t:"e",id}); labels.push((m.label+r.name).trim()+(generic?` (generic, couldn't find ${titleCase(generic.replace(/-/g," "))})`:""));
       }else unsure.push(part);
     }
@@ -2277,11 +2363,12 @@ $("searchForm").onsubmit=async ev=>{ev.preventDefault();
   let raw=$("sq").value.trim(); if(!raw) return;
   if(!(S.clarify&&MQ.list[MQ.i]===raw)&&(!MQ.list.length||MQ.list[MQ.i]!==raw)){const parts=splitMeal(raw); MQ.list=parts.length>1?parts:[]; MQ.i=0; if(MQ.list.length) raw=MQ.list[0], $("sq").value=raw}
   const pq=parseQuery(raw); if(!pq.q) return;
-  lastReq={amt:pq.amt,unit:pq.unit}; const seq=++searchSeq, q=pq.q;
+  lastReq={amt:pq.amt,unit:pq.unit,size:pq.size}; const seq=++searchSeq, q=pq.q;
   $("searchPick").innerHTML="";
   const local=localMatches(q);
   showResults([["Your foods, restaurants & common foods",local]]);
-  if(navigator.onLine===false){const b=bestMatch(q,local); if(b) openPick(b.r,b.exact?"Best match":"Closest match"); $("searchMsg").textContent=local.length?"You're offline, so only your saved foods and the built-in list were searched.":"You're offline. Try the Enter tab to type the numbers in.";return}
+  S.lastQ=q;
+  if(navigator.onLine===false&&!cacheGet("fdc|"+learnKey(q))&&!cacheGet("off|"+learnKey(q))){const b=bestMatch(q,local); if(b) openPick(b.r,b.exact?"Best match":"Closest match"); $("searchMsg").textContent=local.length?"You're offline, so only your saved foods and the built-in list were searched.":"You're offline. Try the Enter tab to type the numbers in.";return}
   $("searchMsg").textContent=`Searching for "${q}"…`;
   let [fdc,off]=await Promise.all([searchFDC(q),searchOFF(q)]);
   let usedQ=q;
@@ -2314,20 +2401,44 @@ function nextInMeal(){
 $("searchResults").onclick=ev=>{const b=ev.target.closest("[data-ri]");if(!b)return;openPick(lastResults[+b.dataset.ri])};
 
 /* Work out the starting amount from what the user typed: "1 cup" against a "2/3 cup" serving is 1.5 servings. */
+const SIZE_MULT={small:.7,little:.7,mini:.5,medium:1,regular:1,large:1.4,big:1.4,huge:1.8,jumbo:1.8,xl:1.8,"extra large":1.8};
+const PORTION={
+  bowl:n=>/cereal|flakes|cheerios|granola|chex|crisp|loops|puffs|bran|krispies/.test(n)?45:/salad|lettuce/.test(n)?150:/popcorn/.test(n)?30:300,
+  plate:n=>/salad/.test(n)?200:/fries/.test(n)?150:350,
+  handful:n=>/berr|grape|cherr|tomato|carrot/.test(n)?75:/popcorn|cereal/.test(n)?12:28,
+  spoonful:n=>/peanut butter|nutella|almond butter|butter/.test(n)?16:/sugar|honey/.test(n)?12:15,
+  splash:()=>30, mug:()=>350, glass:()=>240, shot:()=>44, dash:()=>1, pinch:()=>.5,
+  scoop:n=>/ice cream|gelato|sorbet|sherbet|frozen yogurt/.test(n)?66:/protein|whey|powder|casein|creatine/.test(n)?30:/rice|potato|mashed/.test(n)?120:60,
+};
 function startAmount(r){
-  const {amt,unit}=lastReq, canG=r.per100&&r.per100.k!=null;
-  if(amt==null) return {amt:1,mode:"serv",note:""};
-  if(canG&&(unit==="g"||unit==="oz"||unit==="lb")){const g=unit==="g"?amt:unit==="oz"?amt*28.35:amt*453.6;return {amt:Math.round(g),mode:"g",note:""}}
-  const si=servInfo(r.serving);
-  // "half an avocado" against a "1/2 avocado" serving = 1 serving
-  if(!unit&&si&&si.qty!==1&&norm(r.name).split(" ").some(w=>w===si.unit||w.replace(/s$/,"")===si.unit)) return {amt:r1(amt/si.qty),mode:"serv",note:""};
+  const {unit,size}=lastReq; let amt=lastReq.amt;
+  const canG=r.per100&&r.per100.k!=null, name=String(r.name).toLowerCase(), ms=r.measures||[];
+  const sm=size&&!new RegExp("\\b"+size+"\\b").test(name)?SIZE_MULT[size]??1:1;
+  if(amt==null&&!unit&&!size) return {amt:1,mode:"serv",note:""};
+  if(amt==null) amt=1;
   const sv=n=>r1(n)+(r1(n)===1?" serving":" servings");
-  if(unit&&si&&si.unit===unit){const n=amt/si.qty; return {amt:r1(n)||amt,mode:"serv",note:Math.abs(n-amt)<.01?"":`${r1(amt)} ${unit} = ${sv(n)} (1 serving is ${esc(r.serving)}).`}}
-  if(unit==="cup"&&si&&si.unit==="tbsp") return {amt:r1(amt*16/si.qty),mode:"serv",note:`${r1(amt)} cup = ${sv(amt*16/si.qty)}.`};
-  if(unit==="tbsp"&&si&&si.unit==="cup") return {amt:r1(amt/16/si.qty),mode:"serv",note:`${r1(amt)} tbsp = ${sv(amt/16/si.qty)}.`};
-  if((unit==="slice"||unit==="piece"||unit==="bar")&&si) return {amt,mode:"serv",note:`Counting 1 ${unit} as 1 serving (${esc(r.serving)}). Adjust if yours was bigger or smaller.`};
-  if(unit&&unit!=="serving"&&unit!=="piece") return {amt,mode:"serv",note:`Couldn't convert "${esc(unit)}" to this serving size, so it's set to ${sv(amt)}. Adjust if needed.`};
-  return {amt,mode:"serv",note:""};
+  const gOut=(g,note)=>({amt:Math.round(g),mode:"g",note});
+  if(canG&&(unit==="g"||unit==="oz"||unit==="lb")) return gOut(unit==="g"?amt:unit==="oz"?amt*28.35:amt*453.6,"");
+  if(canG&&unit==="ml") return gOut(amt,""); if(canG&&unit==="l") return gOut(amt*1000,"");
+  // a matching household measure ("1 cup", "1 slice", "1 large") from the food's own data
+  const first=d=>d.toLowerCase().split(/[ ,(]/)[0];
+  const mFor=u=>ms.find(m=>{const w=first(m[1]); return w===u||UNITS[w]===u||w.replace(/e?s$/,"")===u});
+  if(canG&&size&&!unit&&ms.length){const sz=size==="big"?"large":size==="little"?"small":size==="huge"||size==="jumbo"||size==="xl"?"extra large":size;
+    const m=ms.find(x=>x[1].toLowerCase().startsWith(sz)); if(m) return gOut(amt*m[2]/m[0],`${r1(amt)} ${size} = ${Math.round(amt*m[2]/m[0])} g`)}
+  if(canG&&unit&&ms.length){const m=mFor(unit); if(m){const g=amt*m[2]/m[0]*sm; return gOut(g,`${r1(amt)} ${size?size+" ":""}${unit} = ${Math.round(g)} g`)}}
+  if(canG&&unit&&PORTION[unit]){const each=PORTION[unit](name)*sm; return gOut(amt*each,`A ${size?size+" ":""}${unit} of this is about ${Math.round(each)} g. Adjust if yours was different.`)}
+  const si=servInfo(r.serving);
+  let res;
+  if(!unit&&si&&si.qty!==1&&norm(r.name).split(" ").some(w=>w===si.unit||w.replace(/s$/,"")===si.unit)) res={amt:r1(amt/si.qty),mode:"serv",note:""};
+  else if(unit&&si&&si.unit===unit){const n=amt/si.qty; res={amt:r1(n)||amt,mode:"serv",note:Math.abs(n-amt)<.01?"":`${r1(amt)} ${unit} = ${sv(n)} (1 serving is ${esc(r.serving)}).`}}
+  else if(unit==="cup"&&si&&si.unit==="tbsp") res={amt:r1(amt*16/si.qty),mode:"serv",note:`${r1(amt)} cup = ${sv(amt*16/si.qty)}.`};
+  else if(unit==="tbsp"&&si&&si.unit==="cup") res={amt:r1(amt/16/si.qty),mode:"serv",note:`${r1(amt)} tbsp = ${sv(amt/16/si.qty)}.`};
+  else if((unit==="slice"||unit==="piece"||unit==="bar")&&si) res={amt,mode:"serv",note:`Counting 1 ${unit} as 1 serving (${esc(r.serving)}). Adjust if yours was bigger or smaller.`};
+  else if(unit&&unit!=="serving"&&unit!=="piece"&&!PORTION[unit]) res={amt,mode:"serv",note:`Couldn't convert "${esc(unit)}" to this serving size, so it's set to ${sv(amt)}. Adjust if needed.`};
+  else if(unit&&PORTION[unit]) res={amt,mode:"serv",note:`Counting a ${unit} as 1 serving. Adjust if needed.`};
+  else res={amt,mode:"serv",note:""};
+  if(size&&sm!==1){res.amt=r1(res.amt*sm); res.note=(res.note?res.note+" ":"")+`${size[0].toUpperCase()+size.slice(1)} is counted as ${sm}× a regular serving.`}
+  return res;
 }
 function macrosFor(r,a,mode){
   const opt=(v,k,round)=>v==null||v===""||isNaN(v)?undefined:(round?Math.round(v*k):r1(v*k));
@@ -2364,7 +2475,8 @@ function openPick(r,isBest){
     if(favOn){const one=$("pkUnit").value==="serv"&&+$("pkAmt").value===1;
       const fid=one&&r.savedId?r.savedId:saveFood(one?{name:r.name,serving:r.serving,p:r.p,c:r.c,f:r.f,kcal:r.kcal,...extras(r)}:{name:(m.label+r.name).trim(),serving:"as logged",p:m.p,c:m.c,f:m.f,kcal:m.kcal,...extras(m)});
       S.foods.items[fid].fav=true; save("foods",S.foods)}
-    addEntry({name:m.label+r.name,p:m.p,c:m.c,f:m.f,kcal:m.kcal,...extras(m),...(S.pendingMeal?{meal:S.pendingMeal}:{}),src:r.src==="saved"?"saved":"search"});
+    if(S.lastQ&&r.src!=="saved") learnPick(S.lastQ,r);
+    addEntry({name:m.label+r.name,p:m.p,c:m.c,f:m.f,kcal:m.kcal,...extras(m),...(S.pendingMeal?{meal:S.pendingMeal}:{}),src:r.src==="saved"?"saved":"search",q:S.lastQ||undefined,qa:$("pkUnit").value==="serv"?+$("pkAmt").value||1:undefined});
     $("searchPick").innerHTML=""; $("searchResults").innerHTML=""; $("sq").value=""; lastReq={amt:null,unit:null};
     $("searchMsg").textContent=SEARCH_HINT;
     if(!nextInMeal()) closeAdd();
@@ -2720,6 +2832,8 @@ async function boot(){
 document.addEventListener("visibilitychange",()=>{if(!document.hidden&&S.date<todayKey()&&S.lastToday!==todayKey()){S.lastToday=todayKey();S.date=todayKey();getDay(S.date).then(render)}});
 S.lastToday=todayKey();
 boot();
+loadDB();
+window.FuelDebug={dbCount:()=>DBF.length,learned:()=>learned(),get S(){return S},render};
 if(navigator.onLine!==false) setTimeout(()=>checkUpdate(false),1500);
 })();
 </script>
