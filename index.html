@@ -526,6 +526,50 @@ details.panel[open] summary h3::after{content:" −"}
 .rbl .chk{grid-column:1/-1;font-size:12px;color:var(--warn);margin:0}
 .rbtot{display:flex;flex-direction:column;gap:6px}
 .fitrec{align-self:flex-start}
+.recsearch input{width:100%;border:1.5px solid var(--line);background:var(--bg);border-radius:999px;padding:11px 16px;font-size:16px;color:var(--ink)}
+.recsearch input:focus{border-color:var(--accent);outline:none}
+.rqhint{margin:-4px 0 0 4px;font-size:12.5px}
+#recBrowse{display:flex;flex-direction:column;gap:18px}
+.shelf{display:flex;flex-direction:column;gap:8px;min-width:0}
+.shead{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.shead h4{margin:0;font-family:var(--display);font-weight:850;font-stretch:80%;font-size:17px;text-transform:uppercase;letter-spacing:.03em}
+.shead .ssub{font-size:12px;color:var(--muted)}
+.seeall{margin-left:auto;border:0;background:none;color:var(--accent);font-weight:700;font-size:13.5px;padding:4px 2px}
+.srow{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x proximity;padding:2px 2px 8px;scrollbar-width:thin;overscroll-behavior-x:contain}
+.scard{flex:0 0 148px;display:flex;flex-direction:column;gap:5px;text-align:left;border:1px solid var(--line);border-top:3px solid var(--mc);border-radius:8px;background:var(--bg);padding:10px 10px 11px;scroll-snap-align:start;color:var(--ink);transition:transform .15s}
+.scard:active{transform:scale(.97)}
+.scard .si{font-size:24px;line-height:1}
+.scard .sn{font-weight:700;font-size:14px;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.5em}
+.scard .sk{font-family:var(--mono);font-size:12px;font-variant-numeric:tabular-nums}
+.scard .sk .p,.rrow .p{color:var(--protein)}
+.scard .st{font-size:11.5px;color:var(--muted)}
+.chiprow{display:flex;flex-wrap:wrap;gap:6px}
+.bchip{border:1px solid var(--line);background:var(--bg);border-radius:999px;padding:7px 12px;font-weight:650;font-size:13.5px;color:var(--ink)}
+.bchip small{color:var(--muted);font-family:var(--mono);font-weight:500;margin-left:2px}
+.rlhead{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.rlhead .hint{margin:0;min-width:0}
+#recListWrap{display:flex;flex-direction:column;gap:12px}
+.rfbox{display:flex;flex-direction:column;gap:12px;border:1px solid var(--line);border-radius:8px;padding:12px}
+.rsum{margin:0}
+#recFiltBtn[aria-expanded="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.recsel{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.recsel select{width:100%;border:1px solid var(--line);background:var(--bg);border-radius:6px;padding:8px 10px;font-size:14px;color:var(--ink)}
+.rrow{display:grid;grid-template-columns:auto 1fr auto;gap:2px 10px;width:100%;border:0;border-top:1px solid var(--line);background:transparent;text-align:left;padding:11px 2px;align-items:center;color:var(--ink)}
+.reclist .rrow:first-child{border-top:0}
+.rrow .si{grid-row:1/4;font-size:22px;width:34px;height:34px;display:grid;place-items:center;border-radius:8px;background:color-mix(in srgb,var(--mc) 14%,transparent)}
+.rrow .nm{font-weight:700;font-size:15px;min-width:0}
+.rrow .hv{color:var(--protein)}
+.rrow .sm{grid-column:2;font-size:12.5px;color:var(--muted)}
+.rrow .uses{grid-column:2;font-size:12.5px;color:var(--ink)}
+.rrow .uses .tag{margin:0 4px 0 0}
+.rrow .rk{grid-row:1/4;grid-column:3;text-align:right;font-family:var(--mono);font-size:13px;line-height:1.35;font-variant-numeric:tabular-nums}
+.rrow .rk b{font-size:15px}
+#recDetail{display:flex;flex-direction:column;gap:12px}
+#recDetail>.chip{align-self:flex-start}
+.rdhead{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:start;border-left:3px solid var(--mc);padding-left:12px}
+.rdhead .si{font-size:34px;line-height:1}
+.rdhead h2{margin:0;font-family:var(--display);font-weight:850;font-stretch:80%;font-size:24px;line-height:1.15;text-wrap:balance}
+.rdhead .sm{margin:4px 0 6px;font-size:13px;color:var(--muted)}
 .mealh{display:flex;justify-content:space-between;align-items:baseline;gap:8px;padding:4px 0 2px}
 .mealh b{font-family:var(--display);font-weight:850;font-stretch:80%;font-size:16px;text-transform:uppercase;letter-spacing:.03em;color:var(--mc)}
 .mealh span{font-size:12px;color:var(--muted);font-family:var(--mono)}
@@ -840,22 +884,41 @@ details.panel[open] summary h3::after{content:" −"}
 
   <div class="view" id="view-recipes" hidden>
   <section class="panel" aria-labelledby="hRec">
-    <div class="ph"><h3 id="hRec">Recipe ideas</h3><span class="meta" id="recMeta">Healthy meals with nutrition per serving</span></div>
+    <div class="ph"><h3 id="hRec">Recipes</h3><span class="meta" id="recMeta">Healthy meals with nutrition per serving</span></div>
     <p class="hint rec-left" id="recLeft" hidden></p>
-    <div class="f"><input id="recQ" type="search" placeholder="Search recipes, like chicken or oats" aria-label="Search recipes" autocomplete="off"></div>
-    <div class="seg" id="recMeal" role="group" aria-label="Meal">
-      <button type="button" data-meal="all" aria-pressed="true">All</button><button type="button" data-meal="breakfast" aria-pressed="false">Breakfast</button><button type="button" data-meal="lunch" aria-pressed="false">Lunch</button><button type="button" data-meal="dinner" aria-pressed="false">Dinner</button><button type="button" data-meal="snack" aria-pressed="false">Snacks</button>
+    <form class="recsearch" id="recForm" role="search" autocomplete="off">
+      <input id="recQ" type="search" enterkeyhint="search" placeholder="Search recipes, or list what you have" aria-label="Search recipes by name or ingredients">
+    </form>
+    <p class="hint rqhint" id="recQHint">Try "chicken, rice, broccoli" to find recipes that use what you have.</p>
+
+    <div id="recBrowse"></div>
+
+    <div id="recListWrap" hidden>
+      <div class="rlhead"><button type="button" class="chip ghost" id="recBack">← All recipes</button><button type="button" class="chip" id="recFiltBtn" aria-expanded="false" aria-controls="recFiltBox">Filters</button></div>
+      <p class="hint rsum" id="recSummary"></p>
+      <div class="rfbox" id="recFiltBox" hidden>
+      <div class="seg" id="recMeal" role="group" aria-label="Meal">
+        <button type="button" data-meal="all" aria-pressed="true">All</button><button type="button" data-meal="breakfast" aria-pressed="false">Breakfast</button><button type="button" data-meal="lunch" aria-pressed="false">Lunch</button><button type="button" data-meal="dinner" aria-pressed="false">Dinner</button><button type="button" data-meal="snack" aria-pressed="false">Snacks</button>
+      </div>
+      <div class="recfilters" id="recTags" role="group" aria-label="Filters">
+        <button type="button" class="rtag" data-rt="fit" aria-pressed="false">Fits my day</button>
+        <button type="button" class="rtag" data-rt="protein" aria-pressed="false">High protein</button>
+        <button type="button" class="rtag" data-rt="light" aria-pressed="false">Under 400 cal</button>
+        <button type="button" class="rtag" data-rt="quick" aria-pressed="false">15 min or less</button>
+        <button type="button" class="rtag" data-rt="prep" aria-pressed="false">Meal prep</button>
+        <button type="button" class="rtag" data-rt="veg" aria-pressed="false">Vegetarian</button>
+        <button type="button" class="rtag" data-rt="sweet" aria-pressed="false">Sweet</button>
+        <button type="button" class="rtag" data-rt="saved" aria-pressed="false">♥ Saved</button>
+      </div>
+      <div class="recsel">
+        <label class="f"><span class="lbl">Cuisine</span><select id="recCuisine"><option value="">Any</option></select></label>
+        <label class="f"><span class="lbl">Main protein</span><select id="recPro"><option value="">Any</option></select></label>
+      </div>
+      </div>
+      <div class="reclist" id="recList"></div>
     </div>
-    <div class="recfilters" id="recTags" role="group" aria-label="Filters">
-      <button type="button" class="rtag" data-rt="fit" aria-pressed="false">Fits my day</button>
-      <button type="button" class="rtag" data-rt="protein" aria-pressed="false">High protein</button>
-      <button type="button" class="rtag" data-rt="light" aria-pressed="false">Under 400 cal</button>
-      <button type="button" class="rtag" data-rt="veg" aria-pressed="false">Vegetarian</button>
-      <button type="button" class="rtag" data-rt="quick" aria-pressed="false">15 min or less</button>
-      <button type="button" class="rtag" data-rt="prep" aria-pressed="false">Meal prep</button>
-      <button type="button" class="rtag" data-rt="saved" aria-pressed="false">♥ Saved</button>
-    </div>
-    <div class="reclist" id="recList"><p class="empty">Loading recipes…</p></div>
+
+    <div id="recDetail" hidden></div>
   </section>
   <section class="panel" aria-labelledby="hMyRec">
     <div class="ph"><h3 id="hMyRec">My recipes</h3><button type="button" class="chip" id="recNew">+ New recipe</button></div>
@@ -1098,7 +1161,7 @@ details.panel[open] summary h3::after{content:" −"}
 
 <script>
 (() => {
-const APP_VERSION="3.12.0";
+const APP_VERSION="3.13.0";
 const REPO="kefirman9000/fuel-log";
 const $ = id => document.getElementById(id);
 const OZ=29.5735, LB=0.45359237, IN=2.54;
@@ -2705,12 +2768,16 @@ function openPick(r,isBest){
 
 /* ---------- recipes: healthy ideas with nutrition computed from USDA data (recipes.json), plus your own ---------- */
 let RECIPES=null, recLoad=null;
-const RF={meal:"all",tags:new Set(),q:"",open:null};
+const RF={mode:"browse",back:"browse",meal:"all",tags:new Set(),cuisine:"",pro:"",q:"",open:null,scroll:0};
 const MEALN={breakfast:"Breakfast",lunch:"Lunch",dinner:"Dinner",snack:"Snack"};
-const RTAGN={protein:"High protein",light:"Under 400 cal",veg:"Vegetarian",quick:"Quick",prep:"Meal prep"};
+const RTAGN={protein:"High protein",light:"Under 400 cal",veg:"Vegetarian",quick:"Quick",prep:"Meal prep",sweet:"Sweet"};
+const PRON={chicken:"Chicken",beef:"Beef",pork:"Pork",turkey:"Turkey",seafood:"Fish & seafood",eggs:"Eggs",dairy:"Yogurt & dairy",plant:"Plant-based"};
+const CUIS=["American","Mexican","Italian","Asian","Mediterranean","Indian"];
+const mealCol=m=>(MEALS.find(x=>x[0]===m)||[])[3]||"var(--line)";
 function loadRecipes(){
   if(RECIPES) return Promise.resolve(RECIPES);
-  return recLoad||(recLoad=fetch("recipes.json").then(r=>r.ok?r.json():Promise.reject()).then(j=>RECIPES=j.recipes).catch(()=>{recLoad=null;return null}));
+  return recLoad||(recLoad=fetch("recipes.json").then(r=>r.ok?r.json():Promise.reject()).then(j=>{
+    RECIPES=j.recipes; RECIPES.forEach(r=>{r._it=(r.ik||r.ing.map((_,i)=>i)).map(i=>toksOf(r.ing[i]))}); return RECIPES}).catch(()=>{recLoad=null;return null}));
 }
 const recFavs=()=>new Set(load("recFav")||[]);
 function dayLeft(){const day=S.days[S.date]||emptyDay(), g=G(), t=totals(day); return {kl:g.kcal?g.kcal-t.k:null, pl:g.protein?g.protein-t.p:null, ate:t.k>0}}
@@ -2721,71 +2788,177 @@ function fitScore(r,L){
   const pl=Math.max(0,L.pl||0);
   return (pl>0?Math.min(n.p,pl)/Math.max(pl,15):0)+n.p/Math.max(n.kcal,1)*2+(r.meal===mealNow()?.5:0);
 }
-function markRecFilters(){
-  document.querySelectorAll("#recMeal [data-meal]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.meal===RF.meal));
-  document.querySelectorAll("#recTags [data-rt]").forEach(b=>b.setAttribute("aria-pressed",RF.tags.has(b.dataset.rt)));
-  if($("recQ").value!==RF.q) $("recQ").value=RF.q;
+
+/* ---- ingredient search: "chicken, rice, broccoli" finds recipes that use what you have ---- */
+const ING_SYN={beef:["beef","steak","sirloin"],steak:["steak","sirloin"],fish:["fish","salmon","cod","tilapia","tuna"],seafood:["shrimp","salmon","cod","tilapia","tuna","fish"],
+  cheese:["cheese","cheddar","feta","mozzarella","parmesan","swiss","cotija","ricotta"],pasta:["pasta","spaghetti","noodles","macaroni"],noodles:["noodles","pasta","spaghetti"],
+  beans:["beans","chickpeas","edamame","lentils"],potato:["potato","potatoes"],potatoes:["potato","potatoes"],pepper:["pepper","peppers"],peppers:["pepper","peppers"],
+  greens:["spinach","kale","lettuce","romaine","arugula","cabbage"],lettuce:["lettuce","romaine"],berries:["berries","blueberries","strawberries","raspberries"],
+  nuts:["almonds","walnuts","peanuts","cashews"],bread:["bread","toast","pita","muffin","sourdough","tortilla","tortillas"],yogurt:["yogurt","tzatziki"],
+  tortilla:["tortilla","tortillas"],tortillas:["tortilla","tortillas"],rice:["rice"],oats:["oats","oatmeal"],oatmeal:["oats"],sausage:["sausage"],ham:["ham"]};
+const tokSame=(w,t)=>t===w||t===w.replace(/(?:es|s)$/,"")||t.replace(/(?:es|s)$/,"")===w||t===w+"es"||t===w+"s";
+function ingTerms(q){
+  const parts=q.toLowerCase().split(/\s*(?:,|;|\+|\n|&|\band\b|\bwith\b|\bplus\b)\s*/).map(x=>x.trim()).filter(Boolean);
+  return parts.map(p=>({label:p,ws:qwords(p)})).filter(t=>t.ws.length);
+}
+function termHit(t,r){
+  const alts=t.ws.length===1&&ING_SYN[t.ws[0]]?ING_SYN[t.ws[0]].map(x=>[x]):[t.ws];
+  return r._it.some(toks=>alts.some(ws=>ws.every(w=>toks.some(x=>tokSame(w,x)))));
+}
+function ingMatch(r,terms){const used=terms.filter(t=>termHit(t,r)); return {used,n:used.length,other:Math.max(0,r._it.length-r._it.filter(toks=>terms.some(t=>termHit(t,{_it:[toks]}))).length)}}
+
+function recFiltered(list,L,fav){
+  return list.filter(r=>(RF.meal==="all"||r.meal===RF.meal)&&(!RF.cuisine||r.cuisine===RF.cuisine)&&(!RF.pro||r.pro===RF.pro)
+    &&[...RF.tags].every(t=>t==="fit"?L.kl!=null&&fitScore(r,L)>=0:t==="saved"?fav.has(r.id):r.tags.includes(t)));
+}
+const anyFilter=()=>RF.meal!=="all"||RF.tags.size||RF.cuisine||RF.pro;
+function cardHTML(r){return `<button type="button" class="scard" data-rid="${r.id}" style="--mc:${mealCol(r.meal)}">
+  <span class="si" aria-hidden="true">${foodIcon(r.name)}</span><span class="sn">${esc(r.name)}</span>
+  <span class="sk"><b>${r.n.kcal}</b> ${CU()} · <span class="p">${Math.round(r.n.p)}g P</span></span><span class="st">${r.mins} min</span></button>`}
+function rowHTML(r,extra){const fav=recFavs().has(r.id);
+  return `<button type="button" class="rrow" data-rid="${r.id}" style="--mc:${mealCol(r.meal)}">
+    <span class="si" aria-hidden="true">${foodIcon(r.name)}</span>
+    <span class="nm">${esc(r.name)}${fav?` <span class="hv" aria-label="saved">♥</span>`:""}</span>
+    <span class="sm">${MEALN[r.meal]} · ${r.mins} min · ${esc(r.cuisine)}</span>
+    ${extra?`<span class="uses">${extra}</span>`:""}
+    <span class="rk"><b>${r.n.kcal}</b> ${CU()}<br><span class="p">${r1(r.n.p)}g P</span></span></button>`}
+function shelf(title,items,see,sub){
+  if(!items.length) return "";
+  return `<section class="shelf"><div class="shead"><h4>${title}</h4>${sub?`<span class="ssub">${sub}</span>`:""}${see&&items.length>3?`<button type="button" class="seeall" data-see='${JSON.stringify(see)}'>See all ${items.length}</button>`:""}</div>
+    <div class="srow">${items.slice(0,10).map(cardHTML).join("")}</div></section>`;
+}
+function renderBrowse(list,L,fav){
+  const now=mealNow(), mn={breakfast:"Breakfast",lunch:"Lunch",snack:"Snack",dinner:"Dinner"}[now];
+  let right=list.filter(r=>r.meal===now);
+  if(L.kl!=null&&L.ate){right=right.filter(r=>fitScore(r,L)>=0).sort((a,b)=>fitScore(b,L)-fitScore(a,L))}
+  else right=[...right].sort((a,b)=>b.n.p/b.n.kcal-a.n.p/a.n.kcal);
+  const by=f=>list.filter(f), cnt=(k,v)=>list.filter(r=>r[k]===v).length;
+  $("recBrowse").innerHTML=
+    shelf(L.ate&&L.kl!=null?`${mn} ideas that fit`:`${mn} ideas for now`,right,{meal:now,tags:L.ate&&L.kl!=null?["fit"]:[]},L.ate&&L.kl!=null&&L.kl>0?`${Math.round(L.kl).toLocaleString()} ${CU()} left`:"")
+    +shelf("♥ Saved",by(r=>fav.has(r.id)),{tags:["saved"]})
+    +`<section class="shelf"><div class="shead"><h4>Browse</h4></div>
+      <div class="chiprow" aria-label="By cuisine">${CUIS.filter(c=>cnt("cuisine",c)).map(c=>`<button type="button" class="bchip" data-see='${JSON.stringify({cuisine:c})}'>${c} <small>${cnt("cuisine",c)}</small></button>`).join("")}</div>
+      <div class="chiprow" aria-label="By main protein">${Object.keys(PRON).filter(k=>cnt("pro",k)).map(k=>`<button type="button" class="bchip" data-see='${JSON.stringify({pro:k})}'>${PRON[k]} <small>${cnt("pro",k)}</small></button>`).join("")}</div></section>`
+    +shelf("Breakfast",by(r=>r.meal==="breakfast"),{meal:"breakfast"})
+    +shelf("Lunch",by(r=>r.meal==="lunch"),{meal:"lunch"})
+    +shelf("Dinner",by(r=>r.meal==="dinner"),{meal:"dinner"})
+    +shelf("Snacks",by(r=>r.meal==="snack"&&!r.tags.includes("sweet")),{meal:"snack"})
+    +shelf("Sweet treats",by(r=>r.tags.includes("sweet")),{tags:["sweet"]})
+    +shelf("High protein",by(r=>r.tags.includes("protein")).sort((a,b)=>b.n.p-a.n.p),{tags:["protein"]},"25 g+ per meal")
+    +shelf("Ready in 15 minutes",by(r=>r.tags.includes("quick")),{tags:["quick"]})
+    +shelf("Meal prep",by(r=>r.tags.includes("prep")),{tags:["prep"]},"Cook once, eat all week")
+    +shelf("Under 400 calories",by(r=>r.tags.includes("light")&&r.meal!=="snack"),{tags:["light"]})
+    +shelf("Vegetarian",by(r=>r.tags.includes("veg")),{tags:["veg"]});
+}
+function renderList(list,L,fav){
+  let rs=recFiltered(list,L,fav), terms=[], ingMode=false;
+  const q=RF.q.trim();
+  if(q){
+    terms=ingTerms(q);
+    if(terms.length>=2) ingMode=true;
+    else{const ws=qwords(q), hit=rs.filter(r=>{const toks=toksOf(r.name+" "+r.ing.join(" ")); return ws.every(w=>toks.some(x=>tokSame(w,x))||exactHit(w,toks)||wordHit(w,toks))});
+      if(!hit.length&&ws.length>=2){ingMode=true; terms=ws.map(w=>({label:w,ws:[w]}))} else rs=hit}
+  }
+  let extras={};
+  if(ingMode){
+    const nameT=r=>({_it:[toksOf(r.name+" "+(PRON[r.pro]||""))]});
+    const scored=rs.map(r=>{const m=ingMatch(r,terms); m.s=m.n+.4*m.used.filter(t=>termHit(t,nameT(r))).length; return {r,m}}).filter(x=>x.m.n>0);
+    scored.sort((a,b)=>b.m.s-a.m.s||a.m.other-b.m.other||b.r.n.p-a.r.n.p);
+    rs=scored.map(x=>x.r);
+    scored.forEach(({r,m})=>{extras[r.id]=`<span class="tag ${m.n===terms.length?"fit":""}">${m.n} of ${terms.length}</span> Uses ${m.used.map(t=>esc(t.label)).join(", ")}${m.other?` · ${m.other} other ingredient${m.other>1?"s":""}`:""}`});
+  }else if(RF.tags.has("fit")) rs=[...rs].sort((a,b)=>fitScore(b,L)-fitScore(a,L));
+  const bits=[]; if(q) bits.push(ingMode?`Recipes using ${terms.map(t=>`"${esc(t.label)}"`).join(", ")}`:`Matching "${esc(q)}"`);
+  if(RF.meal!=="all") bits.push(MEALN[RF.meal]); RF.tags.forEach(t=>bits.push(t==="fit"?"Fits my day":t==="saved"?"Saved":RTAGN[t]));
+  if(RF.cuisine) bits.push(esc(RF.cuisine)); if(RF.pro) bits.push(PRON[RF.pro]);
+  $("recSummary").innerHTML=bits.join(" · ");
+  $("recMeta").textContent=`${rs.length} of ${list.length} recipes`;
+  if(!rs.length){
+    $("recList").innerHTML=`<p class="empty">${ingMode?"No recipes use those ingredients. Try fewer, or more general words like \"chicken\" or \"beans\".":RF.tags.has("saved")&&!fav.size?"Tap ♡ Save on a recipe to keep it here.":RF.tags.has("fit")&&L.kl==null?"Set a calorie goal under Me to see what fits.":RF.tags.has("fit")?"Nothing fits what's left today. Try a snack, or turn off Fits my day.":"No recipes match. Try fewer filters."}</p>`;
+    return}
+  $("recList").innerHTML=rs.map(r=>rowHTML(r,extras[r.id])).join("");
 }
 function recBody(r){
   const n=r.n, fav=recFavs().has(r.id);
   return `<div class="rbody">
     <div class="rnut"><div><b>${n.kcal}</b><span>${CUL()}</span></div><div class="p"><b>${r1(n.p)}g</b><span>Protein</span></div><div class="c"><b>${r1(n.c)}g</b><span>Carbs</span></div><div><b>${r1(n.f)}g</b><span>Fat</span></div></div>
     <p class="rnote">Per serving · ${r1(n.fi)} g fiber · ${n.na.toLocaleString()} mg sodium. Makes ${r.serves} serving${r.serves>1?"s":""}. Salt and spices aren't counted.</p>
-    <div><h4>Ingredients</h4><ul>${r.ing.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>
-    <div><h4>Steps</h4><ol>${r.steps.map(x=>`<li>${esc(x)}</li>`).join("")}</ol></div>
-    ${r.tip?`<p class="rtip">${esc(r.tip)}</p>`:""}
     <div class="ract">
       <div class="stepper"><span class="lbl">Servings</span><div class="f"><input type="number" id="rsv-${r.id}" min="0.25" step="0.25" value="1" inputmode="decimal" aria-label="Servings to log"></div></div>
       <button type="button" class="primary" data-rlog="${r.id}">Log it</button>
       <button type="button" class="chip heart" data-rfav="${r.id}" aria-pressed="${fav}">${fav?"♥ Saved":"♡ Save"}</button>
       <button type="button" class="chip ghost" data-rsave="${r.id}">Add to My foods</button>
-    </div></div>`;
+    </div>
+    <div><h4>Ingredients</h4><ul>${r.ing.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>
+    <div><h4>Steps</h4><ol>${r.steps.map(x=>`<li>${esc(x)}</li>`).join("")}</ol></div>
+    ${r.tip?`<p class="rtip">${esc(r.tip)}</p>`:""}
+  </div>`;
+}
+function renderDetail(r){
+  const used=RF.q.trim()&&RF.back==="list"?ingTerms(RF.q).filter(t=>termHit(t,r)):[];
+  $("recDetail").innerHTML=`<button type="button" class="chip ghost" id="recDBack">← ${RF.back==="list"?"Back to results":"All recipes"}</button>
+    <div class="rdhead" style="--mc:${mealCol(r.meal)}"><span class="si" aria-hidden="true">${foodIcon(r.name)}</span>
+      <div><h2>${esc(r.name)}</h2><p class="sm">${MEALN[r.meal]} · ${r.mins} min · serves ${r.serves} · ${esc(r.cuisine)}</p>
+      <div class="rpills">${r.tags.map(t=>`<span class="tag">${RTAGN[t]}</span>`).join("")}</div></div></div>
+    ${used.length>1?`<p class="hint">Uses your ${used.map(t=>esc(t.label)).join(", ")}.</p>`:""}
+    ${recBody(r)}`;
+  $("recDBack").onclick=()=>{RF.open=null; RF.mode=RF.back; renderRecipes().then(()=>window.scrollTo({top:RF.scroll}))};
+}
+function markRecFilters(){
+  document.querySelectorAll("#recMeal [data-meal]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.meal===RF.meal));
+  document.querySelectorAll("#recTags [data-rt]").forEach(b=>b.setAttribute("aria-pressed",RF.tags.has(b.dataset.rt)));
+  $("recCuisine").value=RF.cuisine; $("recPro").value=RF.pro;
+  if($("recQ").value!==RF.q) $("recQ").value=RF.q;
+  const n=(RF.meal!=="all")+RF.tags.size+!!RF.cuisine+!!RF.pro; $("recFiltBtn").textContent=n?`Filters (${n})`:"Filters";
 }
 async function renderRecipes(){
-  markRecFilters(); renderMyRecipes();
+  renderMyRecipes();
   const list=await loadRecipes();
-  if(!list){$("recList").innerHTML=`<p class="empty">Couldn't load the recipes. Open the app once while online and they'll be saved for offline use.</p>`; return}
+  if(!list){$("recBrowse").innerHTML=`<p class="empty">Couldn't load the recipes. Open the app once while online and they'll be saved for offline use.</p>`; return}
+  if($("recCuisine").options.length<2){
+    $("recCuisine").innerHTML=`<option value="">Any</option>`+CUIS.map(c=>`<option>${c}</option>`).join("");
+    $("recPro").innerHTML=`<option value="">Any</option>`+Object.entries(PRON).map(([k,v])=>`<option value="${k}">${v}</option>`).join("")}
+  markRecFilters();
   const L=dayLeft(), fav=recFavs(), today=S.date===todayKey();
-  if(L.kl!=null){$("recLeft").hidden=false;
+  if(L.kl!=null&&L.ate){$("recLeft").hidden=false;
     $("recLeft").innerHTML=L.kl>0?`You have <b>${Math.round(L.kl).toLocaleString()} ${CU()}</b>${L.pl>0?` and <b>${Math.round(L.pl)} g protein</b>`:""} left ${today?"today":"on "+esc(niceDate(S.date))}.`
-      :`You've reached your calorie target ${today?"for today":"for "+esc(niceDate(S.date))}. Lighter ideas are under "Under 400 cal".`}
+      :`You've reached your calorie target ${today?"for today":"for "+esc(niceDate(S.date))}. Look under "Under 400 calories" for lighter ideas.`}
   else $("recLeft").hidden=true;
-  let rs=list.filter(r=>(RF.meal==="all"||r.meal===RF.meal)&&[...RF.tags].every(t=>t==="fit"?L.kl!=null&&fitScore(r,L)>=0:t==="saved"?fav.has(r.id):r.tags.includes(t)));
-  if(RF.q.trim()){const ws=qwords(RF.q); rs=rs.filter(r=>{const toks=toksOf(r.name+" "+r.ing.join(" ")); return ws.every(w=>exactHit(w,toks)||wordHit(w,toks))})}
-  if(RF.tags.has("fit")) rs=[...rs].sort((a,b)=>fitScore(b,L)-fitScore(a,L));
-  $("recMeta").textContent=`${rs.length} of ${list.length} recipes`;
-  if(!rs.length){
-    $("recList").innerHTML=`<p class="empty">${RF.tags.has("saved")&&!fav.size?"Tap ♡ Save on a recipe to keep it here.":RF.tags.has("fit")&&L.kl==null?"Set a calorie goal under Me to see what fits.":RF.tags.has("fit")?"Nothing fits what's left today. Try a snack, or turn off Fits my day.":"No recipes match. Try fewer filters."}</p>`;
-    return}
-  $("recList").innerHTML=rs.map(r=>{const n=r.n, open=RF.open===r.id, fits=L.ate&&L.kl!=null&&L.kl>0&&fitScore(r,L)>=0&&!RF.tags.has("fit");
-    return `<div class="rcard" id="rc-${r.id}">
-      <button type="button" class="rhead" data-ropen="${r.id}" aria-expanded="${open}">
-        <span class="nm">${esc(r.name)}${fav.has(r.id)?` <span aria-label="saved" style="color:var(--protein)">♥</span>`:""}</span>
-        <span class="sm">${MEALN[r.meal]} · ${r.mins} min · serves ${r.serves}</span>
-        <span class="rpills">${r.tags.map(t=>`<span class="tag">${RTAGN[t]}</span>`).join("")}${fits?`<span class="tag fit">Fits today</span>`:""}</span>
-        <span class="rk"><b>${n.kcal}</b> ${CU()}<br><span class="p">${r1(n.p)}g P</span></span>
-      </button>${open?recBody(r):""}</div>`}).join("");
+  if(RF.mode==="detail"&&RF.open){const r=list.find(x=>x.id===RF.open); if(r){
+    $("recBrowse").hidden=true; $("recListWrap").hidden=true; $("recDetail").hidden=false; $("recForm").hidden=true; $("recQHint").hidden=true; $("recLeft").hidden=true;
+    $("recMeta").textContent=""; renderDetail(r); return}}
+  RF.mode=RF.q.trim()||anyFilter()?"list":"browse";
+  $("recDetail").hidden=true; $("recForm").hidden=false;
+  $("recBrowse").hidden=RF.mode!=="browse"; $("recListWrap").hidden=RF.mode!=="list";
+  $("recQHint").hidden=!!RF.q.trim();
+  if(RF.mode==="browse"){$("recMeta").textContent=`${list.length} recipes`; renderBrowse(list,L,fav)} else renderList(list,L,fav);
 }
-$("recMeal").onclick=ev=>{const b=ev.target.closest("[data-meal]"); if(!b) return; RF.meal=b.dataset.meal; RF.open=null; renderRecipes()};
-$("recTags").onclick=ev=>{const b=ev.target.closest("[data-rt]"); if(!b) return; const t=b.dataset.rt; RF.tags.has(t)?RF.tags.delete(t):RF.tags.add(t); RF.open=null; renderRecipes()};
-let recQT=null; $("recQ").oninput=()=>{clearTimeout(recQT); recQT=setTimeout(()=>{RF.q=$("recQ").value; renderRecipes()},200)};
-document.addEventListener("click",ev=>{if(ev.target.closest("[data-recfit]")){RF.tags=new Set(["fit"]); RF.meal="all"; RF.q=""; RF.open=null}},true);
-$("recList").onclick=async ev=>{
+function openRecipe(id){RF.back=RF.mode==="list"?"list":"browse"; RF.scroll=scrollY; RF.open=id; RF.mode="detail";
+  renderRecipes().then(()=>{const v=$("view-recipes"); window.scrollTo({top:Math.max(0,v.getBoundingClientRect().top+scrollY-90)})})}
+$("recMeal").onclick=ev=>{const b=ev.target.closest("[data-meal]"); if(!b) return; RF.meal=b.dataset.meal; renderRecipes()};
+$("recTags").onclick=ev=>{const b=ev.target.closest("[data-rt]"); if(!b) return; const t=b.dataset.rt; RF.tags.has(t)?RF.tags.delete(t):RF.tags.add(t); renderRecipes()};
+$("recCuisine").onchange=()=>{RF.cuisine=$("recCuisine").value; renderRecipes()};
+$("recPro").onchange=()=>{RF.pro=$("recPro").value; renderRecipes()};
+$("recFiltBtn").onclick=()=>{const open=$("recFiltBox").hidden; $("recFiltBox").hidden=!open; $("recFiltBtn").setAttribute("aria-expanded",open)};
+$("recBack").onclick=()=>{RF.meal="all"; RF.tags=new Set(); RF.cuisine=""; RF.pro=""; RF.q=""; renderRecipes()};
+let recQT=null; $("recQ").oninput=()=>{clearTimeout(recQT); recQT=setTimeout(()=>{RF.q=$("recQ").value; renderRecipes()},250)};
+$("recForm").onsubmit=ev=>{ev.preventDefault(); clearTimeout(recQT); RF.q=$("recQ").value; $("recQ").blur(); renderRecipes()};
+document.addEventListener("click",ev=>{if(ev.target.closest("[data-recfit]")){RF.tags=new Set(["fit"]); RF.meal="all"; RF.cuisine=""; RF.pro=""; RF.q=""; RF.open=null; RF.mode="list"}},true);
+$("view-recipes").addEventListener("click",async ev=>{
   const list=RECIPES||[], byId=id=>list.find(r=>r.id===id);
-  const o=ev.target.closest("[data-ropen]");
-  if(o){RF.open=RF.open===o.dataset.ropen?null:o.dataset.ropen; await renderRecipes();
-    if(RF.open){const c=$("rc-"+RF.open); if(c) c.scrollIntoView({block:"nearest",behavior:calm?"auto":"smooth"})} return}
+  const see=ev.target.closest("[data-see]");
+  if(see){const o=JSON.parse(see.dataset.see); RF.meal=o.meal||"all"; RF.tags=new Set(o.tags||[]); RF.cuisine=o.cuisine||""; RF.pro=o.pro||""; RF.q="";
+    await renderRecipes(); const v=$("view-recipes"); window.scrollTo({top:Math.max(0,v.getBoundingClientRect().top+scrollY-90)}); return}
+  const c=ev.target.closest("[data-rid]"); if(c){openRecipe(c.dataset.rid); return}
   const lg=ev.target.closest("[data-rlog]");
   if(lg){const r=byId(lg.dataset.rlog); if(!r) return; const sv=+$("rsv-"+r.id).value||1, n=r.n, k=x=>r1(x*sv);
-    await addEntry({name:(sv!==1?r1(sv)+"× ":"")+r.name,p:k(n.p),c:k(n.c),f:k(n.f),kcal:Math.round(n.kcal*sv),fi:k(n.fi),su:k(n.su),na:Math.round(n.na*sv),src:"recipe"});
-    renderRecipes(); return}
+    await addEntry({name:(sv!==1?r1(sv)+"× ":"")+r.name,p:k(n.p),c:k(n.c),f:k(n.f),kcal:Math.round(n.kcal*sv),fi:k(n.fi),su:k(n.su),na:Math.round(n.na*sv),src:"recipe"}); return}
   const fv=ev.target.closest("[data-rfav]");
-  if(fv){const f=recFavs(), id=fv.dataset.rfav; f.has(id)?f.delete(id):f.add(id); save("recFav",[...f]); renderRecipes(); return}
+  if(fv){const f=recFavs(), id=fv.dataset.rfav; f.has(id)?f.delete(id):f.add(id); save("recFav",[...f]); fv.setAttribute("aria-pressed",f.has(id)); fv.textContent=f.has(id)?"♥ Saved":"♡ Save"; return}
   const sb=ev.target.closest("[data-rsave]");
   if(sb){const r=byId(sb.dataset.rsave); if(!r) return; const n=r.n;
     saveFood({name:r.name,serving:"1 serving",p:n.p,c:n.c,f:n.f,kcal:n.kcal,fi:n.fi,su:n.su,na:n.na});
     toast("Added to My foods. Type its name in the bar to log it.")}
-};
+});
 
 /* Your own recipes: one ingredient per line, matched to foods, saved to My foods with nutrition per serving. */
 let RB={lines:[],editId:null};

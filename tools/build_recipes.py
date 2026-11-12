@@ -32,12 +32,17 @@ for r in RECIPES:
     if r["veg"]: tags.append("veg")
     if r["mins"] <= 15: tags.append("quick")
     if r["serves"] >= 4: tags.append("prep")
-    out.append({k: r[k] for k in ("id", "name", "meal", "mins", "serves") if k in r} |
-               {"ing": [i[0] for i in r["ing"]], "steps": r["steps"], **({"tip": r["tip"]} if r.get("tip") else {}), "n": n, "tags": tags})
+    if r.get("sweet"): tags.append("sweet")
+    if not r.get("cuisine") or not r.get("pro"):
+        missing.append((r["id"], "cuisine/pro"))
+    out.append({k: r[k] for k in ("id", "name", "meal", "mins", "serves", "cuisine", "pro") if k in r} |
+               {"ing": [i[0] for i in r["ing"]], "ik": [i for i, x in enumerate(r["ing"]) if x[1]], "steps": r["steps"], **({"tip": r["tip"]} if r.get("tip") else {}), "n": n, "tags": tags})
 if missing:
     raise SystemExit("Not in foods.json:\n" + "\n".join(f"  {a}: {b}" for a, b in missing))
 json.dump({"source": "Original Fuel Log recipes. Nutrition computed from USDA SR26 and FNDDS values in foods.json; salt and spices not counted.",
            "recipes": out}, open(os.path.join(root, "recipes.json"), "w"), separators=(",", ":"), ensure_ascii=False)
+ids = [r["id"] for r in out]
+assert len(ids) == len(set(ids)), "duplicate recipe ids"
 for r in out:
     n = r["n"]; print(f'{r["meal"]:9} {r["name"][:40]:40} {n["kcal"]:4} cal {n["p"]:5}p {n["c"]:5}c {n["f"]:5}f  {",".join(r["tags"])}')
 print(len(out), "recipes")
