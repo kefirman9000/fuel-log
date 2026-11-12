@@ -11,6 +11,7 @@ A one-page food, water and supplement tracker that runs in your phone's browser.
 - **First-run setup** walks new users through their profile, goal and supplements.
 - **Add to home screen:** a one-tap install on Android and step-by-step instructions on iPhone. Works offline once installed.
 - **Quick-add bar** pinned to the top: add food or water without scrolling.
+- **Automatic logging:** type "bagel with avocado and 4 strips bacon" and all three foods go straight in, with Undo. The app only asks when it isn't sure. You can switch to checking every food first.
 - **Food search:** type what you ate, like "2 Little Debbie Nutty Buddy" or "Chipotle chicken bowl". The app searches your saved foods, a built-in list of common restaurant items, USDA FoodData Central and Open Food Facts, then multiplies by the servings, pieces or grams you enter.
 - **Barcode scanning** with the camera or a photo, or by typing the number.
 - **Supplements:** turn on creatine, vitamin D, fish oil, magnesium, electrolytes, a multivitamin, or add your own. Each one has a daily check-off and a 7-day streak, and the app marks which ones suit your profile.

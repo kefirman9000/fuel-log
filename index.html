@@ -212,6 +212,8 @@ details.panel summary h3::after{content:" +";color:var(--muted)}
 details.panel[open] summary h3::after{content:" −"}
 .toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(20px);opacity:0;background:var(--ink);color:var(--paper);padding:9px 16px;border-radius:999px;font-weight:600;font-size:14px;transition:.25s;pointer-events:none;z-index:20;max-width:calc(100% - 32px)}
 .toast.show{opacity:1;transform:translateX(-50%)}
+.toast.act{pointer-events:auto;display:flex;align-items:center;gap:12px;padding:8px 8px 8px 16px}
+.toast .tbtn{border:0;background:var(--paper);color:var(--ink);border-radius:999px;padding:5px 12px;font-weight:800;font-size:13px;flex:none}
 /* Motion: small rewards for logging */
 .jug{transform-origin:50% 100%}
 .jug i::before{content:"";position:absolute;left:0;right:0;top:-7px;height:8px;background:inherit;
@@ -467,7 +469,7 @@ details.panel[open] summary h3::after{content:" −"}
   <div class="view" id="view-today">
   <div class="quick" role="toolbar" aria-label="Quick add">
     <form class="qtype" id="qForm" autocomplete="off">
-      <input id="qIn" placeholder="What did you eat? e.g. 2 eggs and a slice of toast" enterkeyhint="go" aria-label="What did you eat?">
+      <input id="qIn" placeholder="What did you eat? e.g. bagel with avocado and 4 strips bacon" enterkeyhint="go" aria-label="What did you eat?">
       <button class="qfood" id="qFood" type="submit"><span class="plus" aria-hidden="true">+</span><span class="qlbl">Add</span></button>
       <button class="qscan" id="qScan" type="button" aria-label="Scan a barcode"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7V4h3M18 4h3v3M21 17v3h-3M6 20H3v-3"/><path d="M7 8v8M10 8v8M13 8v8M16 8v8" stroke-width="1.6"/></svg><span>Scan</span></button>
     </form>
@@ -667,6 +669,14 @@ details.panel[open] summary h3::after{content:" −"}
     </div>
   </section>
 
+  <section class="panel" aria-labelledby="hLogMode">
+    <div class="ph"><h3 id="hLogMode">Logging</h3><span class="meta">When you type what you ate</span></div>
+    <div class="opts stack" id="entryModeOpts">
+      <button type="button" class="opt" data-em="auto">Add automatically when sure<small>"Bagel with avocado and 4 strips bacon" goes straight in. You're only asked when it's unclear, like "a burger".</small></button>
+      <button type="button" class="opt" data-em="ask">Always let me check first<small>See the match and amount before anything is logged</small></button>
+    </div>
+  </section>
+
   <section class="panel" aria-labelledby="hLook">
     <div class="ph"><h3 id="hLook">Appearance</h3></div>
     <div class="f"><span class="lbl">Theme</span>
@@ -829,7 +839,7 @@ details.panel[open] summary h3::after{content:" −"}
 
 <script>
 (() => {
-const APP_VERSION="3.1.0";
+const APP_VERSION="3.2.0";
 const REPO="kefirman9000/fuel-log";
 const $ = id => document.getElementById(id);
 const OZ=29.5735, LB=0.45359237, IN=2.54;
@@ -1174,10 +1184,18 @@ function renderSuppManage(){
     <input class="sdose" data-dose="${esc(s.id)}" value="${esc(s.dose)}" aria-label="Dose for ${esc(s.name)}">
     ${s.custom?`<button class="del" style="grid-row:auto;grid-column:auto" data-rm="${esc(s.id)}" aria-label="Remove ${esc(s.name)}">×</button>`:"<span></span>"}</div>`).join("");
 }
-function renderMe(){fillProfile();renderPlan();renderSuppManage();renderBadges();$("verMeta").textContent="Version "+APP_VERSION}
+function renderEntryMode(){document.querySelectorAll("#entryModeOpts [data-em]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.em===entryMode()))}
+$("entryModeOpts").onclick=ev=>{const b=ev.target.closest("[data-em]");if(!b)return;S.settings.entryMode=b.dataset.em;saveSettings();renderEntryMode();
+  toast(b.dataset.em==="auto"?"Foods go straight in when the app is sure":"You'll check each food before it's logged")};
+function renderMe(){renderEntryMode();fillProfile();renderPlan();renderSuppManage();renderBadges();$("verMeta").textContent="Version "+APP_VERSION}
 
 /* ---------- actions ---------- */
-function toast(msg){const t=$("toast");t.textContent=msg;t.classList.add("show");clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove("show"),2200)}
+function toast(msg){const t=$("toast"); if(t.classList.contains("act")&&t.classList.contains("show")) return;
+  t.textContent=msg;t.classList.add("show");clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove("show"),2200)}
+function toastAction(msg,label,fn){const t=$("toast");
+  t.innerHTML=`<span>${esc(msg)}</span><button type="button" class="tbtn">${esc(label)}</button>`; t.classList.add("show","act");
+  t.querySelector("button").onclick=()=>{t.classList.remove("show","act");fn()};
+  clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove("show","act"),6500)}
 const now=()=>new Date().toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"});
 
 /* ---------- motion helpers ---------- */
@@ -1224,11 +1242,11 @@ function checkGoals(hits){
   S.hits=hits; S.hitsDate=S.date;
 }
 
-async function addEntry(e){
+async function addEntry(e,quiet){
   const day=await getDay(S.date);
   const id=Math.random().toString(36).slice(2,9);
   day.entries.push({id,t:now(),meal:mealFor(new Date().getHours()),...e}); S.newId=id;
-  saveDay(S.date); render(); toast("Logged "+e.name);
+  saveDay(S.date); render(); if(quiet) return id; toast("Logged "+e.name);
   const pv=$("pVal"); if(pv&&+e.p>0){const r=pv.getBoundingClientRect(); if(r.top>0) floaty(r.left+r.width/2,r.top-2,"+"+r1(+e.p)+"g","var(--protein)")}
 }
 function saveFood(f,id){
@@ -1425,14 +1443,16 @@ function openAdd(tab){
 }
 function closeAdd(){
   $("addPanel").hidden=true; stopCam(); $("searchPick").innerHTML=""; $("searchResults").innerHTML=""; $("scanResult").innerHTML="";
-  $("searchMsg").textContent=SEARCH_HINT; MQ.list=[]; MQ.i=0;
+  $("searchMsg").textContent=SEARCH_HINT; MQ.list=[]; MQ.i=0; S.clarify=false;
 }
 $("addClose").onclick=closeAdd;
 $("qForm").onsubmit=ev=>{ev.preventDefault();
   const text=$("qIn").value.trim();
-  openAdd("search");
-  if(!text){$("qIn").focus();return}
-  $("qIn").value=""; $("qIn").blur(); $("sq").value=text; $("searchForm").requestSubmit();
+  if(entryMode()!=="auto"||!text) openAdd("search");
+  if(!text){openAdd("search");$("qIn").focus();return}
+  $("qIn").value=""; $("qIn").blur();
+  if(entryMode()==="auto"){autoLog(text);return}
+  $("sq").value=text; $("searchForm").requestSubmit();
 };
 $("wUndo").onclick=async()=>{const d=await getDay(S.date);d.water.pop();saveDay(S.date);render()};
 $("wCustomBtn").onclick=()=>{$("wCustom").hidden=!$("wCustom").hidden;if(!$("wCustom").hidden)$("wCustomIn").focus()};
@@ -1566,11 +1586,13 @@ const COMMON=[
   ["Banana","1 medium (118 g)",118,1.3,27,.4,105],["Apple","1 medium (182 g)",182,.5,25,.3,95],["Orange","1 medium (131 g)",131,1.2,15,.2,62],
   ["Avocado","1/2 avocado (100 g)",100,2,8.5,14.7,160],["Potato, baked","1 medium (173 g)",173,4.3,37,.2,161],["Broccoli, cooked","1 cup (156 g)",156,3.7,11,.6,55],
   ["Pizza, cheese","1 slice (107 g)",107,12,36,10,285],["Pizza, pepperoni","1 slice (111 g)",111,13,36,13,313],["Orange juice","1 cup (248 g)",248,1.7,26,.5,112],
-  ["Cola soda","1 can (12 fl oz)",368,0,39,0,140],["Beer, regular","1 can (12 fl oz)",356,1.6,12.6,0,153],
+  ["Cola soda","1 can (12 fl oz)",368,0,39,0,140],["Coffee, black","1 cup (240 g)",240,.3,0,0,2],["Cream cheese","2 tbsp (29 g)",29,1.7,1.6,9.8,99],
+  ["Butter","1 tbsp (14 g)",14,.1,0,11.5,102],["Toast, white","1 slice (28 g)",28,2.6,14,1,75],["French fries","1 medium (117 g)",117,4,48,17,365],
+  ["Sausage patty","1 patty (27 g)",27,5,.3,8,96],["Pancake","1 pancake (38 g)",38,2.4,11,3.5,86],["Hard-boiled egg","1 egg (50 g)",50,6.3,.6,5.3,78],["Beer, regular","1 can (12 fl oz)",356,1.6,12.6,0,153],
 ].map(([name,serving,g,p,c,f,k])=>({name,serving,g,v:[p,c,f,k],common:true}));
 
 const UNITS={cup:"cup",cups:"cup",c:"cup",tbsp:"tbsp",tablespoon:"tbsp",tablespoons:"tbsp",tbs:"tbsp",tsp:"tsp",teaspoon:"tsp",teaspoons:"tsp",
-  oz:"oz",ounce:"oz",ounces:"oz",g:"g",gram:"g",grams:"g",lb:"lb",lbs:"lb",pound:"lb",slice:"slice",slices:"slice",piece:"piece",pieces:"piece",pc:"piece",pcs:"piece",
+  oz:"oz",ounce:"oz",ounces:"oz",g:"g",gram:"g",grams:"g",lb:"lb",lbs:"lb",pound:"lb",slice:"slice",slices:"slice",piece:"piece",pieces:"piece",strip:"slice",strips:"slice",pc:"piece",pcs:"piece",
   scoop:"scoop",scoops:"scoop",bowl:"bowl",bowls:"bowl",bar:"bar",bars:"bar",serving:"serving",servings:"serving",can:"can",cans:"can",bottle:"bottle",bottles:"bottle",
   glass:"glass",glasses:"glass",handful:"handful",plate:"plate",container:"container",pint:"pint",pints:"pint",egg:"egg",eggs:"egg"};
 const WORDNUM={a:1,an:1,one:1,two:2,three:3,four:4,five:5,six:6,half:.5,"½":.5,"¼":.25,"¾":.75};
@@ -1582,7 +1604,7 @@ function parseQuery(raw){
     if(t.length>1&&/^\d+\/\d+$/.test(t[0])){amt+=toNum(t[0]);t.shift()}
     if(t[0]==="and"&&t[1]==="a"&&t[2]==="half"){amt+=.5;t.splice(0,3)}}
   if(t.length>1&&UNITS[t[0]]&&UNITS[t[0]]!=="egg"){unit=UNITS[t[0]];t.shift();if(amt==null)amt=1}
-  while(t.length>1&&["of","some","the","my"].includes(t[0])) t.shift();
+  while(t.length>1&&["of","some","the","my","side","order","bit"].includes(t[0])) t.shift();
   const mx=t.length>1&&t[t.length-1].match(/^(?:x|×)(\d+(?:\.\d+)?)$/); if(mx&&amt==null){amt=+mx[1];t.pop()}
   const q=t.join(" ").trim();
   return {amt,unit,q:q||raw.trim()};
@@ -1671,16 +1693,62 @@ function bestMatch(q,all){
 }
 /* Split "2 eggs, toast and a coffee" into separate foods. Only splits on "and"/"with" when the next part starts with an amount,
    so "mac and cheese" or "peanut butter and jelly" stay whole. Commas, "plus" and "then" always split. */
+const COMBOS=["mac and cheese","macaroni and cheese","peanut butter and jelly","pb and j","pb&j","chips and salsa","fish and chips","rice and beans","beans and rice",
+  "bread and butter","chicken and waffles","sweet and sour","half and half","cookies and cream","biscuits and gravy","spaghetti and meatballs","ham and cheese",
+  "bacon egg and cheese","bacon, egg and cheese","sausage egg and cheese","sausage, egg and cheese","egg and cheese","surf and turf","franks and beans","pork and beans",
+  "cheese and crackers","shrimp and grits","salt and vinegar","sour cream and onion","bangers and mash","steak and cheese","meat and potatoes","oil and vinegar",
+  "and a half","with cheese","with bacon","with egg"];
+/* Split "bagel with avocado and 4 strips bacon" into separate foods, but keep dishes like "mac and cheese" whole. */
 function splitMeal(text){
-  const parts=text.split(/\s*(?:,|;|\+|\bplus\b|\bthen\b)\s*/i).filter(Boolean);
-  const out=[];
-  parts.forEach(p=>{
-    const bits=p.split(/\s+(?:and|with|&)\s+(?=(?:\d|a\b|an\b|one\b|two\b|three\b|four\b|five\b|half\b|some\b|[½¼¾]))/i);
-    out.push(...bits.map(b=>b.trim()).filter(Boolean));
-  });
-  return out.length?out:[text];
+  let s=" "+text.trim().replace(/\s+/g," ")+" ";
+  COMBOS.forEach(c=>{const re=new RegExp(" "+c.replace(/[.*+?^${}()|[\]\\]/g,"\\$&").replace(/ /g,"\\s+")+"(?=[ ,])","gi"); s=s.replace(re,m=>m.replace(/,/g,"¸").replace(/\s+(and|with)\s+/gi,(x,w)=>w.toLowerCase()==="and"?"\u0001":"\u0002").replace(/&/g,"¤"))});
+  const out=s.split(/\s*(?:,|;|\+|&|\bplus\b|\bthen\b|\band\b|\bwith\b|\balso\b)\s*/i)
+    .map(p=>p.replace(/\u0001/g," and ").replace(/\u0002/g," with ").replace(/¸/g,",").replace(/¤/g,"&").trim()).filter(p=>p&&!/^(a|an|some|the)$/i.test(p));
+  return out.length?out:[text.trim()];
 }
 const MQ={list:[],i:0};
+const entryMode=()=>S.settings.entryMode||"auto";
+/* Sure enough to log without asking? Needs a match containing every word typed, a calorie value, and an amount we could work out.
+   Built-in and saved foods count as sure; database results need at least two matching words ("tombstone pizza", not just "burger"). */
+function isSure(best,pq,st){
+  if(!best||!best.exact) return false;
+  const r=best.r; if(r.kcal==null&&!(r.per100&&r.per100.k!=null)) return false;
+  if(/Couldn't convert/.test(st.note)) return false;
+  if(["saved","common","restaurant"].includes(r.src)) return true;
+  return norm(pq.q).split(" ").filter(w=>w.length>1&&!STOP.has(w)).length>=2;
+}
+async function autoLog(text){
+  const parts=splitMeal(text), logged=[], unsure=[];
+  const btn=$("qFood"), lbl=btn.querySelector(".qlbl"); btn.disabled=true; lbl.textContent="Adding…";
+  try{
+    for(const part of parts){
+      const pq=parseQuery(part); if(!pq.q) continue;
+      lastReq={amt:pq.amt,unit:pq.unit};
+      let pool=localMatches(pq.q), best=bestMatch(pq.q,pool);
+      if(!(best&&isSure(best,pq,startAmount(best.r)))&&navigator.onLine!==false){
+        const [f,o]=await Promise.all([searchFDC(pq.q),searchOFF(pq.q)]); pool=[...pool,...f.items,...o.items]; best=bestMatch(pq.q,pool);
+      }
+      const st=best?startAmount(best.r):null;
+      if(best&&isSure(best,pq,st)){
+        const r=best.r, m=macrosFor(r,st.amt,st.mode);
+        if(r.savedId){const f=S.foods.items[r.savedId]; if(f){f.used=(f.used||0)+1;save("foods",S.foods)}}
+        const id=await addEntry({name:(m.label+r.name).trim(),p:m.p,c:m.c,f:m.f,kcal:m.kcal,src:r.src==="saved"?"saved":"auto"},true);
+        logged.push({id,name:(m.label+r.name).trim(),p:m.p});
+      }else unsure.push(part);
+    }
+  }finally{btn.disabled=false; lbl.textContent="Add"}
+  lastReq={amt:null,unit:null};
+  if(logged.length){
+    const pr=logged.reduce((s,x)=>s+(+x.p||0),0), pv=$("qFood").getBoundingClientRect();
+    if(pr>0) floaty(pv.left+pv.width/2,pv.top-4,"+"+Math.round(pr)+"g protein","var(--protein)");
+    const ids=logged.map(x=>x.id);
+    toastAction(logged.length===1?"Logged "+logged[0].name:`Logged ${logged.length} foods`,"Undo",async()=>{
+      const d=await getDay(S.date); d.entries=d.entries.filter(e=>!ids.includes(e.id)); saveDay(S.date); render(); toast("Removed")});
+  }
+  if(unsure.length){
+    MQ.list=unsure; MQ.i=0; S.clarify=true; openAdd("search"); $("sq").value=unsure[0]; $("searchForm").requestSubmit();
+  }else if(!logged.length) toast("Couldn't find that. Try different words.");
+}
 let lastResults=[], lastReq={amt:null,unit:null}, searchSeq=0;
 const SEARCH_HINT="Type what you ate in the bar at the top, like \"2 nutty buddy\", \"slice of pizza\" or \"cup of tillamook ice cream\". The amount is worked out for you.";
 function resHTML(r,i){return `<button type="button" class="res" data-ri="${i}"><span class="nm">${esc(r.name)}</span>
@@ -1693,7 +1761,7 @@ function showResults(groups){
 }
 $("searchForm").onsubmit=async ev=>{ev.preventDefault();
   let raw=$("sq").value.trim(); if(!raw) return;
-  if(!MQ.list.length||MQ.list[MQ.i]!==raw){const parts=splitMeal(raw); MQ.list=parts.length>1?parts:[]; MQ.i=0; if(MQ.list.length) raw=MQ.list[0], $("sq").value=raw}
+  if(!(S.clarify&&MQ.list[MQ.i]===raw)&&(!MQ.list.length||MQ.list[MQ.i]!==raw)){const parts=splitMeal(raw); MQ.list=parts.length>1?parts:[]; MQ.i=0; if(MQ.list.length) raw=MQ.list[0], $("sq").value=raw}
   const pq=parseQuery(raw); if(!pq.q) return;
   lastReq={amt:pq.amt,unit:pq.unit}; const seq=++searchSeq, q=pq.q;
   $("searchPick").innerHTML="";
@@ -1718,14 +1786,16 @@ $("searchForm").onsubmit=async ev=>{ev.preventDefault();
   if(off.status!=="ok") down.push("Open Food Facts didn't respond");
   if(down.length) msg+=" "+down.join(", and ")+". Try again in a moment.";
   const best=bestMatch(usedQ,lastResults);
-  if(best){openPick(best.r,best.exact?"Best match":"Closest match");
+  if(best){openPick(best.r,S.clarify?"Is this it?":best.exact?"Best match":"Closest match");
     msg=(best.exact?`Here's the best match.`:`Couldn't find that exact product, so this is a generic version.`)+`${amtTxt} Not right? Pick another below.`+(down.length?" "+down.join(", and ")+".":"")}
-  if(MQ.list.length) msg=`Food ${MQ.i+1} of ${MQ.list.length}: "${MQ.list[MQ.i]}". `+msg;
+  if(S.clarify&&!n) msg=`Couldn't find "${MQ.list[MQ.i]}". Try other words, or use the Enter tab to type the numbers in.`;
+  else if(S.clarify) msg=`Not sure which "${MQ.list[MQ.i]}" you meant${MQ.list.length>1?` (${MQ.i+1} of ${MQ.list.length})`:""}. Is this it? If not, tap the right one below, or Skip.`;
+  else if(MQ.list.length) msg=`Food ${MQ.i+1} of ${MQ.list.length}: "${MQ.list[MQ.i]}". `+msg;
   $("searchMsg").textContent=msg;
 };
 function nextInMeal(){
   if(MQ.list.length&&MQ.i<MQ.list.length-1){MQ.i++; $("sq").value=MQ.list[MQ.i]; setTimeout(()=>$("searchForm").requestSubmit(),350); return true}
-  MQ.list=[]; MQ.i=0; return false;
+  MQ.list=[]; MQ.i=0; S.clarify=false; return false;
 }
 $("searchResults").onclick=ev=>{const b=ev.target.closest("[data-ri]");if(!b)return;openPick(lastResults[+b.dataset.ri])};
 
@@ -1743,6 +1813,10 @@ function startAmount(r){
   if(unit&&unit!=="serving"&&unit!=="piece") return {amt,mode:"serv",note:`Couldn't convert "${esc(unit)}" to this serving size, so it's set to ${sv(amt)}. Adjust if needed.`};
   return {amt,mode:"serv",note:""};
 }
+function macrosFor(r,a,mode){
+  if(mode==="g"){const k=a/100;return {p:r1(r.per100.p*k),c:r1(r.per100.c*k),f:r1(r.per100.f*k),kcal:Math.round(r.per100.k*k),label:a+" g "}}
+  return {p:r1(r.p*a),c:r1(r.c*a),f:r1(r.f*a),kcal:r.kcal!=null?Math.round(r.kcal*a):null,label:a!==1?r1(a)+"× ":""};
+}
 function openPick(r,isBest){
   const canGrams=r.per100&&r.per100.k!=null, st=startAmount(r);
   $("searchPick").innerHTML=`<div class="product">
@@ -1757,9 +1831,7 @@ function openPick(r,isBest){
       <label class="hint" style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="pkSave" ${r.savedId?"disabled checked":""}> Save to my foods</label>
       <button class="chip" id="pkFav" type="button" aria-pressed="false">☆ Favorite</button>
       <button class="chip ghost" id="pkClose" type="button">Cancel</button></div></div>`;
-  const calc=()=>{const a=+$("pkAmt").value||0, u=$("pkUnit").value;
-    if(u==="g"){const k=a/100;return {p:r1(r.per100.p*k),c:r1(r.per100.c*k),f:r1(r.per100.f*k),kcal:Math.round(r.per100.k*k),label:a+" g "}}
-    return {p:r1(r.p*a),c:r1(r.c*a),f:r1(r.f*a),kcal:r.kcal!=null?Math.round(r.kcal*a):null,label:a!==1?r1(a)+"× ":""}};
+  const calc=()=>macrosFor(r,+$("pkAmt").value||0,$("pkUnit").value==="g"?"g":"serv");
   const show=()=>{const m=calc();$("pkMac").innerHTML=`<span class="p">${m.p}g protein</span><span class="c">${m.c}g carbs</span><span>${m.f}g fat</span><span>${m.kcal??kcalOf(m)} kcal</span>`};
   $("pkAmt").oninput=show;
   let favOn=false;
