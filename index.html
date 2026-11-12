@@ -383,6 +383,24 @@ details.panel[open] summary h3::after{content:" −"}
 @media (prefers-reduced-motion:reduce){.flame span,.flame.risk::after{animation:none}}
 .supppanel.pending{border:1.5px solid color-mix(in srgb,var(--creatine) 55%,var(--line));box-shadow:0 0 0 3px color-mix(in srgb,var(--creatine) 10%,transparent)}
 .supppanel.alldone .ph .meta{color:var(--good);font-weight:700}
+/* Custom layout */
+.userhide{display:none!important}
+.custlink{order:999;align-self:center;font-size:13px}
+.layoutlist{display:flex;flex-direction:column}
+.lrow{display:flex;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--line)}
+.lrow:first-child{border-top:0}
+.lrow .ln{flex:1;min-width:0;font-weight:650}
+.lrow .ln small{display:block;font-weight:400;color:var(--muted);font-size:12px}
+.lrow.off .ln{color:var(--muted)}
+.lbtn{width:36px;height:36px;border-radius:9px;border:1px solid var(--line);background:var(--bg);font-size:16px;display:grid;place-items:center}
+.lbtn:disabled{opacity:.3}
+.sw{position:relative;width:44px;height:26px;flex:none}
+.sw input{position:absolute;inset:0;opacity:0;margin:0;cursor:pointer}
+.sw span{position:absolute;inset:0;border-radius:999px;background:var(--soft);transition:background .2s;pointer-events:none}
+.sw span::after{content:"";position:absolute;left:3px;top:3px;width:20px;height:20px;border-radius:50%;background:var(--paper);box-shadow:0 1px 3px rgb(0 0 0 / .25);transition:transform .2s}
+.sw input:checked+span{background:var(--good)}
+.sw input:checked+span::after{transform:translateX(18px)}
+.sw input:disabled+span{opacity:.5}
 /* Goal checklist */
 .goalstrip{display:flex;flex-direction:column;gap:7px;margin-bottom:-6px}
 .gpills{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:6px}
@@ -660,7 +678,7 @@ details.panel[open] summary h3::after{content:" −"}
     <div class="ph"><h3 id="hSupp">Supplements</h3><span class="meta" id="suppMeta"></span></div>
     <div id="suppList"></div>
   </section>
-  <section class="panel" aria-labelledby="hWater">
+  <section class="panel" id="waterPanel" aria-labelledby="hWater">
     <div class="ph"><h3 id="hWater">Water</h3><span class="meta" id="wLeft"></span></div>
     <div class="water">
       <div class="jug" aria-hidden="true"><i id="jugFill"></i><div class="ticks"></div></div>
@@ -717,7 +735,7 @@ details.panel[open] summary h3::after{content:" −"}
     <div class="row"><span class="n"><b>Supplements</b> <span class="num" id="sVal">0 of 0</span></span><span class="pct" id="sPct">—</span><div class="bar" style="--c:var(--creatine)"><i id="sBar"></i></div></div>
     <div class="foot">Goals come from your profile in the Me tab. Calories count 4 per gram of protein and carbs and 9 per gram of fat unless a food lists its own.</div>
   </section>
-  <section class="panel" aria-labelledby="hLog">
+  <section class="panel" id="logPanel" aria-labelledby="hLog">
     <div class="ph"><h3 id="hLog">Food log</h3><span class="meta" id="logMeta"></span></div>
     <div class="copychips" id="copyChips"></div>
     <div class="list" id="logList"></div>
@@ -733,6 +751,7 @@ details.panel[open] summary h3::after{content:" −"}
   </section>
 
 
+  <button type="button" class="chip ghost custlink" id="custLink">✎ Customize this page</button>
   </div>
 
   <!-- ================= ME & GOALS ================= -->
@@ -796,6 +815,12 @@ details.panel[open] summary h3::after{content:" −"}
       <button type="button" class="opt" data-em="auto">Add automatically when sure<small>"Bagel with avocado and 4 strips bacon" goes straight in. You're only asked when it's unclear, like "a burger".</small></button>
       <button type="button" class="opt" data-em="ask">Always let me check first<small>See the match and amount before anything is logged</small></button>
     </div>
+  </section>
+
+  <section class="panel" id="layoutPanel" aria-labelledby="hLayout">
+    <div class="ph"><h3 id="hLayout">Today layout</h3><span class="meta">Move or hide sections</span></div>
+    <div class="layoutlist" id="layoutList"></div>
+    <div class="actions"><button type="button" class="chip ghost" id="layoutReset">Reset to default</button></div>
   </section>
 
   <section class="panel" aria-labelledby="hLook">
@@ -966,7 +991,7 @@ details.panel[open] summary h3::after{content:" −"}
 
 <script>
 (() => {
-const APP_VERSION="3.8.1";
+const APP_VERSION="3.9.0";
 const REPO="kefirman9000/fuel-log";
 const $ = id => document.getElementById(id);
 const OZ=29.5735, LB=0.45359237, IN=2.54;
@@ -1331,7 +1356,7 @@ function renderLearnInfo(){const n=Object.keys(learned()).length, c=Object.keys(
   $("learnInfo").textContent=`The app has learned ${n} phrase${n===1?"":"s"} from your picks and corrections, and remembers ${c} online search${c===1?"":"es"} so they work offline. It also has ${DBF.length.toLocaleString()} common foods built in from USDA data.`}
 $("learnClear").onclick=()=>{save("learn",{});renderLearnInfo();toast("Learned matches cleared")};
 $("cacheClear").onclick=()=>{save("fcache",{});renderLearnInfo();toast("Saved search results cleared")};
-function renderMe(){renderEntryMode();renderLearnInfo();fillProfile();renderPlan();renderSuppManage();renderBadges();$("verMeta").textContent="Version "+APP_VERSION}
+function renderMe(){renderLayout();renderEntryMode();renderLearnInfo();fillProfile();renderPlan();renderSuppManage();renderBadges();$("verMeta").textContent="Version "+APP_VERSION}
 
 /* ---------- actions ---------- */
 function toast(msg){const t=$("toast"); if(t.classList.contains("act")&&t.classList.contains("show")) return;
@@ -1683,6 +1708,42 @@ document.addEventListener("submit",async ev=>{
   const id=saveFood(food); S.foods.items[id].fav=true; save("foods",S.foods); S.saveMeal=null; render();
   toast(`Saved "${name}". It's in your favorites and you can type its name to log it.`);
 });
+
+/* ---------- customizable Today layout (uses flex order, so the pinned search bar keeps working) ---------- */
+const SECTIONS=[
+  ["streak","Streak","Your day count and last 7 days",["#streakCard"]],
+  ["goals","Goal checklist","Protein, calories, water, fiber, supplements",["#goalStrip"]],
+  ["search","Search bar","Type, scan, favorites (can't be hidden)",[".quick",".qextras","#addPanel","#bNudge","#wNudge"],true],
+  ["supps","Supplements","Daily check-offs",["#suppPanel"]],
+  ["water","Water","Jug and quick-add buttons",["#waterPanel"]],
+  ["stats","Stats","Rings, bars or the nutrition label",[".statbar","#barsCard","#ringCard","#labelBox"]],
+  ["log","Food log","Everything you ate today",["#logPanel"]],
+  ["fit","What fits now","Snack and meal ideas",["#fitPanel"]],
+  ["coach","Suggestions","Tips for the rest of the day",["#coachPanel"]],
+];
+const DEFAULT_ORDER=SECTIONS.map(s=>s[0]);
+function getLayout(){const L=load("layout")||{}; let order=(L.order||[]).filter(k=>DEFAULT_ORDER.includes(k)); DEFAULT_ORDER.forEach(k=>{if(!order.includes(k)) order.push(k)});
+  return {order,hide:(L.hide||[]).filter(k=>k!=="search")}}
+function applyLayout(){
+  const L=getLayout(), root=$("view-today");
+  SECTIONS.forEach(([k,,,sels])=>{const i=L.order.indexOf(k), hide=L.hide.includes(k);
+    sels.forEach(sel=>root.querySelectorAll(sel).forEach(el=>{el.style.order=i*10; el.classList.toggle("userhide",hide)}))});
+}
+function renderLayout(){
+  const L=getLayout();
+  $("layoutList").innerHTML=L.order.map((k,i)=>{const s=SECTIONS.find(x=>x[0]===k), on=!L.hide.includes(k);
+    return `<div class="lrow${on?"":" off"}"><span class="ln">${s[1]}<small>${s[2]}</small></span>
+      <button type="button" class="lbtn" data-lmove="${k}|-1" aria-label="Move ${s[1]} up" ${i===0?"disabled":""}>↑</button>
+      <button type="button" class="lbtn" data-lmove="${k}|1" aria-label="Move ${s[1]} down" ${i===L.order.length-1?"disabled":""}>↓</button>
+      <label class="sw" title="${on?"Shown":"Hidden"}"><input type="checkbox" data-lshow="${k}" ${on?"checked":""} ${s[4]?"disabled":""} aria-label="Show ${s[1]}"><span></span></label></div>`}).join("");
+}
+$("layoutList").onclick=ev=>{const b=ev.target.closest("[data-lmove]"); if(!b) return; const [k,d]=b.dataset.lmove.split("|"), L=getLayout(), i=L.order.indexOf(k), j=i+(+d);
+  if(j<0||j>=L.order.length) return; [L.order[i],L.order[j]]=[L.order[j],L.order[i]]; save("layout",L); applyLayout(); renderLayout();
+  const nb=document.querySelector(`[data-lmove="${k}|${d}"]`); if(nb&&!nb.disabled) nb.focus()};
+$("layoutList").onchange=ev=>{const c=ev.target.closest("[data-lshow]"); if(!c) return; const L=getLayout(), k=c.dataset.lshow;
+  L.hide=L.hide.filter(x=>x!==k); if(!c.checked) L.hide.push(k); save("layout",L); applyLayout(); renderLayout()};
+$("layoutReset").onclick=()=>{save("layout",{}); applyLayout(); renderLayout(); toast("Layout reset")};
+$("custLink").onclick=()=>{setView("me"); setTimeout(()=>$("layoutPanel").scrollIntoView({behavior:calm?"auto":"smooth",block:"start"}),80)};
 
 /* ---------- history ---------- */
 async function renderHistory(){
@@ -2825,7 +2886,7 @@ async function boot(){
   $("sDot").classList.add("ok");
   $("sText").textContent="Saved in this browser. Works offline (search needs internet).";
   S.days={}; S.ready=true; await getDay(S.date);
-  applyStatStyle();
+  applyStatStyle(); applyLayout();
   render(); if(S.view==="me") renderMe();
   if(!(S.settings.profile.weightKg>0)&&!load("onboarded")) obOpen();
   updateInstallUI();

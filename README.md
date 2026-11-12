@@ -33,6 +33,7 @@ A one-page food, water and supplement tracker that runs in your phone's browser.
 - **Streak card** at the top of Today: your day count, the last 7 days, progress to the next badge, and a reminder if your streak is at risk.
 - **Streak badges** from your first log up to a full year, plus a water reminder when you fall behind.
 - **Stat styles:** show your day as rings, bars or the full Nutrition Facts label.
+- **Your layout:** move or hide any section of Today under Me → Today layout.
 - **Themes:** auto, light or dark, and six accent colors. Swipe left or right on Today to change the day.
 - **Small animations** when you log water, hit a goal or check off a supplement.
 - **Backup:** export and import your data as JSON.
