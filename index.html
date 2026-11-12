@@ -342,6 +342,25 @@ details.panel[open] summary h3::after{content:" −"}
 .daymove-l{animation:dayl .3s ease}.daymove-r{animation:dayr .3s ease}
 @keyframes dayl{from{opacity:.2;transform:translateX(28px)}}
 @keyframes dayr{from{opacity:.2;transform:translateX(-28px)}}
+/* Goal checklist */
+.goalstrip{display:flex;flex-direction:column;gap:7px;margin-bottom:-6px}
+.gpills{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:6px}
+.gp{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 2px 7px;border-radius:12px;background:var(--paper);border:1.5px solid var(--line);font-size:11.5px;font-weight:750;text-align:center;min-width:0;transition:background .3s,border-color .3s}
+.gp .gn{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 2px}
+.gp small{font-weight:600;color:var(--muted);font-family:var(--mono);font-size:10.5px;line-height:1}
+.gc{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;flex:none;background:conic-gradient(var(--pc) calc(var(--p) * 1%),var(--soft) 0);transition:--p .6s}
+.gc i{width:20px;height:20px;border-radius:50%;background:var(--paper);display:grid;place-items:center;font-style:normal;font-size:12px;font-weight:900;color:var(--good)}
+.gp.done{background:color-mix(in srgb,var(--good) 13%,var(--paper));border-color:color-mix(in srgb,var(--good) 55%,var(--line))}
+.gp.done .gc{background:var(--good)}
+.gp.done .gc i{background:var(--good);color:#fff}
+.gp.done small{color:var(--good)}
+.gp.over{border-color:color-mix(in srgb,var(--warn) 55%,var(--line))}
+.gp.over small{color:var(--warn)}
+.gp.pop{animation:pop .45s ease}
+.gmsg{margin:0;font-size:13.5px;line-height:1.35;color:var(--muted)}
+.gmsg b{color:var(--ink)}
+.goalstrip.allmet .gmsg{color:var(--good);font-weight:700}
+@property --p{syntax:"<number>";inherits:false;initial-value:0}
 /* Rings */
 .ringcard{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:center}
 .bigring{position:relative;width:132px;height:132px}
@@ -477,6 +496,10 @@ details.panel[open] summary h3::after{content:" −"}
 
   <!-- ================= TODAY ================= -->
   <div class="view" id="view-today">
+  <section class="goalstrip" id="goalStrip" aria-label="Today's goals">
+    <div class="gpills" id="gPills"></div>
+    <p class="gmsg" id="gMsg"></p>
+  </section>
   <div class="quick" role="toolbar" aria-label="Quick add">
     <form class="qtype" id="qForm" autocomplete="off">
       <input id="qIn" placeholder="What did you eat? e.g. bagel with avocado and 4 strips bacon" enterkeyhint="go" aria-label="What did you eat?">
@@ -864,7 +887,7 @@ details.panel[open] summary h3::after{content:" −"}
 
 <script>
 (() => {
-const APP_VERSION="3.3.0";
+const APP_VERSION="3.4.0";
 const REPO="kefirman9000/fuel-log";
 const $ = id => document.getElementById(id);
 const OZ=29.5735, LB=0.45359237, IN=2.54;
@@ -1076,7 +1099,7 @@ function render(){
 
   S.newId=null;
   checkGoals({p:!!g.protein&&t.p>=g.protein, c:!!g.carbs&&t.c>=g.carbs, w:!!g.waterMl&&t.w>=g.waterMl, s:onS.length>0&&took===onS.length});
-  renderCoach(day,t,g); renderSaved(); renderFavs(); renderWaterNudge(); renderBackupNudge(); checkBadges(); renderWeek();
+  renderGoalStrip(day,t,g); renderCoach(day,t,g); renderSaved(); renderFavs(); renderWaterNudge(); renderBackupNudge(); checkBadges(); renderWeek();
 }
 
 function proteinIdea(left){
@@ -1345,6 +1368,49 @@ function renderBadges(){
   const b=load("badges")||{}, best=load("bestStreak")||0, st=currentStreak();
   $("badgeMeta").textContent=`Current ${st} · Best ${best}`;
   $("badges").innerHTML=BADGES.map(([n,ic,title])=>`<div class="badge ${b[n]?"got":"locked"}"><span class="bi">${ic}</span><b>${title}</b><small>${b[n]?"Earned "+niceDate(b[n]):n===1?"Log once":n+" days"}</small></div>`).join("");
+}
+
+/* ---------- goal checklist + time-of-day nudge ---------- */
+function goalStatus(t,g,day){
+  const p=S.settings.profile, onS=S.settings.supps.filter(s=>s.on), took=onS.filter(s=>day.supps[s.id]).length;
+  const kp=g.kcal?t.k/g.kcal:0, lo=p.goal==="gain"?.95:.9, hi=p.goal==="gain"?1.15:1.1;
+  const list=[
+    {k:"p",name:"Protein",c:"var(--protein)",pct:g.protein?t.p/g.protein:0,done:!!g.protein&&t.p>=g.protein,left:g.protein?`${Math.max(0,Math.round(g.protein-t.p))} g protein`:""},
+    {k:"k",name:"Calories",c:"var(--accent)",pct:Math.min(kp,1),done:!!g.kcal&&kp>=lo&&kp<=hi,over:kp>hi,
+      left:g.kcal&&kp<lo?`${Math.round(g.kcal*lo-t.k).toLocaleString()} kcal`:""},
+    {k:"w",name:"Water",c:"var(--water)",pct:g.waterMl?t.w/g.waterMl:0,done:!!g.waterMl&&t.w>=g.waterMl,left:g.waterMl?`${fmtW(Math.max(0,g.waterMl-t.w))} ${uW()} water`:""},
+    {k:"fi",name:"Fiber",c:"var(--good)",pct:g.fiber?t.fi/g.fiber:0,done:!!g.fiber&&t.fi>=g.fiber,left:g.fiber?`${Math.max(0,Math.round(g.fiber-t.fi))} g fiber`:""},
+  ];
+  if(onS.length) list.push({k:"s",name:onS.length===1?onS[0].name.split(" ")[0]:"Supplements",c:"var(--creatine)",pct:took/onS.length,done:took===onS.length,
+    left:onS.filter(s=>!day.supps[s.id]).map(s=>s.name.split(" (")[0]).join(", ")});
+  return list;
+}
+function renderGoalStrip(day,t,g){
+  const list=goalStatus(t,g,day), met=list.filter(x=>x.done).length, today=S.date===todayKey();
+  const prevDone=S.gDone&&S.gDoneDate===S.date?S.gDone:null;
+  $("gPills").innerHTML=list.map(x=>{const pc=Math.round(Math.min(1,x.pct)*100);
+    return `<div class="gp${x.done?" done":""}${x.over?" over":""}${prevDone&&x.done&&!prevDone[x.k]?" pop":""}" title="${x.name}"><span class="gc" style="--p:${x.done?100:pc};--pc:${x.c}"><i>${x.done?"✓":""}</i></span><span class="gn">${esc(x.name)}</span><small>${x.done?"done":x.over?"over":pc+"%"}</small></div>`}).join("");
+  S.gDone=Object.fromEntries(list.map(x=>[x.k,x.done])); S.gDoneDate=S.date;
+  const strip=$("goalStrip"), all=met===list.length;
+  strip.classList.toggle("allmet",all);
+  const todo=list.filter(x=>!x.done&&x.left).map(x=>x.left);
+  const two=todo.slice(0,2).map(s=>`<b>${esc(s)}</b>`).join(" and ");
+  let msg;
+  if(!today) msg=`On ${niceDate(S.date)} you met <b>${met} of ${list.length}</b> goals.`;
+  else if(all) msg="All goals met today! 🎉 Great work.";
+  else{
+    const hr=new Date().getHours();
+    if(hr<11) msg=`It's still early, so there's plenty of time. <b>${met} of ${list.length}</b> goals done so far.${two?` Today's targets include ${two}.`:""}`;
+    else if(hr<15) msg=`Good midday check: <b>${met} of ${list.length}</b> done. Next up: ${two}.`;
+    else if(hr<19) msg=`Afternoon push: still need ${two}. Plenty of day left.`;
+    else if(hr<23) msg=`Last stretch tonight: ${two}${todo.length>2?` and ${todo.length-2} more`:""}. You can still make it!`;
+    else msg=`Nearly midnight: ${met} of ${list.length} goals met today. Tomorrow's a fresh start.`;
+  }
+  $("gMsg").innerHTML=msg;
+  if(today&&all&&load("allMet")!==S.date&&S.ready&&S.view==="today"){
+    save("allMet",S.date); setTimeout(()=>{burst($("gPills"),"var(--good)");burst(document.querySelector(".gp.done:last-child"),"var(--carbs)")},300);
+    setTimeout(()=>toast("Every goal met today! 🎉"),900);
+  }
 }
 
 /* ---------- copy and save meals ---------- */

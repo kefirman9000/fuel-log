@@ -23,6 +23,7 @@ A one-page food, water and supplement tracker that runs in your phone's browser.
 - **Fiber, sugar and sodium** from the food databases, with fiber and sodium goals.
 - **Favorites:** star a food and it's pinned under the search bar for one-tap logging.
 - **History tab:** 30-day averages, the 7-day chart, a day-by-day list and CSV export.
+- **Goal checklist** at the top of Today: protein, calories, water, fiber and supplements turn green with a check when met, with a time-of-day nudge.
 - **Streak badges** from your first log up to a full year, plus a water reminder when you fall behind.
 - **Stat styles:** show your day as rings, bars or the full Nutrition Facts label.
 - **Themes:** auto, light or dark, and six accent colors. Swipe left or right on Today to change the day.
