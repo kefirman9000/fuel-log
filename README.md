@@ -17,6 +17,9 @@ A one-page food, water and supplement tracker that runs in your phone's browser.
 - **Learns from you:** when you pick a different match or correct an entry, that phrase comes out your way next time. Online results are remembered for 60 days so repeat searches are instant and work offline.
 - **Food search:** type what you ate, like "2 Little Debbie Nutty Buddy" or "Chipotle chicken bowl". The app searches your saved foods, a built-in list of common restaurant items, USDA FoodData Central and Open Food Facts, then multiplies by the servings, pieces or grams you enter.
 - **Barcode scanning** with the camera or a photo, or by typing the number.
+- **Train tab:** 39 workouts built from standard exercises and common strength and conditioning guidelines. Filter by goal (build muscle, get stronger, lose fat, endurance, general fitness), equipment (no equipment, free weights, dumbbells, kettlebell, barbell, machines and cables, cardio), focus, body part, time and level. Every exercise has step-by-step cues, a safety tip, and easier and harder versions.
+- **Weekly plans with "up next":** 9 plans (3-day full body at home, with dumbbells or on machines; barbell strength; upper/lower; push/pull/legs; a fat loss mix; walk to run). Start one and Train shows your next workout and which day to do it, keeping rest days where they belong. Without a plan, it suggests a sensible next session from what you did last.
+- **Log workouts:** from any workout page, from a list of 28 activities, or by typing "30 min run" or "an hour of yoga" in the bar. Calories burned use MET values from the 2024 Adult Compendium of Physical Activities and your weight. Choose whether workout calories add to your daily target: off (default, since your target already counts your activity level), half or all.
 - **Supplements:** turn on creatine, vitamin D, fish oil, magnesium, electrolytes, a multivitamin, or add your own. Each one has a daily check-off and a 7-day streak, and the app marks which ones suit your profile.
 - **Daily suggestions:** protein left (with food ideas), calories left, whether you're on pace for water, and supplements still to take.
 - **Meals:** the log groups food into breakfast, lunch, dinner and snacks, each with a food icon. Tap any entry to edit it.
@@ -66,6 +69,8 @@ The nutrition targets are estimates, not medical advice.
 `recipes.json` is built by `tools/build_recipes.py` from the recipes in `tools/recipes_src.py`. Each ingredient is tied to a `foods.json` entry by weight, so the nutrition is computed from USDA values rather than estimated. Salt and spices aren't counted. Run the script again after editing a recipe.
 
 To refresh the FNDDS foods when USDA publishes a new release, open **Actions → Build food list → Run workflow** and paste the new survey foods JSON link from [FoodData Central downloads](https://fdc.nal.usda.gov/download-datasets). The workflow runs `tools/build_foods.py` and commits the new `foods.json`. Re-running it replaces the earlier FNDDS foods, and the SR26 foods are kept as they are.
+
+`workouts.json` is built by `tools/build_workouts.py` from `tools/workouts_src.py`, which checks that every workout and plan uses exercises that exist. MET values are from the 2024 Adult Compendium of Physical Activities (Herrmann et al., Journal of Sport and Health Science, 2024).
 
 ## Support
 
