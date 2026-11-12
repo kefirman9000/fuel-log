@@ -20,6 +20,8 @@ A one-page food, water and supplement tracker that runs in your phone's browser.
 - **Supplements:** turn on creatine, vitamin D, fish oil, magnesium, electrolytes, a multivitamin, or add your own. Each one has a daily check-off and a 7-day streak, and the app marks which ones suit your profile.
 - **Daily suggestions:** protein left (with food ideas), calories left, whether you're on pace for water, and supplements still to take.
 - **Meals:** the log groups food into breakfast, lunch, dinner and snacks, each with a food icon. Tap any entry to edit it.
+- **Recipes tab:** 36 original healthy recipes (breakfast, lunch, dinner and snacks) with ingredients, steps and nutrition per serving. Filter by high protein, under 400 cal, vegetarian, 15 minutes or less and meal prep, or tap **Fits my day** to see what fits the calories and protein you have left. Log a serving in one tap or ♡ save favorites.
+- **Recipe builder:** paste or type a recipe's ingredients, one per line ("1 lb ground beef", "1 can black beans"). Fuel Log matches each one, converts raw meat weights to cooked, flags anything to check, and works out nutrition per serving. Saved recipes show up when you type their name.
 - **Did you mean…?** Your exact words are searched first. If a food only matches after fixing a typo ("avacado"), the app asks before logging it, then remembers your answer so the same typo logs instantly next time.
 - **Calories or kcal:** energy shows as "cal" by default. Switch to "kcal" under **Me → Profile → Show energy as**.
 - **Understands everyday typing:** "I had a couple scrambled eggs and toast for breakfast", typos like "avacado", shorthand like "oj" or "pb&j", "16 oz water", "took my creatine", or your own numbers like "protein shake 30g protein 160 cal".
@@ -55,6 +57,8 @@ The nutrition targets are estimates, not medical advice.
 
 - **SR26:** USDA National Nutrient Database for Standard Reference, Release 26 (3,185 foods).
 - **FNDDS:** USDA Food and Nutrient Database for Dietary Studies, October 2024 release, from FoodData Central survey foods (5,218 foods not already in SR26). Baby foods and infant formulas are left out.
+
+`recipes.json` is built by `tools/build_recipes.py` from the recipes in `tools/recipes_src.py`. Each ingredient is tied to a `foods.json` entry by weight, so the nutrition is computed from USDA values rather than estimated. Salt and spices aren't counted. Run the script again after editing a recipe.
 
 To refresh the FNDDS foods when USDA publishes a new release, open **Actions → Build food list → Run workflow** and paste the new survey foods JSON link from [FoodData Central downloads](https://fdc.nal.usda.gov/download-datasets). The workflow runs `tools/build_foods.py` and commits the new `foods.json`. Re-running it replaces the earlier FNDDS foods, and the SR26 foods are kept as they are.
 

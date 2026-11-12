@@ -482,6 +482,50 @@ details.panel[open] summary h3::after{content:" −"}
 /* Meals and food icons */
 .meal{border-left:3px solid var(--mc);padding-left:10px;margin-bottom:10px}
 .meal:last-child{margin-bottom:0}
+/* Recipes */
+.recfilters{display:flex;flex-wrap:wrap;gap:6px}
+.rtag{border:1px solid var(--line);background:var(--bg);border-radius:999px;padding:6px 11px;font-weight:600;font-size:13px;color:var(--ink)}
+.rtag[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.rec-left b{color:var(--ink)}
+.reclist{display:flex;flex-direction:column}
+.rcard{border-top:1px solid var(--line)}
+.rcard:first-child{border-top:0}
+.rhead{display:grid;grid-template-columns:1fr auto;gap:3px 12px;width:100%;border:0;background:transparent;text-align:left;padding:12px 2px;align-items:center}
+.rhead .nm{font-weight:700;font-size:15.5px;min-width:0}
+.rhead .sm{grid-column:1;font-size:12.5px;color:var(--muted)}
+.rhead .rk{grid-row:1/3;grid-column:2;text-align:right;font-family:var(--mono);font-size:13px;line-height:1.35;font-variant-numeric:tabular-nums}
+.rhead .rk b{font-size:15px}
+.rhead .rk .p{color:var(--protein)}
+.rpills{grid-column:1;display:flex;flex-wrap:wrap;gap:4px;margin-top:2px}
+.rpills .tag{margin-left:0}
+.rpills .tag.fit{color:var(--good);border-color:color-mix(in srgb,var(--good) 50%,var(--line))}
+.rbody{padding:2px 2px 16px;display:flex;flex-direction:column;gap:12px}
+.rbody h4{margin:0;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.rbody ul,.rbody ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:5px;font-size:14.5px;max-width:62ch}
+.rbody .rtip{margin:0;font-size:13.5px;color:var(--muted);border-left:3px solid var(--line);padding-left:10px}
+.rnut{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;font-variant-numeric:tabular-nums}
+.rnut div{background:var(--soft);border-radius:6px;padding:7px 8px;display:flex;flex-direction:column}
+.rnut b{font-family:var(--mono);font-size:15px}
+.rnut span{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:700}
+.rnut .p b{color:var(--protein)} .rnut .c b{color:var(--carbs)}
+.rnote{font-size:12px;color:var(--muted);margin:0}
+.ract{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.ract .stepper input{width:64px}
+.heart[aria-pressed="true"]{color:var(--protein);border-color:color-mix(in srgb,var(--protein) 50%,var(--line))}
+.recbuild{display:flex;flex-direction:column;gap:12px;border:1px solid var(--line);border-radius:8px;padding:12px}
+.recbuild textarea{width:100%;border:1px solid var(--line);background:var(--bg);border-radius:6px;padding:9px 10px;font:inherit;font-size:15px;resize:vertical;color:var(--ink)}
+.rbl{display:grid;grid-template-columns:1fr auto auto;gap:3px 10px;align-items:center;padding:8px 0;border-top:1px solid var(--line)}
+.rbl:first-child{border-top:0}
+.rbl .t{font-size:13px;color:var(--muted);grid-column:1/-1}
+.rbl select{grid-column:1/-1;min-width:0;width:100%;border:1px solid var(--line);background:var(--bg);border-radius:6px;padding:6px 8px;font-size:14px;color:var(--ink)}
+.rbl input{width:76px;border:1px solid var(--line);background:var(--bg);border-radius:6px;padding:6px 8px;font-family:var(--mono);font-size:14px;text-align:right;color:var(--ink)}
+.rbl .k{font-family:var(--mono);font-size:13px;text-align:right;min-width:62px;font-variant-numeric:tabular-nums}
+.rbl .stepper{grid-column:1/3}
+.rbl .k{grid-column:3}
+.rbl.miss .t{color:var(--warn)}
+.rbl .chk{grid-column:1/-1;font-size:12px;color:var(--warn);margin:0}
+.rbtot{display:flex;flex-direction:column;gap:6px}
+.fitrec{align-self:flex-start}
 .mealh{display:flex;justify-content:space-between;align-items:baseline;gap:8px;padding:4px 0 2px}
 .mealh b{font-family:var(--display);font-weight:850;font-stretch:80%;font-size:16px;text-transform:uppercase;letter-spacing:.03em;color:var(--mc)}
 .mealh span{font-size:12px;color:var(--muted);font-family:var(--mono)}
@@ -765,6 +809,7 @@ details.panel[open] summary h3::after{content:" −"}
     <div class="ph"><h3 id="hFit">What fits now</h3><span class="meta" id="fitMeta"></span></div>
     <p class="hint" id="fitMsg"></p>
     <div class="list" id="fitList"></div>
+    <button type="button" class="chip fitrec" data-goto="recipes" data-recfit="1">Recipe ideas that fit your day →</button>
   </section>
   <section class="panel tips" id="coachPanel" aria-labelledby="hCoach">
     <div class="ph"><h3 id="hCoach">Suggestions</h3><span class="meta" id="coachMeta"></span></div>
@@ -790,6 +835,44 @@ details.panel[open] summary h3::after{content:" −"}
     <div class="ph"><h3 id="hDays">Day by day</h3><span class="meta">Tap a day to open it</span></div>
     <div class="days" id="histDays"></div>
     <div class="actions"><button type="button" class="secondary" id="csvBtn">Export CSV</button></div>
+  </section>
+  </div>
+
+  <div class="view" id="view-recipes" hidden>
+  <section class="panel" aria-labelledby="hRec">
+    <div class="ph"><h3 id="hRec">Recipe ideas</h3><span class="meta" id="recMeta">Healthy meals with nutrition per serving</span></div>
+    <p class="hint rec-left" id="recLeft" hidden></p>
+    <div class="f"><input id="recQ" type="search" placeholder="Search recipes, like chicken or oats" aria-label="Search recipes" autocomplete="off"></div>
+    <div class="seg" id="recMeal" role="group" aria-label="Meal">
+      <button type="button" data-meal="all" aria-pressed="true">All</button><button type="button" data-meal="breakfast" aria-pressed="false">Breakfast</button><button type="button" data-meal="lunch" aria-pressed="false">Lunch</button><button type="button" data-meal="dinner" aria-pressed="false">Dinner</button><button type="button" data-meal="snack" aria-pressed="false">Snacks</button>
+    </div>
+    <div class="recfilters" id="recTags" role="group" aria-label="Filters">
+      <button type="button" class="rtag" data-rt="fit" aria-pressed="false">Fits my day</button>
+      <button type="button" class="rtag" data-rt="protein" aria-pressed="false">High protein</button>
+      <button type="button" class="rtag" data-rt="light" aria-pressed="false">Under 400 cal</button>
+      <button type="button" class="rtag" data-rt="veg" aria-pressed="false">Vegetarian</button>
+      <button type="button" class="rtag" data-rt="quick" aria-pressed="false">15 min or less</button>
+      <button type="button" class="rtag" data-rt="prep" aria-pressed="false">Meal prep</button>
+      <button type="button" class="rtag" data-rt="saved" aria-pressed="false">♥ Saved</button>
+    </div>
+    <div class="reclist" id="recList"><p class="empty">Loading recipes…</p></div>
+  </section>
+  <section class="panel" aria-labelledby="hMyRec">
+    <div class="ph"><h3 id="hMyRec">My recipes</h3><button type="button" class="chip" id="recNew">+ New recipe</button></div>
+    <p class="hint" id="myRecHint">Add the ingredients of something you cook, and Fuel Log works out calories and macros per serving. Your recipes also show up when you type their name in the bar at the top.</p>
+    <form class="recbuild" id="recBuild" autocomplete="off" hidden>
+      <div class="grid">
+        <label class="f half"><span class="lbl">Recipe name</span><input id="rbName" required placeholder="Mom's chili"></label>
+        <label class="f half"><span class="lbl">Makes how many servings?</span><input id="rbServes" type="number" min="1" max="50" step="1" value="4" inputmode="numeric"></label>
+      </div>
+      <label class="f"><span class="lbl">Ingredients, one per line</span>
+        <textarea id="rbIng" rows="6" placeholder="1 lb ground turkey&#10;1 can black beans&#10;1 cup brown rice&#10;2 tbsp olive oil"></textarea></label>
+      <div class="actions"><button type="button" class="secondary" id="rbCalc">Work out nutrition</button><span class="hint" id="rbMsg" aria-live="polite"></span></div>
+      <div id="rbLines"></div>
+      <div class="rbtot" id="rbTot" hidden></div>
+      <div class="actions" id="rbSaveRow" hidden><button type="submit" class="primary" id="rbSave">Save recipe</button><button type="button" class="chip ghost" id="rbCancel">Cancel</button></div>
+    </form>
+    <div class="list" id="myRecList"></div>
   </section>
   </div>
 
@@ -996,6 +1079,7 @@ details.panel[open] summary h3::after{content:" −"}
 <nav class="tabbar" id="nav" aria-label="Sections">
   <button type="button" data-view="today" aria-selected="true"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg><span>Today</span></button>
   <button type="button" data-view="history" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span>History</span></button>
+  <button type="button" data-view="recipes" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M4 11h16a8 8 0 0 1-16 0Z"/><path d="M9 4c-.8 1.2.8 2 0 3.2M13 4c-.8 1.2.8 2 0 3.2M17 4c-.8 1.2.8 2 0 3.2"/><path d="M8 21h8"/></svg><span>Recipes</span></button>
   <button type="button" data-view="me" aria-selected="false"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg><span>Me</span></button>
 </nav>
 <div class="ob" id="instSheet" hidden role="dialog" aria-modal="true" aria-labelledby="instTitle">
@@ -1014,7 +1098,7 @@ details.panel[open] summary h3::after{content:" −"}
 
 <script>
 (() => {
-const APP_VERSION="3.11.0";
+const APP_VERSION="3.12.0";
 const REPO="kefirman9000/fuel-log";
 const $ = id => document.getElementById(id);
 const OZ=29.5735, LB=0.45359237, IN=2.54;
@@ -1268,7 +1352,7 @@ function renderSaved(){
   const q=$("savedFilter").value.trim().toLowerCase();
   const items=Object.entries(S.foods.items).filter(([,f])=>!q||f.name.toLowerCase().includes(q)).sort((a,b)=>(b[1].used||0)-(a[1].used||0));
   $("savedList").innerHTML=items.length?items.map(([id,f])=>`
-    <div class="item"><span class="nm">${esc(f.name)}${f.code?`<span class="tag">barcode</span>`:""}<button class="star" data-star-saved="${esc(id)}" aria-pressed="${!!f.fav}" aria-label="Favorite ${esc(f.name)}">${f.fav?"★":"☆"}</button></span>
+    <div class="item"><span class="nm">${esc(f.name)}${f.code?`<span class="tag">barcode</span>`:""}${f.recipe?`<span class="tag">recipe</span>`:""}<button class="star" data-star-saved="${esc(id)}" aria-pressed="${!!f.fav}" aria-label="Favorite ${esc(f.name)}">${f.fav?"★":"☆"}</button></span>
     <span class="sm">${f.serving?esc(f.serving)+" · ":""}${kcalOf(f)} ${CU()}</span>
     <span class="mac"><span class="p">${r1(+f.p||0)}g P</span><br><span class="c">${r1(+f.c||0)}g C</span></span>
     <button class="chip" data-quick="${esc(id)}" style="grid-row:1/3;grid-column:3">Log</button></div>`).join("")
@@ -1870,10 +1954,10 @@ function useFood(id,servings=1){
 function setView(v){
   const changed=S.view!==v; S.view=v;
   document.querySelectorAll("#nav button").forEach(b=>b.setAttribute("aria-selected",b.dataset.view===v));
-  ["today","history","me"].forEach(x=>{const el=$("view-"+x); el.hidden=x!==v; if(x===v&&changed&&!calm){el.classList.remove("enter");void el.offsetWidth;el.classList.add("enter")}});
+  ["today","history","recipes","me"].forEach(x=>{const el=$("view-"+x); el.hidden=x!==v; if(x===v&&changed&&!calm){el.classList.remove("enter");void el.offsetWidth;el.classList.add("enter")}});
   $("datebar").style.visibility=v==="today"?"visible":"hidden";
   if(v!=="today") stopCam();
-  if(v==="me") renderMe(); else if(v==="history"){render();renderHistory()} else render();
+  if(v==="me") renderMe(); else if(v==="history"){render();renderHistory()} else if(v==="recipes") renderRecipes(); else render();
   window.scrollTo({top:0});
 }
 $("nav").onclick=ev=>{const b=ev.target.closest("[data-view]");if(b)setView(b.dataset.view)};
@@ -2086,7 +2170,7 @@ const SNACKS=[
   ["Hard-boiled eggs","2 eggs (100 g)",100,12.6,1.2,10.6,156,0],["Tuna salad on crackers","3 oz tuna + 6 crackers",120,18,13,6,180,.5],
 ].map(([name,serving,g,p,c,f,k,fi])=>({name,serving,g,v:[p,c,f,k],fi,common:true,snack:true}));
 
-const UNITS={cup:"cup",cups:"cup",c:"cup",tbsp:"tbsp",tablespoon:"tbsp",tablespoons:"tbsp",tbs:"tbsp",tsp:"tsp",teaspoon:"tsp",teaspoons:"tsp",
+const UNITS={clove:"clove",cloves:"clove",cup:"cup",cups:"cup",c:"cup",tbsp:"tbsp",tablespoon:"tbsp",tablespoons:"tbsp",tbs:"tbsp",tsp:"tsp",teaspoon:"tsp",teaspoons:"tsp",
   oz:"oz",ounce:"oz",ounces:"oz",g:"g",gram:"g",grams:"g",lb:"lb",lbs:"lb",pound:"lb",slice:"slice",slices:"slice",piece:"piece",pieces:"piece",strip:"slice",strips:"slice",pc:"piece",pcs:"piece",
   scoop:"scoop",scoops:"scoop",bowl:"bowl",bowls:"bowl",bar:"bar",bars:"bar",serving:"serving",servings:"serving",can:"can",cans:"can",bottle:"bottle",bottles:"bottle",
   glass:"glass",glasses:"glass",mug:"mug",mugs:"mug",spoonful:"spoonful",spoonfuls:"spoonful",spoon:"spoonful",splash:"splash",shot:"shot",shots:"shot",dash:"dash",pinch:"pinch",
@@ -2115,15 +2199,18 @@ function parseQuery(raw){
 let DBF=[];
 const CHAIN_RE=/^(McDonald's|Burger King|Wendy's|Taco Bell|Pizza Hut|Domino's|Papa John's|Little Caesars|Kfc|Popeyes|Subway|Denny's|Applebee's|Olive Garden|Cracker Barrel|Carrabba's|On The Border|T\.G\.I\. Friday's|Dairy Queen|Arby's|Sonic|Jack In The Box|Starbucks|Chick-Fil-A|Chick-fil-A|Restaurant, (?:Chinese|Italian|Mexican|Latino|family style))/i;
 const fmtAmt=a=>a===.5?"1/2":a===.25?"1/4":a===.75?"3/4":a===1/3||String(a).startsWith("0.33")?"1/3":String(r1(a));
-function defMeasure(ms){
+function defMeasure(ms,name){
   if(!ms||!ms.length) return null;
+  // a portion named after the food itself ("1 banana", "1 taco") is the natural single serving
+  const sing=w=>w.replace(/(?:ies)$/,"y").replace(/(?:es|s)$/,""), head=name?sing(norm(String(name).split(/[,(]/)[0]).split(" ").pop()||""):"";
+  if(head.length>2){const m=ms.find(x=>{const w=sing(x[1].toLowerCase().split(/[ ,(]/)[0]); return x[0]===1&&x[2]<=400&&!/\s/.test(x[1].toLowerCase().split(/[,(]/)[0].trim())&&(w===head||w==="fruit")}); if(m) return m}
   const pri=[/^(medium|large|small|extra large)\b/,/^(slice|piece|item|serving|sandwich|burger|patty|bar|cookie|link|strip|fillet|container|bagel|muffin|pancake|waffle|tortilla|taco|burrito|egg|order|pizza|cone|bun|roll|biscuit|donut|doughnut|wrap|breast|thigh|drumstick|wing|stick|packet|pouch|can|bottle|fruit)/,/^cup\b/,/^tbsp/,/^oz/];
   for(const re of pri){const m=ms.find(x=>re.test(x[1].toLowerCase())); if(m) return m}
   return ms[0];
 }
 async function loadDB(){
   try{const r=await fetch("foods.json"); if(!r.ok) return; const j=await r.json();
-    DBF=j.foods.map(([name,alias,k,p,c,f,fi,su,na,ms])=>{const dm=defMeasure(ms), g=dm?dm[2]:100, q=g/100, ch=name.match(CHAIN_RE);
+    DBF=j.foods.map(([name,alias,k,p,c,f,fi,su,na,ms])=>{const dm=defMeasure(ms,name), g=dm?dm[2]:100, q=g/100, ch=name.match(CHAIN_RE);
       const o={name,key:name+" "+(alias||""),serving:dm?`${fmtAmt(dm[0])} ${dm[1]} (${Math.round(g)} g)`:"100 g",g,v:[r1(p*q),r1(c*q),r1(f*q),Math.round(k*q)],
         per100:{p,c,f,k,fi,su,na},measures:ms,db:true,chain:ch?norm(ch[1]).split(" ")[0]:null};
       if(fi!=null) o.fi=r1(fi*q); if(su!=null) o.su=r1(su*q); if(na!=null) o.na=Math.round(na*q); return o});
@@ -2158,7 +2245,7 @@ function servInfo(s){
 const norm=s=>s.toLowerCase().replace(/[^a-z0-9 ]+/g," ").replace(/\s+/g," ").trim();
 const STOP=new Set(["with","and","the","of","a","an","my","some","in","on"]);
 /* Words that describe how food was made or its size. They don't decide which food it is, so they're ignored when matching. */
-const PREP=new Set(["scrambled","poached","over","easy","sunny","side","up","grilled","baked","roasted","steamed","toasted","homemade","fresh","plain","cooked","large","small","medium","big","little","regular","whole","sliced","diced","chopped","hot","cold","iced","leftover","piece","pieces"]);
+const PREP=new Set(["shredded","crumbled","minced","rinsed","drained","peeled","halved","cubed","trimmed","boneless","skinless","packed","heaping","level","scrambled","poached","over","easy","sunny","side","up","grilled","baked","roasted","steamed","toasted","homemade","fresh","plain","cooked","large","small","medium","big","little","regular","whole","sliced","diced","chopped","hot","cold","iced","leftover","piece","pieces"]);
 function qwords(q){const all=norm(q).split(" ").filter(w=>w.length>1&&!STOP.has(w)); const core=all.filter(w=>!PREP.has(w)); return core.length?core:all}
 /* Typo-tolerant compare: one slip allowed for 5+ letter words, two for 8+ (swapped letters count as one). */
 function typoDist(a,b,max){
@@ -2178,7 +2265,7 @@ const ALIAS=[[/\bdiet (coke|pepsi|soda)\b/,"diet soda"],[/\b(coke|pepsi|coca col
   [/\b(polly ?-?o|pollyo|polly)\b/,"polly-o"],[/\bpolly-o (?:mozz\w* )?(?:string )?(?:cheese )?(?:sticks?)?\b/,"polly-o string cheese "],
   [/\b(babybel|baby bel)\b/,"babybel cheese"],[/\bslate(?: milk)?(?: protein)?(?: (?:shake|drink|milk))?\b/,"slate milk protein shake"],
   [/\bpremier(?: protein)?(?: (?:shake|drink))?\b/,"premier protein shake"],[/\b(?:fairlife )?core power(?: (?:protein|shake|26g?))*\b/,"fairlife core power protein shake"],[/\b(laughing cow)\b/,"laughing cow cheese"],[/\b(big mac|mc ?(?:chicken|muffin|flurry|rib|double|nuggets?|griddles?)|quarter pounder|filet-o-fish|egg mcmuffin)\b/,"mcdonald's $1"],[/\bwhopper\b/,"burger king whopper"],[/\bgrilled cheese\b(?! sandwich)/,"grilled cheese sandwich"],
-  [/\b(frosty|baconator)\b/,"wendy's $1"],[/\b(crunchwrap|chalupa|gordita|doritos locos)\b/,"taco bell $1"],[/\bmcdonald's mcdonald's\b/,"mcdonald's"],[/\bmac (?:and|n|&|'n') ?cheese\b/,"macaroni and cheese"],[/\bhamburgers?\b/,"burger"],[/\bbrekkie\b/,"breakfast"],[/\bpbr\b/,"beer"]];
+  [/\b(frosty|baconator)\b/,"wendy's $1"],[/\b(crunchwrap|chalupa|gordita|doritos locos)\b/,"taco bell $1"],[/\bmcdonald's mcdonald's\b/,"mcdonald's"],[/\bmac (?:and|n|&|'n') ?cheese\b/,"macaroni and cheese"],[/\b(?:red |green |yellow |orange )?bell peppers?\b/,m=>"sweet "+m.replace(/\s*bell peppers?/,"").trim()+" peppers"],[/\bhamburgers?\b/,"burger"],[/\bbrekkie\b/,"breakfast"],[/\bpbr\b/,"beer"]];
 /* Fix misspelled words before searching online ("mozzerella" -> "mozzarella"), using known food words and brands. */
 const EXTRA_WORDS="slate premier fairlife core power muscle orgain quest oikos ghost celsius bang alani liquid iv mozzarella cheddar parmesan provolone swiss american ricotta feta gouda brie string cheese sticks yogurt oatmeal cereal granola cheerios frosted flakes waffles waffle pancakes sausage ham turkey salami pepperoni hotdog bratwurst burrito quesadilla nachos tortilla chips doritos cheetos pringles pretzels crackers goldfish ritz oreo oreos cookies cookie brownie muffin croissant donut doughnut bagel english biscuit biscuits sandwich burger cheeseburger wings tenders nuggets spaghetti lasagna macaroni ravioli noodles ramen sushi teriyaki curry salmon shrimp tilapia steak pork chicken broccoli spinach lettuce cucumber tomato potato potatoes sweet carrots celery peppers onion onions mushrooms avocado guacamole salsa hummus almonds cashews peanuts walnuts pistachios raisins strawberries blueberries raspberries grapes watermelon pineapple mango peach pear cherries banana bananas apple apples orange oranges smoothie milkshake latte cappuccino espresso frappuccino gatorade powerade monster lemonade kombucha protein whey casein creatine jerky popcorn edamame tofu quinoa couscous lentils chickpeas beans rice pasta bread toast butter honey syrup jelly nutella ketchup mayonnaise mustard ranch dressing gravy soup chili stew salad wrap pita naan pizza calzone cupcake cheesecake pie cream gelato sherbet popsicle chocolate vanilla caramel cinnamon pudding applesauce coffee milk water juice soda beer wine tillamook kraft sargento chobani fage oikos yoplait dannon quest clif kind fairlife kelloggs nabisco hostess debbie nutty buddy tombstone digiorno totinos lunchables starbucks dunkin wendys chipotle subway popeyes arbys panera babybel".split(" ");
 let VOCAB=null;
@@ -2253,6 +2340,7 @@ const WSC=new Map();
 function tokScore(w,t){let m=WSC.get(w); if(!m){if(WSC.size>300) WSC.clear(); m=new Map(); WSC.set(w,m)}
   let v=m.get(t); if(v===undefined){v=exactHit(w,[t])?1:wordHit(w,[t])?.9:0; m.set(t,v)} return v}
 const hits=(words,name)=>{const toks=toksOf(name); let s=0; for(const w of words){let b=0; for(const t of toks){const v=tokScore(w,t); if(v>b){b=v; if(b===1) break}} s+=b} return s};
+const dbItem=x=>({name:x.name,key:x.key,serving:x.serving,p:x.v[0],c:x.v[1],f:x.v[2],kcal:x.v[3],fi:x.fi,su:x.su,na:x.na,src:"USDA built-in",grams:x.g,per100:x.per100,measures:x.measures,chain:x.chain});
 function localMatches(q){
   const words=qwords(q); if(!words.length) return [];
   const score=n=>hits(words,n);
@@ -2271,7 +2359,7 @@ function localMatches(q){
   const qn=" "+norm(q)+" ";
   const db=DBF.filter(x=>!x.chain||qn.includes(" "+x.chain+" ")).map(x=>({x,s:score(x.key)})).filter(o=>o.s>=Math.max(need,words.length))
     .sort((a,b)=>(a.x.name.length/40+oddPenalty(q,a.x.name)*10)-(b.x.name.length/40+oddPenalty(q,b.x.name)*10)).slice(0,8)
-    .map(({x})=>({name:x.name,key:x.key,serving:x.serving,p:x.v[0],c:x.v[1],f:x.v[2],kcal:x.v[3],fi:x.fi,su:x.su,na:x.na,src:"USDA built-in",grams:x.g,per100:x.per100,measures:x.measures,chain:x.chain}));
+    .map(({x})=>dbItem(x));
   return [...out,...saved,...loc,...db];
 }
 const titleCase=s=>s?s.toLowerCase().replace(/\b\w/g,c=>c.toUpperCase()):s;
@@ -2536,6 +2624,8 @@ const PORTION={
   plate:n=>/salad/.test(n)?200:/fries/.test(n)?150:350,
   handful:n=>/berr|grape|cherr|tomato|carrot/.test(n)?75:/popcorn|cereal/.test(n)?12:28,
   spoonful:n=>/peanut butter|nutella|almond butter|butter/.test(n)?16:/sugar|honey/.test(n)?12:15,
+  can:n=>/tomato|sauce|soup|broth|pumpkin|coconut/.test(n)?400:/tuna|chicken|salmon|sardine|crab/.test(n)?140:/soda|cola|beer|drink|juice/.test(n)?355:240,
+  clove:()=>3,
   splash:()=>30, mug:()=>350, glass:()=>240, shot:()=>44, dash:()=>1, pinch:()=>.5,
   scoop:n=>/ice cream|gelato|sorbet|sherbet|frozen yogurt/.test(n)?66:/protein|whey|powder|casein|creatine/.test(n)?30:/rice|potato|mashed/.test(n)?120:60,
 };
@@ -2612,6 +2702,226 @@ function openPick(r,isBest){
   };
   $("searchPick").scrollIntoView({block:"nearest",behavior:calm?"auto":"smooth"});
 }
+
+/* ---------- recipes: healthy ideas with nutrition computed from USDA data (recipes.json), plus your own ---------- */
+let RECIPES=null, recLoad=null;
+const RF={meal:"all",tags:new Set(),q:"",open:null};
+const MEALN={breakfast:"Breakfast",lunch:"Lunch",dinner:"Dinner",snack:"Snack"};
+const RTAGN={protein:"High protein",light:"Under 400 cal",veg:"Vegetarian",quick:"Quick",prep:"Meal prep"};
+function loadRecipes(){
+  if(RECIPES) return Promise.resolve(RECIPES);
+  return recLoad||(recLoad=fetch("recipes.json").then(r=>r.ok?r.json():Promise.reject()).then(j=>RECIPES=j.recipes).catch(()=>{recLoad=null;return null}));
+}
+const recFavs=()=>new Set(load("recFav")||[]);
+function dayLeft(){const day=S.days[S.date]||emptyDay(), g=G(), t=totals(day); return {kl:g.kcal?g.kcal-t.k:null, pl:g.protein?g.protein-t.p:null, ate:t.k>0}}
+function mealNow(){const h=new Date().getHours(); return h<11?"breakfast":h<15?"lunch":h<17?"snack":"dinner"}
+/* Fits = one serving is within the calories you have left. Ranked by how much of your remaining protein it covers, protein per calorie, and the time of day. */
+function fitScore(r,L){
+  if(L.kl==null) return 0; const n=r.n; if(n.kcal>L.kl+50) return -1;
+  const pl=Math.max(0,L.pl||0);
+  return (pl>0?Math.min(n.p,pl)/Math.max(pl,15):0)+n.p/Math.max(n.kcal,1)*2+(r.meal===mealNow()?.5:0);
+}
+function markRecFilters(){
+  document.querySelectorAll("#recMeal [data-meal]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.meal===RF.meal));
+  document.querySelectorAll("#recTags [data-rt]").forEach(b=>b.setAttribute("aria-pressed",RF.tags.has(b.dataset.rt)));
+  if($("recQ").value!==RF.q) $("recQ").value=RF.q;
+}
+function recBody(r){
+  const n=r.n, fav=recFavs().has(r.id);
+  return `<div class="rbody">
+    <div class="rnut"><div><b>${n.kcal}</b><span>${CUL()}</span></div><div class="p"><b>${r1(n.p)}g</b><span>Protein</span></div><div class="c"><b>${r1(n.c)}g</b><span>Carbs</span></div><div><b>${r1(n.f)}g</b><span>Fat</span></div></div>
+    <p class="rnote">Per serving · ${r1(n.fi)} g fiber · ${n.na.toLocaleString()} mg sodium. Makes ${r.serves} serving${r.serves>1?"s":""}. Salt and spices aren't counted.</p>
+    <div><h4>Ingredients</h4><ul>${r.ing.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>
+    <div><h4>Steps</h4><ol>${r.steps.map(x=>`<li>${esc(x)}</li>`).join("")}</ol></div>
+    ${r.tip?`<p class="rtip">${esc(r.tip)}</p>`:""}
+    <div class="ract">
+      <div class="stepper"><span class="lbl">Servings</span><div class="f"><input type="number" id="rsv-${r.id}" min="0.25" step="0.25" value="1" inputmode="decimal" aria-label="Servings to log"></div></div>
+      <button type="button" class="primary" data-rlog="${r.id}">Log it</button>
+      <button type="button" class="chip heart" data-rfav="${r.id}" aria-pressed="${fav}">${fav?"♥ Saved":"♡ Save"}</button>
+      <button type="button" class="chip ghost" data-rsave="${r.id}">Add to My foods</button>
+    </div></div>`;
+}
+async function renderRecipes(){
+  markRecFilters(); renderMyRecipes();
+  const list=await loadRecipes();
+  if(!list){$("recList").innerHTML=`<p class="empty">Couldn't load the recipes. Open the app once while online and they'll be saved for offline use.</p>`; return}
+  const L=dayLeft(), fav=recFavs(), today=S.date===todayKey();
+  if(L.kl!=null){$("recLeft").hidden=false;
+    $("recLeft").innerHTML=L.kl>0?`You have <b>${Math.round(L.kl).toLocaleString()} ${CU()}</b>${L.pl>0?` and <b>${Math.round(L.pl)} g protein</b>`:""} left ${today?"today":"on "+esc(niceDate(S.date))}.`
+      :`You've reached your calorie target ${today?"for today":"for "+esc(niceDate(S.date))}. Lighter ideas are under "Under 400 cal".`}
+  else $("recLeft").hidden=true;
+  let rs=list.filter(r=>(RF.meal==="all"||r.meal===RF.meal)&&[...RF.tags].every(t=>t==="fit"?L.kl!=null&&fitScore(r,L)>=0:t==="saved"?fav.has(r.id):r.tags.includes(t)));
+  if(RF.q.trim()){const ws=qwords(RF.q); rs=rs.filter(r=>{const toks=toksOf(r.name+" "+r.ing.join(" ")); return ws.every(w=>exactHit(w,toks)||wordHit(w,toks))})}
+  if(RF.tags.has("fit")) rs=[...rs].sort((a,b)=>fitScore(b,L)-fitScore(a,L));
+  $("recMeta").textContent=`${rs.length} of ${list.length} recipes`;
+  if(!rs.length){
+    $("recList").innerHTML=`<p class="empty">${RF.tags.has("saved")&&!fav.size?"Tap ♡ Save on a recipe to keep it here.":RF.tags.has("fit")&&L.kl==null?"Set a calorie goal under Me to see what fits.":RF.tags.has("fit")?"Nothing fits what's left today. Try a snack, or turn off Fits my day.":"No recipes match. Try fewer filters."}</p>`;
+    return}
+  $("recList").innerHTML=rs.map(r=>{const n=r.n, open=RF.open===r.id, fits=L.ate&&L.kl!=null&&L.kl>0&&fitScore(r,L)>=0&&!RF.tags.has("fit");
+    return `<div class="rcard" id="rc-${r.id}">
+      <button type="button" class="rhead" data-ropen="${r.id}" aria-expanded="${open}">
+        <span class="nm">${esc(r.name)}${fav.has(r.id)?` <span aria-label="saved" style="color:var(--protein)">♥</span>`:""}</span>
+        <span class="sm">${MEALN[r.meal]} · ${r.mins} min · serves ${r.serves}</span>
+        <span class="rpills">${r.tags.map(t=>`<span class="tag">${RTAGN[t]}</span>`).join("")}${fits?`<span class="tag fit">Fits today</span>`:""}</span>
+        <span class="rk"><b>${n.kcal}</b> ${CU()}<br><span class="p">${r1(n.p)}g P</span></span>
+      </button>${open?recBody(r):""}</div>`}).join("");
+}
+$("recMeal").onclick=ev=>{const b=ev.target.closest("[data-meal]"); if(!b) return; RF.meal=b.dataset.meal; RF.open=null; renderRecipes()};
+$("recTags").onclick=ev=>{const b=ev.target.closest("[data-rt]"); if(!b) return; const t=b.dataset.rt; RF.tags.has(t)?RF.tags.delete(t):RF.tags.add(t); RF.open=null; renderRecipes()};
+let recQT=null; $("recQ").oninput=()=>{clearTimeout(recQT); recQT=setTimeout(()=>{RF.q=$("recQ").value; renderRecipes()},200)};
+document.addEventListener("click",ev=>{if(ev.target.closest("[data-recfit]")){RF.tags=new Set(["fit"]); RF.meal="all"; RF.q=""; RF.open=null}},true);
+$("recList").onclick=async ev=>{
+  const list=RECIPES||[], byId=id=>list.find(r=>r.id===id);
+  const o=ev.target.closest("[data-ropen]");
+  if(o){RF.open=RF.open===o.dataset.ropen?null:o.dataset.ropen; await renderRecipes();
+    if(RF.open){const c=$("rc-"+RF.open); if(c) c.scrollIntoView({block:"nearest",behavior:calm?"auto":"smooth"})} return}
+  const lg=ev.target.closest("[data-rlog]");
+  if(lg){const r=byId(lg.dataset.rlog); if(!r) return; const sv=+$("rsv-"+r.id).value||1, n=r.n, k=x=>r1(x*sv);
+    await addEntry({name:(sv!==1?r1(sv)+"× ":"")+r.name,p:k(n.p),c:k(n.c),f:k(n.f),kcal:Math.round(n.kcal*sv),fi:k(n.fi),su:k(n.su),na:Math.round(n.na*sv),src:"recipe"});
+    renderRecipes(); return}
+  const fv=ev.target.closest("[data-rfav]");
+  if(fv){const f=recFavs(), id=fv.dataset.rfav; f.has(id)?f.delete(id):f.add(id); save("recFav",[...f]); renderRecipes(); return}
+  const sb=ev.target.closest("[data-rsave]");
+  if(sb){const r=byId(sb.dataset.rsave); if(!r) return; const n=r.n;
+    saveFood({name:r.name,serving:"1 serving",p:n.p,c:n.c,f:n.f,kcal:n.kcal,fi:n.fi,su:n.su,na:n.na});
+    toast("Added to My foods. Type its name in the bar to log it.")}
+};
+
+/* Your own recipes: one ingredient per line, matched to foods, saved to My foods with nutrition per serving. */
+let RB={lines:[],editId:null};
+function rbLine(text){
+  const pq=parseQuery(text); lastReq={amt:pq.amt,unit:pq.unit,size:pq.size};
+  const wide=q=>{const ws=qwords(q); if(!ws.length) return [];
+    const extra=DBF.filter(x=>!x.chain&&ws.every(w=>exactHit(w,toksOf(x.key)))).sort((a,b)=>a.name.length-b.name.length).slice(0,40).map(dbItem);
+    const seen=new Set(), out=[]; [...localMatches(q),...extra].forEach(r=>{if(!seen.has(r.name)){seen.add(r.name);out.push(r)}}); return out};
+  let pool=wide(pq.q0), best=bestMatch(pq.q0,pool);
+  if(!(best&&best.exact)&&pq.q!==pq.q0){const p2=wide(pq.q), b2=bestMatch(pq.q,p2); if(b2&&b2.exact){pool=[...p2,...pool]; best={...b2,guess:true}}}
+  if(best&&!best.exact) best=null;
+  lastReq={amt:pq.amt,unit:pq.unit,size:pq.size};
+  return finishLine({t:text,pq,spice:SPICE_RE.test(text)},pool,rbPrefer(pq,pool,best));
+}
+const RB_ODD=["leaves","stems","seeds","peel","flour","oil","skin","roll","deli","luncheon","nugget","nuggets","patty","patties","sandwich","tenders","strips","sticks","jerky","baby food","soup","sauce","juice","paste","dried","powder","salad","chips","dip","bread","rings","yolk","white","substitute","imitation","flavored","sweetened","nectar","pie","dessert","candy","drink","mix"];
+const SPICE_RE=/\b(salt|pepper(?!s)|powder|spices?|seasoning|to taste|oregano|cumin|paprika|thyme|rosemary|cinnamon|chil[il]i flakes|vanilla|baking soda|baking powder|water|cooking spray|bay leaf)\b/i;
+/* Recipe ingredients are usually raw ("1 onion", "1 lb ground beef") or canned ("1 can beans"), so among foods with all your words, prefer those. */
+function rbPrefer(pq,pool,best){
+  if(!best||best.guess||best.r.src==="learned"||best.r.src==="saved") return best;
+  const ws=qwords(pq.q0), same=(w,t)=>t===w||t===w.replace(/e?s$/,"")||t.replace(/e?s$/,"")===w;
+  const full=pool.filter(r=>{const t=toksOf(r.key||r.name); return ws.every(w=>t.some(x=>same(w,x)))});
+  if(!full.length) return best;
+  const cooked=/\b(cooked|baked|roasted|grilled|fried|boiled|steamed|leftover)\b/i.test(pq.q0), can=pq.unit==="can"||/\bcanned\b/i.test(pq.q0);
+  const qn=" "+norm(pq.q0)+" ", u=pq.unit;
+  const meatW=["lb","oz","g","kg"].includes(u)&&/\b(chicken|beef|turkey|pork|steak|salmon|fish|shrimp|lamb|tuna|tilapia|cod)\b/.test(qn), hasRaw=full.some(r=>/\braw\b/i.test(r.name)&&!/from raw/i.test(r.name));
+  const unitOK=r=>!u||(["g","oz","lb","ml","l"].includes(u)&&r.per100&&r.per100.k!=null)||(r.measures||[]).some(m=>{const w=m[1].toLowerCase().split(/[ ,(]/)[0]; return w===u||UNITS[w]===u||w.replace(/e?s$/,"")===u})||(PORTION[u]&&r.per100&&r.per100.k!=null);
+  const sc=r=>{const n=r.name.toLowerCase(); let v=0;
+    if(!cooked&&/\braw\b/.test(n)&&!/from raw/.test(n)) v+=3;
+    if(can&&/canned/.test(n)) v+=4;
+    if(/no added fat|drained/.test(n)) v+=1;
+    if(/fat added|with (oil|butter|margarine)|fried|fast food|restaurant|style|with meat| and /.test(n)) v-=2;
+    RB_ODD.forEach(w=>{if(n.includes(w)&&!qn.includes(" "+w)) v-=4});
+    if(unitOK(r)) v+=3;
+    if(meatW&&!hasRaw&&/steamed|boiled|grilled|baked|broiled|roasted|dry heat/.test(n)&&!/coated|breaded|fried|sauce/.test(n)) v+=1.5;
+    const seg=toksOf(r.name.split(",")[0]); if(ws.every(w=>seg.some(x=>same(w,x)))) v+=2;
+    if(cooked&&/cooked|baked|broiled|grilled|roasted|dry heat/.test(n)) v+=2;
+    if(!can&&/canned/.test(n)) v-=2;
+    return v-toksOf(r.name).length*.05};
+  const top=[...full].sort((a,b)=>sc(b)-sc(a))[0];
+  return !full.includes(best.r)||sc(top)>sc(best.r)?{...best,r:top}:best;
+}
+function finishLine(L,pool,best){
+  const seen=new Set(), cands=[];
+  if(best) {cands.push(best.r); seen.add(best.r.name)}
+  pool.forEach(r=>{if(!seen.has(r.name)&&cands.length<6){seen.add(r.name);cands.push(r)}});
+  const gw=(L.pq.q0.match(/\b(rice|quinoa|pasta|oats|lentils|couscous|barley|noodles|spaghetti|macaroni|farro|bulgur)\b/i)||[])[1];
+  if(gw&&cands.length&&!cands.some(r=>/uncooked|\bdry\b|\braw\b/i.test(r.name))){
+    const dry=DBF.filter(x=>toksOf(x.name).some(t=>t===gw.toLowerCase()||t===gw.toLowerCase()+"s")&&/uncooked|\bdry\b|\braw\b/i.test(x.name)&&!/flour|bran|cereal|bar|cookie|baby/i.test(x.name)).sort((a,b)=>a.name.length-b.name.length)[0];
+    if(dry) cands.push(dbItem(dry))}
+  L.cands=cands; L.ci=0; L.check=!!best&&(best.guess||typoWords(L.pq.q0,best.r).length>0||!best.exact);
+  setLineAmount(L); return L;
+}
+function setLineAmount(L){
+  const r=L.cands[L.ci]; if(!r){L.amt=0;L.mode="serv";return}
+  lastReq={amt:L.pq.amt,unit:L.pq.unit,size:L.pq.size}; const st=startAmount(r); L.amt=st.amt; L.mode=st.mode; L.note="";
+  const n=r.name.toLowerCase();
+  const GR=/\b(rice|quinoa|pasta|oats|lentils|couscous|barley|noodles|spaghetti|macaroni|farro|bulgur)\b/i;
+  if(GR.test(L.pq.q0)&&!/\b(cooked|dry|uncooked|raw)\b/i.test(L.pq.q0)&&/cooked|no added fat|prepared/i.test(r.name))
+    L.note=L.cands.some(c=>/uncooked|\bdry\b|\braw\b/i.test(c.name))?"Counted as cooked. If you measured it dry, pick the uncooked option in the list."
+      :"Counted as cooked. If you measured it dry, it makes about 3 times as much cooked, so triple the amount.";
+  if(st.mode==="g"&&["lb","oz","g"].includes(L.pq.unit)&&/\b(chicken|beef|turkey|pork|steak|salmon|fish|shrimp|lamb|tuna)\b/.test(n)&&!/\braw\b/.test(n)&&!/canned/.test(n)
+     &&!/\b(cooked|baked|roasted|grilled|leftover)\b/i.test(L.pq.q0)){L.amt=Math.round(st.amt*.75); L.note=`Raw weight, so this counts about ${L.amt} g cooked (meat loses about a quarter of its weight cooking). Change it if you weighed it cooked.`}
+}
+const lineMac=L=>{const r=L.cands[L.ci]; return r&&L.amt>0?macrosFor(r,L.amt,L.mode):null};
+function renderBuild(){
+  $("rbLines").innerHTML=RB.lines.map((L,i)=>{const m=lineMac(L), r=L.cands[L.ci];
+    if(!r) return L.spice?`<div class="rbl"><span class="t">${esc(L.t)}</span><p class="hint" style="margin:0;grid-column:1/-1">Not counted (seasoning)</p></div>`
+      :`<div class="rbl miss"><span class="t">${esc(L.t)}</span><p class="chk">No match, so this line isn't counted. Try simpler words, like "chicken breast" or "brown rice".</p></div>`;
+    return `<div class="rbl"><span class="t">${esc(L.t)}</span>
+      <select data-rbc="${i}" aria-label="Food for ${esc(L.t)}">${L.cands.map((c,j)=>`<option value="${j}"${j===L.ci?" selected":""}>${esc(c.name)}</option>`).join("")}</select>
+      <span class="stepper" style="gap:4px"><input data-rba="${i}" type="number" min="0" step="any" value="${L.amt}" inputmode="decimal" aria-label="Amount"><span class="hint">${L.mode==="g"?"g":"serv"}</span></span>
+      <span class="k">${m?m.kcal??"–":"–"} ${CU()}</span>
+      ${L.check?`<p class="chk">Check this match: is it the right food?</p>`:""}${L.note?`<p class="hint" style="margin:0;grid-column:1/-1;font-size:12px">${esc(L.note)}</p>`:""}</div>`}).join("");
+  const sv=Math.max(1,+$("rbServes").value||1), T={p:0,c:0,f:0,k:0,fi:0,su:0,na:0};
+  RB.lines.forEach(L=>{const m=lineMac(L); if(!m) return; T.p+=m.p; T.c+=m.c; T.f+=m.f; T.k+=m.kcal||0; T.fi+=m.fi||0; T.su+=m.su||0; T.na+=m.na||0});
+  RB.per={p:r1(T.p/sv),c:r1(T.c/sv),f:r1(T.f/sv),kcal:Math.round(T.k/sv),fi:r1(T.fi/sv),su:r1(T.su/sv),na:Math.round(T.na/sv)};
+  const ok=RB.lines.some(L=>L.cands.length);
+  $("rbTot").hidden=!ok; $("rbSaveRow").hidden=!ok;
+  if(ok) $("rbTot").innerHTML=`<span class="lbl">Per serving (whole recipe ${Math.round(T.k).toLocaleString()} ${CU()})</span>
+    <div class="rnut"><div><b>${RB.per.kcal}</b><span>${CUL()}</span></div><div class="p"><b>${RB.per.p}g</b><span>Protein</span></div><div class="c"><b>${RB.per.c}g</b><span>Carbs</span></div><div><b>${RB.per.f}g</b><span>Fat</span></div></div>`;
+}
+async function rbCalc(){
+  const lines=$("rbIng").value.split(/\n+/).map(x=>x.replace(/^\s*(?:[-*•]|\d+[.)])\s+/,"").trim()).filter(Boolean);
+  if(!lines.length){$("rbMsg").textContent="Add at least one ingredient."; return}
+  RB.lines=lines.map(rbLine); renderBuild();
+  const miss=RB.lines.filter(L=>!L.cands.length&&!L.spice);
+  if(miss.length&&navigator.onLine!==false){
+    $("rbMsg").textContent=`Looking up ${miss.length} ingredient${miss.length>1?"s":""} online…`;
+    for(const L of miss){const [f,o]=await Promise.all([searchFDC(L.pq.q0),searchOFF(L.pq.q0)]), pool=[...f.items,...o.items]; finishLine(L,pool,bestMatch(L.pq.q0,pool))}
+    renderBuild();
+  }
+  const still=RB.lines.filter(L=>!L.cands.length&&!L.spice).length, chk=RB.lines.filter(L=>L.check).length;
+  $("rbMsg").textContent=still?`${still} line${still>1?"s":""} couldn't be matched.`:chk?"Check the highlighted matches, then save.":"All ingredients matched. Adjust any amounts, then save.";
+}
+function renderMyRecipes(){
+  const mine=Object.entries(S.foods.items).filter(([,f])=>f.recipe).sort((a,b)=>(b[1].used||0)-(a[1].used||0));
+  $("myRecHint").hidden=!!mine.length||!$("recBuild").hidden;
+  $("myRecList").innerHTML=mine.map(([id,f])=>`<div class="item"><span class="nm">${esc(f.name)}</span>
+    <span class="sm">${esc(f.serving)} · ${kcalOf(f)} ${CU()} · ${r1(+f.p||0)}g P</span>
+    <span class="ract" style="grid-row:1/3;grid-column:2/4"><button type="button" class="chip" data-mylog="${esc(id)}">Log</button><button type="button" class="chip ghost" data-myedit="${esc(id)}">Edit</button><button type="button" class="chip ghost" data-mydel="${esc(id)}">Delete</button></span></div>`).join("");
+}
+function openBuild(id){
+  const f=id&&S.foods.items[id]; RB={lines:[],editId:id||null};
+  $("rbName").value=f?f.name:""; $("rbServes").value=f?f.recipe.serves:4; $("rbIng").value=f?f.recipe.text:"";
+  $("rbLines").innerHTML=""; $("rbTot").hidden=true; $("rbSaveRow").hidden=true; $("rbMsg").textContent="";
+  $("recBuild").hidden=false; $("myRecHint").hidden=true; $("recNew").hidden=true;
+  if(f) rbCalc(); $("rbName").focus();
+}
+function closeBuild(){$("recBuild").hidden=true; $("recNew").hidden=false; RB={lines:[],editId:null}; renderMyRecipes()}
+$("recNew").onclick=()=>openBuild(null);
+$("rbCancel").onclick=closeBuild;
+$("rbCalc").onclick=rbCalc;
+$("rbServes").oninput=()=>{if(RB.lines.length) renderBuild()};
+$("rbLines").onchange=ev=>{const c=ev.target.closest("[data-rbc]"); if(c){const L=RB.lines[+c.dataset.rbc]; L.ci=+c.value; L.check=false; setLineAmount(L); renderBuild()}};
+/* typing your own amount replaces the raw-weight estimate */
+$("rbLines").oninput=ev=>{const a=ev.target.closest("[data-rba]"); if(!a) return; const L=RB.lines[+a.dataset.rba]; L.amt=+a.value||0; L.note="";
+  const row=a.closest(".rbl"), m=lineMac(L); row.querySelector(".k").textContent=(m?m.kcal??"–":"–")+" "+CU();
+  clearTimeout(rbT); rbT=setTimeout(()=>{const keep=document.activeElement===a; renderBuild(); if(keep){const n=document.querySelector(`[data-rba="${a.dataset.rba}"]`); if(n){n.focus(); const v=n.value; n.value=""; n.value=v}}},700)};
+let rbT=null;
+$("recBuild").onsubmit=ev=>{ev.preventDefault();
+  const name=$("rbName").value.trim(); if(!name){$("rbName").focus(); return}
+  if(!RB.per){$("rbMsg").textContent="Work out the nutrition first."; return}
+  const sv=Math.max(1,+$("rbServes").value||1);
+  const id=RB.editId||("r-"+name.toLowerCase().replace(/[^a-z0-9]+/g,"-").slice(0,40));
+  if(RB.editId){const old=S.foods.items[RB.editId]; if(old) S.foods.items[RB.editId]={used:old.used,fav:old.fav}}
+  saveFood({name,serving:`1 serving (1/${sv} of recipe)`,...RB.per,recipe:{serves:sv,text:$("rbIng").value.trim()}},id);
+  VOCAB=null; toast(RB.editId?"Recipe updated":"Recipe saved. Type its name in the bar to log a serving.");
+  closeBuild();
+};
+$("myRecList").onclick=ev=>{
+  const l=ev.target.closest("[data-mylog]"); if(l){useFood(l.dataset.mylog,1); renderMyRecipes(); return}
+  const e=ev.target.closest("[data-myedit]"); if(e){openBuild(e.dataset.myedit); return}
+  const d=ev.target.closest("[data-mydel]"); if(!d) return;
+  if(d.dataset.sure){delete S.foods.items[d.dataset.mydel]; save("foods",S.foods); renderMyRecipes(); toast("Recipe deleted"); return}
+  d.dataset.sure="1"; d.textContent="Tap again to delete"; setTimeout(()=>{if(d.isConnected){delete d.dataset.sure; d.textContent="Delete"}},3000);
+};
 
 /* ---------- barcode ---------- */
 let zxingLoad=null;
