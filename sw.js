@@ -1,5 +1,5 @@
 // Keeps Fuel Log working offline. Loads the newest version when online and falls back to the saved copy.
-const CACHE = "fuel-log-v1";
+const CACHE = "fuel-log-v2";
 const CORE = ["./", "./index.html", "./manifest.json", "./icon-192.png", "./icon-512.png", "./icon-180.png"];
 self.addEventListener("install", e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(CORE))); self.skipWaiting(); });
 self.addEventListener("activate", e => {
