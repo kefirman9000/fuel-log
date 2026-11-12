@@ -8,6 +8,8 @@ A one-page food, water and supplement tracker that runs in your phone's browser.
 
 - **Nutrition Facts label** shows calories, protein, carbs, fat, water and supplements against your daily goals.
 - **Profile-based plan:** enter your age, sex, height, weight, activity, goal and training style. The app suggests calorie, protein, carb, fat and water targets (Mifflin-St Jeor plus body-weight ranges) and explains how it got each one.
+- **First-run setup** walks new users through their profile, goal and supplements.
+- **Quick-add bar** pinned to the top: add food or water without scrolling.
 - **Food search:** type what you ate, like "2 Little Debbie Nutty Buddy" or "Chipotle chicken bowl". The app searches your saved foods, a built-in list of common restaurant items, USDA FoodData Central and Open Food Facts, then multiplies by the servings, pieces or grams you enter.
 - **Barcode scanning** with the camera or a photo, or by typing the number.
 - **Supplements:** turn on creatine, vitamin D, fish oil, magnesium, electrolytes, a multivitamin, or add your own. Each one has a daily check-off and a 7-day streak, and the app marks which ones suit your profile.

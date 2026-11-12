@@ -230,6 +230,42 @@ details.panel[open] summary h3::after{content:" −"}
 .item.new{animation:slidein .45s ease}
 @keyframes slidein{from{transform:translateX(-12px);opacity:0;background:color-mix(in srgb,var(--good) 18%,transparent)}to{transform:none;opacity:1}}
 .streak span.y.fresh i{animation:pop .4s ease}
+/* Quick-add bar, pinned to the top of Today */
+.quick{position:sticky;top:max(6px,env(safe-area-inset-top,0px));z-index:15;display:flex;gap:10px;align-items:center;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:8px;box-shadow:0 4px 14px rgb(0 0 0 / .08)}
+.quick .primary{padding:10px 14px;white-space:nowrap}
+.qwater{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+.qwater .btns{gap:6px;flex-wrap:nowrap}
+.qwater .chip{padding:6px 10px;font-size:13px;white-space:nowrap}
+.qbar{height:4px;background:var(--soft);border-radius:2px;overflow:hidden}
+.qbar i{display:block;height:100%;width:0;background:var(--water);transition:width .4s ease}
+.qtxt{font-size:11px;color:var(--muted)}
+.panel,.label{scroll-margin-top:84px}
+/* First-run setup */
+.ob{position:fixed;inset:0;z-index:40;background:color-mix(in srgb,var(--bg) 90%,transparent);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);display:grid;place-items:center;overflow:auto;
+  padding:max(16px,env(safe-area-inset-top,0px)) 16px max(16px,env(safe-area-inset-bottom,0px))}
+.obcard{width:100%;max-width:460px;background:var(--paper);border:2px solid var(--ink);border-radius:10px;padding:20px;display:flex;flex-direction:column;gap:16px;animation:obin .45s cubic-bezier(.2,.8,.3,1)}
+@keyframes obin{from{transform:translateY(24px) scale(.97);opacity:0}}
+.obcard h2{font-family:var(--display);font-weight:900;font-stretch:72%;font-size:32px;line-height:1;margin:0;letter-spacing:.005em}
+.obcard .brand{font-size:44px}
+.obstep{display:flex;flex-direction:column;gap:12px;animation:obstep .3s ease}
+@keyframes obstep{from{transform:translateX(14px);opacity:0}}
+.obdots{display:flex;gap:6px}
+.obdots i{height:4px;flex:1;border-radius:2px;background:var(--soft);transition:background .3s}
+.obdots i.on{background:var(--ink)}
+.opts{display:flex;flex-wrap:wrap;gap:8px}
+.opts.col{flex-direction:column}
+.opt{border:1.5px solid var(--line);background:var(--bg);border-radius:8px;padding:9px 13px;font-weight:650;text-align:left;transition:transform .15s,background .15s}
+.opt:active{transform:scale(.97)}
+.opts.col .opt{width:100%}
+.opt small{display:block;font-weight:500;opacity:.75;font-size:12px}
+.opt[aria-pressed="true"]{border-color:var(--ink);background:var(--ink);color:var(--paper)}
+.opt .tag{color:inherit;border-color:currentColor;opacity:.8}
+.obsum{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.obsum div{border:1px solid var(--line);border-radius:8px;padding:10px 12px;animation:obstep .4s ease backwards}
+.obsum div:first-child{grid-column:1/-1}
+.obsum b{display:block;font-family:var(--mono);font-size:24px;font-weight:600}
+.obsum span{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700}
+.obnav{justify-content:space-between}
 @media (prefers-reduced-motion:reduce){.jug i::before,.drop,.floaty,.spark,.bub{animation:none!important;display:none}}
 @media (max-width:420px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.label h2{font-size:38px}.srow{grid-template-columns:1fr 96px 28px}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
@@ -255,6 +291,11 @@ details.panel[open] summary h3::after{content:" −"}
 
   <!-- ================= TODAY ================= -->
   <div class="view" id="view-today">
+  <div class="quick" role="toolbar" aria-label="Quick add">
+    <button class="primary" id="qFood" type="button">+ Food</button>
+    <div class="qwater"><div class="btns" id="qWater"></div>
+      <div class="qbar" aria-hidden="true"><i id="qBar"></i></div><span class="num qtxt" id="qTxt"></span></div>
+  </div>
   <section class="label" aria-label="Daily totals">
     <h2>Nutrition Facts</h2>
     <div class="sub"><span id="entryCount">0 items logged</span><span id="labelDate"></span></div>
@@ -395,7 +436,7 @@ details.panel[open] summary h3::after{content:" −"}
       <label class="f half"><span class="lbl">Goal</span><select id="pGoal"><option value="lose">Lose fat</option><option value="maintain">Maintain</option><option value="gain">Build muscle</option></select></label>
       <label class="f half"><span class="lbl">Training</span><select id="pTrain"><option value="strength">Mostly lifting</option><option value="endurance">Mostly cardio / endurance</option><option value="mixed">A mix of both</option><option value="none">Not training</option></select></label>
       <label class="f half"><span class="lbl">Target weight <span class="pWtU">lb</span> (optional)</span><input id="pTgt" type="number" min="0" step="0.1" inputmode="decimal"></label>
-      <div class="actions full"><button class="primary" type="submit">Save profile</button></div>
+      <div class="actions full"><button class="primary" type="submit">Save profile</button><button class="chip ghost" type="button" id="obRedo">Walk me through setup</button></div>
     </form>
   </section>
 
@@ -453,11 +494,74 @@ details.panel[open] summary h3::after{content:" −"}
   </details>
   </div>
 </div>
+<div class="ob" id="ob" hidden role="dialog" aria-modal="true" aria-labelledby="obTitle">
+  <div class="obcard">
+    <div class="obdots" id="obDots" aria-hidden="true"></div>
+
+    <div class="obstep" data-step="0">
+      <div class="brand">Fuel Log</div>
+      <h2 id="obTitle">Let's set your daily targets</h2>
+      <p class="hint" style="font-size:15px">Answer a few quick questions and Fuel Log works out how much protein, carbs, fat, calories and water to aim for each day. It takes about 30 seconds, and it all stays on this device.</p>
+    </div>
+
+    <div class="obstep" data-step="1" hidden>
+      <h2>About you</h2>
+      <div class="grid">
+        <label class="f half"><span class="lbl">Units</span><select id="obUnit"><option value="oz">US (lb, ft)</option><option value="ml">Metric (kg, cm)</option></select></label>
+        <label class="f half"><span class="lbl">Age</span><input id="obAge" type="number" min="10" max="110" inputmode="numeric" placeholder="Years"></label>
+        <label class="f half"><span class="lbl">Weight <span class="obWU">lb</span></span><input id="obWt" type="number" min="0" step="0.1" inputmode="decimal" placeholder="Required"></label>
+        <div class="f half"><span class="lbl">Height</span>
+          <div class="pair" id="obUS"><input id="obFt" type="number" min="0" max="8" inputmode="numeric" placeholder="ft" aria-label="Height, feet"><input id="obIn" type="number" min="0" max="11" inputmode="numeric" placeholder="in" aria-label="Height, inches"></div>
+          <div id="obMet" hidden><input id="obCm" type="number" min="0" inputmode="numeric" placeholder="cm" aria-label="Height, centimeters"></div>
+        </div>
+      </div>
+      <div class="f"><span class="lbl">Sex (for the calorie formula)</span>
+        <div class="opts"><button type="button" class="opt" data-k="sex" data-v="m">Male</button><button type="button" class="opt" data-k="sex" data-v="f">Female</button><button type="button" class="opt" data-k="sex" data-v="">Prefer not to say</button></div></div>
+    </div>
+
+    <div class="obstep" data-step="2" hidden>
+      <h2>What are you working toward?</h2>
+      <div class="opts col">
+        <button type="button" class="opt" data-k="goal" data-v="lose">Lose fat<small>A moderate calorie deficit with high protein to keep muscle</small></button>
+        <button type="button" class="opt" data-k="goal" data-v="maintain">Maintain<small>Eat about what you burn</small></button>
+        <button type="button" class="opt" data-k="goal" data-v="gain">Build muscle<small>A small surplus and plenty of protein</small></button>
+      </div>
+      <div class="f"><span class="lbl">How active are you?</span>
+        <div class="opts col">
+          <button type="button" class="opt" data-k="activity" data-v="sedentary">Mostly sitting<small>Little or no exercise</small></button>
+          <button type="button" class="opt" data-k="activity" data-v="light">Light<small>Exercise 1–3 days a week</small></button>
+          <button type="button" class="opt" data-k="activity" data-v="moderate">Moderate<small>Exercise 3–5 days a week</small></button>
+          <button type="button" class="opt" data-k="activity" data-v="very">Very active<small>Hard exercise 6–7 days a week</small></button>
+          <button type="button" class="opt" data-k="activity" data-v="athlete">Athlete<small>Twice-a-day training or a physical job</small></button>
+        </div></div>
+      <div class="f"><span class="lbl">Training style</span>
+        <div class="opts"><button type="button" class="opt" data-k="training" data-v="strength">Lifting</button><button type="button" class="opt" data-k="training" data-v="endurance">Cardio</button><button type="button" class="opt" data-k="training" data-v="mixed">Both</button><button type="button" class="opt" data-k="training" data-v="none">None</button></div></div>
+    </div>
+
+    <div class="obstep" data-step="3" hidden>
+      <h2>Any supplements?</h2>
+      <p class="hint">Pick what you take and you'll get a daily check-off and streak for each. You can change these later.</p>
+      <div class="opts col" id="obSupps"></div>
+    </div>
+
+    <div class="obstep" data-step="4" hidden>
+      <h2>Your daily plan</h2>
+      <div class="obsum" id="obSum"></div>
+      <p class="hint">Estimates to start from, not medical advice. You can see how each one was worked out, or change them, under Me &amp; goals.</p>
+    </div>
+
+    <p class="err" id="obErr" aria-live="polite"></p>
+    <div class="actions obnav">
+      <button type="button" class="chip ghost" id="obBack">Back</button>
+      <span class="actions"><button type="button" class="chip ghost" id="obSkip">Skip for now</button><button type="button" class="primary" id="obNext">Get started</button></span>
+    </div>
+  </div>
+</div>
 <div class="toast" id="toast" role="status"></div>
 
 <script>
 (() => {
-const APP_VERSION="2.0.0";
+const APP_VERSION="2.1.0";
 const REPO="kefirman9000/fuel-log";
 const $ = id => document.getElementById(id);
 const OZ=29.5735, LB=0.45359237, IN=2.54;
@@ -633,6 +737,9 @@ function render(){
   $("wLeft").textContent=left>0?fmtW(left)+" "+uW()+" to go":"Goal reached";
   const amounts=S.settings.unit==="oz"?[8,16,24].map(o=>[o+" oz",o*OZ]):[250,500,750].map(m=>[m+" ml",m]);
   $("waterBtns").innerHTML=amounts.map(([l,ml])=>`<button class="chip w" data-ml="${ml}">+ ${l}</button>`).join("");
+  $("qWater").innerHTML=amounts.map(([l,ml])=>`<button class="chip w" data-ml="${ml}" aria-label="Add ${l} of water">💧 ${l}</button>`).join("");
+  $("qBar").style.width=Math.min(100,wp)+"%";
+  $("qTxt").textContent=`${fmtW(t.w)} / ${fmtW(g.waterMl||0)} ${uW()} water · ${Math.round(t.k).toLocaleString()}${g.kcal?" / "+(+g.kcal).toLocaleString():""} kcal`;
   $("wUndo").disabled=!day.water.length;
   $("wCustomIn").placeholder=uW();
 
@@ -865,8 +972,14 @@ document.addEventListener("click",ev=>{const b=ev.target.closest("[data-goto]");
 $("prev").onclick=async()=>{S.date=shift(S.date,-1);await getDay(S.date);render()};
 $("next").onclick=async()=>{if(S.date<todayKey()){S.date=shift(S.date,1);await getDay(S.date);render()}};
 
-$("waterBtns").onclick=async ev=>{const b=ev.target.closest("[data-ml]");if(!b)return;
-  const d=await getDay(S.date);d.water.push(Math.round(+b.dataset.ml));saveDay(S.date);pour(b,b.textContent.replace(/\s+/g," ").trim());render()};
+const addWater=async ev=>{const b=ev.target.closest("[data-ml]");if(!b)return;
+  const d=await getDay(S.date);d.water.push(Math.round(+b.dataset.ml));saveDay(S.date);pour(b,"+"+b.textContent.replace(/[^\d.a-z ]/gi,"").trim());render()};
+$("waterBtns").onclick=addWater; $("qWater").onclick=addWater;
+$("qFood").onclick=()=>{
+  document.querySelector('#foodTabs [data-tab="search"]').click();
+  $("hAdd").closest(".panel").scrollIntoView({behavior:calm?"auto":"smooth",block:"start"});
+  setTimeout(()=>$("sq").focus({preventScroll:true}),calm?0:350);
+};
 $("wUndo").onclick=async()=>{const d=await getDay(S.date);d.water.pop();saveDay(S.date);render()};
 $("wCustomBtn").onclick=()=>{$("wCustom").hidden=!$("wCustom").hidden;if(!$("wCustom").hidden)$("wCustomIn").focus()};
 $("wCustomAdd").onclick=async()=>{const v=+$("wCustomIn").value;if(!(v>0))return;
@@ -1254,6 +1367,71 @@ $("updateGo").onclick=()=>{
   else{const u=new URL(location.href);u.searchParams.set("v",pendingVer||Date.now());location.replace(u.toString())}
 };
 
+/* ---------- first-run setup ---------- */
+const OB={step:0,a:{},supps:new Set()};
+function obBody(u){
+  const us=u==="oz", wt=+$("obWt").value; let h=null;
+  if(us){const ft=+$("obFt").value||0, i=+$("obIn").value||0; if(ft||i) h=(ft*12+i)*IN}
+  else{const c=+$("obCm").value; if(c>0) h=c}
+  return {weightKg:wt>0?(us?wt*LB:wt):null, heightCm:h};
+}
+function obWrite(u,b){
+  const us=u==="oz";
+  $("obWt").value=b.weightKg>0?(us?r1(b.weightKg/LB):r1(b.weightKg)):"";
+  if(b.heightCm>0){const tin=b.heightCm/IN;let ft=Math.floor(tin/12),i=Math.round(tin-ft*12);if(i===12){ft++;i=0}
+    $("obFt").value=ft;$("obIn").value=i;$("obCm").value=Math.round(b.heightCm)}
+  else{$("obFt").value="";$("obIn").value="";$("obCm").value=""}
+  document.querySelectorAll(".obWU").forEach(e=>e.textContent=us?"lb":"kg");
+  $("obUS").hidden=!us; $("obMet").hidden=us; $("obUnit").dataset.u=u;
+}
+function obProfile(){const age=+$("obAge").value;
+  return {...S.settings.profile,...OB.a,age:age>0?Math.round(age):null,...obBody($("obUnit").value)}}
+function obOpen(){
+  const s=S.settings, p=s.profile;
+  let u=s.unit;
+  if(!load("settings")){const reg=(navigator.language||"en-US").split("-")[1]||"US"; u=["US","LR","MM"].includes(reg.toUpperCase())?"oz":"ml"}
+  OB.step=0; OB.a={sex:p.sex||"",goal:p.goal,activity:p.activity,training:p.training};
+  OB.supps=new Set(s.supps.filter(x=>x.on&&!x.custom).map(x=>x.id));
+  $("obUnit").value=u; $("obAge").value=p.age??""; obWrite(u,p);
+  $("ob").hidden=false; document.body.style.overflow="hidden"; obShow();
+}
+function obClose(){$("ob").hidden=true; document.body.style.overflow=""; render(); if(S.view==="me") renderMe()}
+function obShow(){
+  document.querySelectorAll(".obstep").forEach(el=>el.hidden=+el.dataset.step!==OB.step);
+  $("obDots").innerHTML=[0,1,2,3,4].map(i=>`<i class="${i<=OB.step?"on":""}"></i>`).join("");
+  $("obBack").style.visibility=OB.step===0||OB.step===4?"hidden":"visible";
+  $("obSkip").hidden=OB.step===4;
+  $("obNext").textContent=["Get started","Next","Next","See my plan","Start logging"][OB.step];
+  document.querySelectorAll("#ob .opt[data-k]").forEach(b=>b.setAttribute("aria-pressed",OB.a[b.dataset.k]===b.dataset.v));
+  $("obErr").textContent="";
+  if(OB.step===3){const sug=suggestSupps(obProfile());
+    $("obSupps").innerHTML=PRESET_SUPPS.map(x=>`<button type="button" class="opt" data-sp="${x.id}" aria-pressed="${OB.supps.has(x.id)}">${esc(x.name)}${sug[x.id]?`<span class="tag">Suggested</span>`:""}<small>${sug[x.id]?esc(sug[x.id]):esc(x.dose)+" a day"}</small></button>`).join("")}
+  if(OB.step===4){const g=suggest(S.settings.profile)||G();
+    const cells=[["Calories",(+g.kcal).toLocaleString()+" kcal"],["Protein",g.protein+" g"],["Carbs",g.carbs+" g"],["Fat",g.fat+" g"],["Water",fmtW(g.waterMl)+" "+uW()]];
+    $("obSum").innerHTML=cells.map(([k,v],i)=>`<div style="animation-delay:${i*.08}s"><span>${k}</span><b>${v}</b></div>`).join("")}
+  $("ob").scrollTop=0;
+}
+$("ob").addEventListener("click",ev=>{
+  const o=ev.target.closest(".opt[data-k]"); if(o){OB.a[o.dataset.k]=o.dataset.v;obShow();return}
+  const sp=ev.target.closest(".opt[data-sp]"); if(sp){const id=sp.dataset.sp; OB.supps.has(id)?OB.supps.delete(id):OB.supps.add(id); sp.setAttribute("aria-pressed",OB.supps.has(id))}
+});
+$("obUnit").onchange=()=>{const b=obBody($("obUnit").dataset.u);obWrite($("obUnit").value,b)};
+$("obBack").onclick=()=>{if(OB.step>0){OB.step--;obShow()}};
+$("obSkip").onclick=()=>{save("onboarded",true);obClose();toast("You can set this up anytime under Me & goals")};
+$("obNext").onclick=()=>{
+  if(OB.step===1&&!(obBody($("obUnit").value).weightKg>0)){$("obErr").textContent="Add your weight. It's the one number the plan needs.";$("obWt").focus();return}
+  if(OB.step===3){
+    const s=S.settings, prevW=s.profile.weightKg;
+    s.unit=$("obUnit").value; s.profile=obProfile(); s.auto=true;
+    if(!prevW||Math.abs(s.profile.weightKg-prevW)>.05){s.weights=s.weights||{};s.weights[todayKey()]=r1(s.profile.weightKg)}
+    s.supps.forEach(x=>{if(!x.custom) x.on=OB.supps.has(x.id)});
+    saveSettings(); save("onboarded",true);
+  }
+  if(OB.step===4){obClose(); setTimeout(()=>burst($("kcal"),"var(--good)"),150); toast("You're all set. Log your first food or glass of water."); return}
+  OB.step++; obShow();
+};
+$("obRedo").onclick=obOpen;
+
 /* ---------- boot ---------- */
 async function boot(){
   S.settings=migrate(load("settings"));
@@ -1262,6 +1440,7 @@ async function boot(){
   $("sText").textContent="Saved in this browser. Works offline (search needs internet).";
   S.days={}; S.ready=true; await getDay(S.date);
   render(); if(S.view==="me") renderMe();
+  if(!(S.settings.profile.weightKg>0)&&!load("onboarded")) obOpen();
 }
 // a new day starts when the app is reopened after midnight
 document.addEventListener("visibilitychange",()=>{if(!document.hidden&&S.date<todayKey()&&S.lastToday!==todayKey()){S.lastToday=todayKey();S.date=todayKey();getDay(S.date).then(render)}});
