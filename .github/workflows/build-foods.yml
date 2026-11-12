@@ -8,9 +8,6 @@ on:
       fndds_url:
         description: USDA FNDDS survey foods JSON zip (from fdc.nal.usda.gov/download-datasets)
         default: https://fdc.nal.usda.gov/fdc-datasets/FoodData_Central_survey_food_json_2024-10-31.zip
-  push:
-    branches: [bundle-fndds]
-    paths: [tools/build_foods.py, .github/workflows/build-foods.yml]
 
 permissions:
   contents: write
