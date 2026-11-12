@@ -24,6 +24,9 @@ A one-page food, water and supplement tracker that runs in your phone's browser.
 - **Favorites:** star a food and it's pinned under the search bar for one-tap logging.
 - **History tab:** 30-day averages, the 7-day chart, a day-by-day list and CSV export.
 - **Goal checklist** at the top of Today: protein, calories, water, fiber and supplements turn green with a check when met, with a time-of-day nudge.
+- **Perfect-day streaks:** days where every goal turns green, with their own badges.
+- **What fits now:** snack and meal ideas that fill your remaining protein within your calories left, from your favorites, recent foods and a list of good snacks.
+- **Read a nutrition label from a photo:** the numbers are filled in for you to check (runs on your phone with Tesseract.js).
 - **Streak badges** from your first log up to a full year, plus a water reminder when you fall behind.
 - **Stat styles:** show your day as rings, bars or the full Nutrition Facts label.
 - **Themes:** auto, light or dark, and six accent colors. Swipe left or right on Today to change the day.
