@@ -381,6 +381,8 @@ details.panel[open] summary h3::after{content:" −"}
 .sknext{height:4px;background:var(--soft);border-radius:2px;overflow:hidden;margin-top:2px}
 .sknext i{display:block;height:100%;width:0;background:var(--warn);border-radius:2px;transition:width .6s ease}
 @media (prefers-reduced-motion:reduce){.flame span,.flame.risk::after{animation:none}}
+.supppanel.pending{border:1.5px solid color-mix(in srgb,var(--creatine) 55%,var(--line));box-shadow:0 0 0 3px color-mix(in srgb,var(--creatine) 10%,transparent)}
+.supppanel.alldone .ph .meta{color:var(--good);font-weight:700}
 /* Goal checklist */
 .goalstrip{display:flex;flex-direction:column;gap:7px;margin-bottom:-6px}
 .gpills{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:6px}
@@ -567,7 +569,7 @@ details.panel[open] summary h3::after{content:" −"}
   </div>
   <div class="qextras">
     <div class="favs" id="favs" aria-label="Favorite and recent foods"></div>
-    <div class="qwater">
+    <div class="qwater" hidden>
       <span class="qwl" aria-hidden="true">💧</span>
       <div class="btns" id="qWater"></div>
       <div class="qwmeta"><div class="qbar" aria-hidden="true"><i id="qBar"></i></div><span class="num qtxt" id="qTxt"></span></div>
@@ -654,6 +656,28 @@ details.panel[open] summary h3::after{content:" −"}
     <button type="button" class="chip w" id="wNudgeAdd"></button>
     <button type="button" class="x" id="wNudgeX" aria-label="Remind me later">×</button>
   </div>
+  <section class="panel supppanel" id="suppPanel" aria-labelledby="hSupp">
+    <div class="ph"><h3 id="hSupp">Supplements</h3><span class="meta" id="suppMeta"></span></div>
+    <div id="suppList"></div>
+  </section>
+  <section class="panel" aria-labelledby="hWater">
+    <div class="ph"><h3 id="hWater">Water</h3><span class="meta" id="wLeft"></span></div>
+    <div class="water">
+      <div class="jug" aria-hidden="true"><i id="jugFill"></i><div class="ticks"></div></div>
+      <div style="display:flex;flex-direction:column;gap:10px;min-width:0">
+        <div class="wstat"><span id="wBig">0</span> <small id="wUnit">oz</small></div>
+        <div class="btns" id="waterBtns"></div>
+        <div class="btns">
+          <button class="chip ghost" id="wUndo">Undo last</button>
+          <button class="chip ghost" id="wCustomBtn">Custom amount</button>
+        </div>
+        <div class="actions" id="wCustom" hidden>
+          <div class="f" style="width:110px"><input id="wCustomIn" type="number" inputmode="decimal" min="0" placeholder="Amount" aria-label="Custom water amount"></div>
+          <button class="secondary" id="wCustomAdd">Add</button>
+        </div>
+      </div>
+    </div>
+  </section>
   <div class="statbar"><div class="seg statseg" role="group" aria-label="How to show your stats">
       <button type="button" data-stat="rings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 8 8"/></svg>Rings</button>
       <button type="button" data-stat="bars"><svg viewBox="0 0 24 24"><path d="M4 7h12M4 12h16M4 17h8"/></svg>Bars</button>
@@ -693,7 +717,11 @@ details.panel[open] summary h3::after{content:" −"}
     <div class="row"><span class="n"><b>Supplements</b> <span class="num" id="sVal">0 of 0</span></span><span class="pct" id="sPct">—</span><div class="bar" style="--c:var(--creatine)"><i id="sBar"></i></div></div>
     <div class="foot">Goals come from your profile in the Me tab. Calories count 4 per gram of protein and carbs and 9 per gram of fat unless a food lists its own.</div>
   </section>
-
+  <section class="panel" aria-labelledby="hLog">
+    <div class="ph"><h3 id="hLog">Food log</h3><span class="meta" id="logMeta"></span></div>
+    <div class="copychips" id="copyChips"></div>
+    <div class="list" id="logList"></div>
+  </section>
   <section class="panel" id="fitPanel" aria-labelledby="hFit" hidden>
     <div class="ph"><h3 id="hFit">What fits now</h3><span class="meta" id="fitMeta"></span></div>
     <p class="hint" id="fitMsg"></p>
@@ -704,35 +732,6 @@ details.panel[open] summary h3::after{content:" −"}
     <ul id="coach"></ul>
   </section>
 
-  <section class="panel" aria-labelledby="hWater">
-    <div class="ph"><h3 id="hWater">Water</h3><span class="meta" id="wLeft"></span></div>
-    <div class="water">
-      <div class="jug" aria-hidden="true"><i id="jugFill"></i><div class="ticks"></div></div>
-      <div style="display:flex;flex-direction:column;gap:10px;min-width:0">
-        <div class="wstat"><span id="wBig">0</span> <small id="wUnit">oz</small></div>
-        <div class="btns" id="waterBtns"></div>
-        <div class="btns">
-          <button class="chip ghost" id="wUndo">Undo last</button>
-          <button class="chip ghost" id="wCustomBtn">Custom amount</button>
-        </div>
-        <div class="actions" id="wCustom" hidden>
-          <div class="f" style="width:110px"><input id="wCustomIn" type="number" inputmode="decimal" min="0" placeholder="Amount" aria-label="Custom water amount"></div>
-          <button class="secondary" id="wCustomAdd">Add</button>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="panel" aria-labelledby="hSupp">
-    <div class="ph"><h3 id="hSupp">Supplements</h3><span class="meta" id="suppMeta"></span></div>
-    <div id="suppList"></div>
-  </section>
-
-  <section class="panel" aria-labelledby="hLog">
-    <div class="ph"><h3 id="hLog">Food log</h3><span class="meta" id="logMeta"></span></div>
-    <div class="copychips" id="copyChips"></div>
-    <div class="list" id="logList"></div>
-  </section>
 
   </div>
 
@@ -967,7 +966,7 @@ details.panel[open] summary h3::after{content:" −"}
 
 <script>
 (() => {
-const APP_VERSION="3.8.0";
+const APP_VERSION="3.8.1";
 const REPO="kefirman9000/fuel-log";
 const $ = id => document.getElementById(id);
 const OZ=29.5735, LB=0.45359237, IN=2.54;
@@ -1241,7 +1240,10 @@ async function renderWeek(){
 
   // supplements, with a 7-day strip ending on the selected day
   const on=S.settings.supps.filter(s=>s.on), day=days[6];
-  $("suppMeta").textContent=on.length?`${on.filter(s=>day.supps[s.id]).length} of ${on.length} taken`:"";
+  const takenN=on.filter(s=>day.supps[s.id]).length;
+  $("suppMeta").textContent=on.length?(takenN===on.length?"All taken ✓":`${takenN} of ${on.length} taken`):"";
+  $("suppPanel").classList.toggle("pending",on.length>0&&takenN<on.length&&S.date===todayKey());
+  $("suppPanel").classList.toggle("alldone",on.length>0&&takenN===on.length);
   $("suppList").innerHTML=on.length?on.map(s=>{
     const took=day.supps[s.id];
     let streak=0; for(let i=6;i>=0;i--){if(days[i].supps[s.id])streak++;else if(i===6&&keys[6]===todayKey())continue;else break}
