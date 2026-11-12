@@ -929,7 +929,7 @@ details.panel[open] summary h3::after{content:" −"}
 
 <script>
 (() => {
-const APP_VERSION="3.6.0";
+const APP_VERSION="3.6.1";
 const REPO="kefirman9000/fuel-log";
 const $ = id => document.getElementById(id);
 const OZ=29.5735, LB=0.45359237, IN=2.54;
@@ -1913,13 +1913,13 @@ const COMMON=[
   ["Pizza, cheese","1 slice (107 g)",107,12,36,10,285],["Pizza, pepperoni","1 slice (111 g)",111,13,36,13,313],["Orange juice","1 cup (248 g)",248,1.7,26,.5,112],
   ["Cola soda","1 can (12 fl oz)",368,0,39,0,140],["Coffee, black","1 cup (240 g)",240,.3,0,0,2],["Coffee with milk","1 cup (250 g)",250,1,1.5,1,22],["Coffee with cream","1 cup with 1 tbsp half and half",255,.5,1,3.5,42],
   ["Coffee with sugar","1 cup with 1 tsp sugar",244,.3,4.2,0,18],["Coffee with cream and sugar","1 cup",259,.5,5,3.5,58],["Tea with honey","1 cup with 1 tbsp honey",261,0,17,0,64],
-  ["Diet soda","1 can (12 fl oz)",355,0,0,0,0],["Sports drink","20 fl oz bottle",591,0,34,0,140],["Granola bar","1 bar (24 g)",24,2,16,4,110],["Protein bar","1 bar (60 g)",60,20,23,8,230],["Cream cheese","2 tbsp (29 g)",29,1.7,1.6,9.8,99],
+  ["Diet soda","1 can (12 fl oz)",355,0,0,0,0],["Sports drink","20 fl oz bottle",591,0,34,0,140],["Granola bar","1 bar (24 g)",24,2,16,4,110],["Mozzarella sticks, fried (appetizer)","1 stick (30 g)",30,4.5,8,5.2,95],["Mini Babybel cheese","1 piece (21 g)",21,5,0,6,70],["Protein bar","1 bar (60 g)",60,20,23,8,230],["Cream cheese","2 tbsp (29 g)",29,1.7,1.6,9.8,99],
   ["Butter","1 tbsp (14 g)",14,.1,0,11.5,102],["Toast, white","1 slice (28 g)",28,2.6,14,1,75],["French fries","1 medium (117 g)",117,4,48,17,365],
   ["Sausage patty","1 patty (27 g)",27,5,.3,8,96],["Pancake","1 pancake (38 g)",38,2.4,11,3.5,86],["Hard-boiled egg","1 egg (50 g)",50,6.3,.6,5.3,78],["Beer, regular","1 can (12 fl oz)",356,1.6,12.6,0,153],
 ].map(([name,serving,g,p,c,f,k])=>({name,serving,g,v:[p,c,f,k],common:true}));
 /* Snack ideas, USDA averages. [name, serving, grams, protein, carbs, fat, kcal, fiber] */
 const SNACKS=[
-  ["String cheese","1 stick (28 g)",28,7,1,5,80,0],["Beef jerky","1 oz (28 g)",28,9.4,3.1,7.3,116,.5],["Edamame, shelled","1 cup (155 g)",155,18.4,13.8,8.1,188,8],
+  ["String cheese (mozzarella stick)","1 stick (28 g)",28,7,1,5,80,0],["Beef jerky","1 oz (28 g)",28,9.4,3.1,7.3,116,.5],["Edamame, shelled","1 cup (155 g)",155,18.4,13.8,8.1,188,8],
   ["Hummus","2 tbsp (30 g)",30,2.4,4.3,5.1,78,1.8],["Baby carrots","10 carrots (100 g)",100,.6,8,.1,35,2.9],["Apple with peanut butter","1 apple + 1 tbsp peanut butter",198,4,28.5,8.3,190,5.4],
   ["Popcorn, air-popped","3 cups (24 g)",24,3,19,1.1,93,3.6],["Rice cakes","2 cakes (18 g)",18,1.4,14.7,.5,70,.8],["Turkey deli slices","2 oz (56 g)",56,10,2,1,60,0],
   ["Chocolate milk, low-fat","1 cup (250 g)",250,8.5,26,2.5,158,1],["Trail mix","1/4 cup (38 g)",38,5,17,11,173,2],["Protein shake (whey + water)","1 scoop in water",330,24,3,1.5,120,0],
@@ -1942,7 +1942,7 @@ function parseQuery(raw){
   if(t.length>1&&UNITS[t[0]]&&UNITS[t[0]]!=="egg"){unit=UNITS[t[0]];t.shift();if(amt==null)amt=1}
   while(t.length>1&&["of","some","the","my","side","order","bit"].includes(t[0])) t.shift();
   const mx=t.length>1&&t[t.length-1].match(/^(?:x|×)(\d+(?:\.\d+)?)$/); if(mx&&amt==null){amt=+mx[1];t.pop()}
-  const q=applyAlias(t.join(" ").trim());
+  const q=spellFix(applyAlias(t.join(" ").trim()));
   return {amt,unit,q:q||raw.trim()};
 }
 /* "2/3 cup (88 g)" -> {qty:.667, unit:"cup"} */
@@ -1972,7 +1972,19 @@ const ALIAS=[[/\bdiet (coke|pepsi|soda)\b/,"diet soda"],[/\b(coke|pepsi|coca col
   [/\b(pbj|pb ?& ?j|pb and j|pb ?n ?j)\b/,"peanut butter and jelly sandwich"],[/\bpb\b/,"peanut butter"],[/\b(mickey ?d'?s|mcdonalds|mc donalds|mcd'?s)\b/,"mcdonald's"],
   [/\b(chick ?fil ?a|chickfila|cfa)\b/,"chick-fil-a"],[/\bza\b/,"pizza"],[/\b(sammy|sammich|sando)\b/,"sandwich"],[/\b(java|cup of joe|joe)\b/,"coffee"],
   [/\b(h2o|agua)\b/,"water"],[/\bstarbs\b/,"starbucks"],[/\b(nuggies|nugs)\b/,"nuggets"],[/\bfroyo\b/,"frozen yogurt"],[/\b(avo)\b/,"avocado"],[/\bspuds?\b/,"potato"],
-  [/\bhamburgers?\b/,"burger"],[/\bbrekkie\b/,"breakfast"],[/\bpbr\b/,"beer"]];
+  [/\b(polly ?-?o|pollyo|polly)\b/,"polly-o"],[/\bpolly-o (?:mozz\w* )?(?:string )?(?:cheese )?(?:sticks?)?\b/,"polly-o string cheese "],
+  [/\b(babybel|baby bel)\b/,"babybel cheese"],[/\b(laughing cow)\b/,"laughing cow cheese"],[/\bhamburgers?\b/,"burger"],[/\bbrekkie\b/,"breakfast"],[/\bpbr\b/,"beer"]];
+/* Fix misspelled words before searching online ("mozzerella" -> "mozzarella"), using known food words and brands. */
+const EXTRA_WORDS="mozzarella cheddar parmesan provolone swiss american ricotta feta gouda brie string cheese sticks yogurt oatmeal cereal granola cheerios frosted flakes waffles waffle pancakes sausage ham turkey salami pepperoni hotdog bratwurst burrito quesadilla nachos tortilla chips doritos cheetos pringles pretzels crackers goldfish ritz oreo oreos cookies cookie brownie muffin croissant donut doughnut bagel english biscuit biscuits sandwich burger cheeseburger wings tenders nuggets spaghetti lasagna macaroni ravioli noodles ramen sushi teriyaki curry salmon shrimp tilapia steak pork chicken broccoli spinach lettuce cucumber tomato potato potatoes sweet carrots celery peppers onion onions mushrooms avocado guacamole salsa hummus almonds cashews peanuts walnuts pistachios raisins strawberries blueberries raspberries grapes watermelon pineapple mango peach pear cherries banana bananas apple apples orange oranges smoothie milkshake latte cappuccino espresso frappuccino gatorade powerade monster lemonade kombucha protein whey casein creatine jerky popcorn edamame tofu quinoa couscous lentils chickpeas beans rice pasta bread toast butter honey syrup jelly nutella ketchup mayonnaise mustard ranch dressing gravy soup chili stew salad wrap pita naan pizza calzone cupcake cheesecake pie cream gelato sherbet popsicle chocolate vanilla caramel cinnamon pudding applesauce coffee milk water juice soda beer wine tillamook kraft sargento chobani fage oikos yoplait dannon quest clif kind fairlife kelloggs nabisco hostess debbie nutty buddy tombstone digiorno totinos lunchables starbucks dunkin wendys chipotle subway popeyes arbys panera babybel".split(" ");
+let VOCAB=null;
+function vocab(){if(VOCAB) return VOCAB; VOCAB=new Set(EXTRA_WORDS); [...LOCAL,...COMMON,...SNACKS].forEach(x=>norm(x.name).split(" ").forEach(w=>{if(w.length>2) VOCAB.add(w)})); return VOCAB}
+function spellFix(q){
+  const V=vocab();
+  return q.split(" ").map(w=>{const n=w.toLowerCase(); if(n.length<5||V.has(n)||/\d/.test(n)||V.has(n.replace(/e?s$/,""))) return w;
+    const max=n.length>=8?2:1; let best=null,bd=9;
+    for(const v of V){if(Math.abs(v.length-n.length)>max) continue; const d=typoDist(n,v,max); if(d<bd){bd=d;best=v; if(d===1&&max===1) break}}
+    return best&&bd<=max?best:w}).join(" ");
+}
 function applyAlias(q){let s=" "+q.toLowerCase()+" "; ALIAS.forEach(([re,to])=>{s=s.replace(re,to)}); return s.replace(/\s+/g," ").trim()}
 
 /* Clean everyday phrasing: "I had a couple eggs for breakfast" -> "2 eggs", meal = breakfast */
@@ -2096,9 +2108,11 @@ async function searchOFF(q){
 function bestMatch(q,all){
   const words=qwords(q); if(!words.length) return null;
   const bonus={saved:.3,common:.05,"USDA brand":.02,restaurant:0};
-  const scored=all.map(r=>({r,s:hits(words,r.name)/words.length}));
+  // chain menu items only count when the chain is named ("chick-fil-a sandwich", not just "sandwich")
+  const qn=" "+norm(q)+" ", chainOk=r=>r.src!=="restaurant"||qn.includes(" "+norm(r.name).split(" ")[0]+" ");
+  const scored=all.filter(chainOk).map(r=>({r,s:hits(words,r.name)/words.length}));
   const full=scored.filter(x=>x.s>=.99).map(x=>({r:x.r,s:x.s+(bonus[x.r.src]||0)-.01*Math.max(0,norm(x.r.name).split(" ").length-words.length)}));
-  full.sort((a,b)=>b.s-a.s); if(full[0]) return {r:full[0].r,exact:true};
+  full.sort((a,b)=>b.s-a.s); if(full[0]) return {r:full[0].r,exact:true,alt:full[1]&&full[1].s>=full[0].s-.03?full[1].r:null};
   // nothing has every word (e.g. the brand wasn't found): fall back to the closest generic food
   const part=scored.filter(x=>x.r.src==="common"&&x.s>=.5).sort((a,b)=>b.s-a.s);
   return part[0]?{r:part[0].r,exact:false}:null;
@@ -2126,6 +2140,8 @@ function isSure(best,pq,st){
   if(!best||!best.exact) return false;
   const r=best.r; if(r.kcal==null&&!(r.per100&&r.per100.k!=null)) return false;
   if(/Couldn't convert/.test(st.note)) return false;
+  // two equally good matches with very different calories (e.g. "a sandwich") -> ask
+  if(best.alt&&best.alt.kcal!=null&&r.kcal!=null&&Math.abs(best.alt.kcal-r.kcal)>150&&Math.max(best.alt.kcal,r.kcal)/Math.max(1,Math.min(best.alt.kcal,r.kcal))>1.6) return false;
   if(["saved","common","restaurant"].includes(r.src)) return true;
   return qwords(pq.q).length>=2;
 }
@@ -2166,12 +2182,16 @@ async function autoLog(parts,meal,done=[],labels=[]){
       if(!(best&&isSure(best,pq,startAmount(best.r)))&&navigator.onLine!==false){
         const [f,o]=await Promise.all([searchFDC(pq.q),searchOFF(pq.q)]); pool=[...pool,...f.items,...o.items]; best=bestMatch(pq.q,pool);
       }
-      const st=best?startAmount(best.r):null;
+      let st=best?startAmount(best.r):null, generic=null;
+      if(best&&!best.exact&&best.r.src==="common"){
+        const ws=qwords(pq.q), toks=norm(best.r.name).split(" "), miss=ws.filter(w=>!wordHit(w,toks));
+        if(ws.length>=2&&miss.length===1&&!vocab().has(miss[0])){generic=miss[0]; best={...best,exact:true}}
+      }
       if(best&&isSure(best,pq,st)){
         const r=best.r, m=macrosFor(r,st.amt,st.mode);
         if(r.savedId){const f=S.foods.items[r.savedId]; if(f){f.used=(f.used||0)+1;save("foods",S.foods)}}
         const id=await addEntry({name:(m.label+r.name).trim(),p:m.p,c:m.c,f:m.f,kcal:m.kcal,...extras(m),...(meal?{meal}:{}),src:r.src==="saved"?"saved":"auto"},true);
-        logged.push({id,name:(m.label+r.name).trim(),p:m.p}); done.push({t:"e",id}); labels.push((m.label+r.name).trim());
+        logged.push({id,name:(m.label+r.name).trim(),p:m.p}); done.push({t:"e",id}); labels.push((m.label+r.name).trim()+(generic?` (generic, couldn't find ${titleCase(generic.replace(/-/g," "))})`:""));
       }else unsure.push(part);
     }
   }finally{btn.disabled=false; lbl.textContent="Add"; $("qIn").placeholder="What did you eat?"}
