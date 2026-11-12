@@ -5,6 +5,12 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#151816">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Fuel Log">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-180.png">
 <title>Fuel Log</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=IBM+Plex+Mono:wght@400;600&display=swap">
@@ -240,6 +246,17 @@ details.panel[open] summary h3::after{content:" −"}
 .qbar i{display:block;height:100%;width:0;background:var(--water);transition:width .4s ease}
 .qtxt{font-size:11px;color:var(--muted)}
 .panel,.label{scroll-margin-top:84px}
+/* Install */
+.install{display:flex;align-items:center;gap:10px;background:var(--paper);border:1.5px solid var(--water);border-radius:10px;padding:10px 12px;animation:obin .45s ease}
+.install img{border-radius:9px;flex:none}
+.install span{flex:1;min-width:0;font-size:14px;line-height:1.3}
+.install small{color:var(--muted)}
+.install .primary{padding:8px 14px}
+.install .x{border:0;background:none;color:var(--muted);font-size:20px;width:30px;height:30px;border-radius:50%}
+.steps{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:12px;font-size:15px}
+.steps li{padding-left:4px}
+.steps .ico{display:inline-grid;place-items:center;width:28px;height:28px;border:1px solid var(--line);border-radius:7px;vertical-align:middle;margin:0 2px;background:var(--bg)}
+.steps .ico svg{width:18px;height:18px;stroke:var(--water);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 /* First-run setup */
 .ob{position:fixed;inset:0;z-index:40;background:color-mix(in srgb,var(--bg) 90%,transparent);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);display:grid;place-items:center;overflow:auto;
   padding:max(16px,env(safe-area-inset-top,0px)) 16px max(16px,env(safe-area-inset-bottom,0px))}
@@ -288,6 +305,12 @@ details.panel[open] summary h3::after{content:" −"}
   </div>
   <div class="update" id="updateBar" hidden><span id="updateText">A new version is available.</span><span class="actions"><button id="updateGo">Update now</button><button class="ghost" id="updateLater">Later</button></span></div>
   <div class="status"><span class="dot" id="sDot"></span><span id="sText">Loading your log…</span></div>
+  <div class="install" id="installBar" hidden>
+    <img src="icon-192.png" alt="" width="36" height="36">
+    <span><b>Add Fuel Log to your home screen</b><br><small>Opens like an app, in one tap, even offline.</small></span>
+    <button type="button" class="primary installGo">Add</button>
+    <button type="button" class="x" id="installX" aria-label="Dismiss">×</button>
+  </div>
 
   <!-- ================= TODAY ================= -->
   <div class="view" id="view-today">
@@ -487,6 +510,7 @@ details.panel[open] summary h3::after{content:" −"}
     <summary class="ph"><h3>About</h3><span class="meta" id="verMeta"></span></summary>
     <p class="hint">Fuel Log is free and open source. If it helps you, you can support it through GitHub Sponsors.</p>
     <div class="actions">
+      <button class="secondary installGo" id="installMe" type="button">📲 Add to home screen</button>
       <button class="secondary" id="checkUpd" type="button">Check for updates</button>
       <a class="secondary" href="https://github.com/sponsors/kefirman9000" target="_blank" rel="noopener" style="text-decoration:none;color:inherit">Sponsor ♥</a>
     </div>
@@ -557,11 +581,22 @@ details.panel[open] summary h3::after{content:" −"}
     </div>
   </div>
 </div>
+<div class="ob" id="instSheet" hidden role="dialog" aria-modal="true" aria-labelledby="instTitle">
+  <div class="obcard">
+    <div class="actions" style="justify-content:space-between;align-items:center">
+      <img src="icon-192.png" alt="" width="52" height="52" style="border-radius:12px">
+      <button type="button" class="chip ghost" id="instClose">Close</button>
+    </div>
+    <h2 id="instTitle">Add to your home screen</h2>
+    <ol class="steps" id="instSteps"></ol>
+    <p class="hint" id="instNote"></p>
+  </div>
+</div>
 <div class="toast" id="toast" role="status"></div>
 
 <script>
 (() => {
-const APP_VERSION="2.1.0";
+const APP_VERSION="2.2.0";
 const REPO="kefirman9000/fuel-log";
 const $ = id => document.getElementById(id);
 const OZ=29.5735, LB=0.45359237, IN=2.54;
@@ -1395,7 +1430,7 @@ function obOpen(){
   $("obUnit").value=u; $("obAge").value=p.age??""; obWrite(u,p);
   $("ob").hidden=false; document.body.style.overflow="hidden"; obShow();
 }
-function obClose(){$("ob").hidden=true; document.body.style.overflow=""; render(); if(S.view==="me") renderMe()}
+function obClose(){$("ob").hidden=true; document.body.style.overflow=""; render(); if(S.view==="me") renderMe(); setTimeout(updateInstallUI,1200)}
 function obShow(){
   document.querySelectorAll(".obstep").forEach(el=>el.hidden=+el.dataset.step!==OB.step);
   $("obDots").innerHTML=[0,1,2,3,4].map(i=>`<i class="${i<=OB.step?"on":""}"></i>`).join("");
@@ -1432,6 +1467,54 @@ $("obNext").onclick=()=>{
 };
 $("obRedo").onclick=obOpen;
 
+/* ---------- add to home screen ---------- */
+const UA=navigator.userAgent;
+const isIOS=/iphone|ipad|ipod/i.test(UA)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
+const isAndroid=/android/i.test(UA);
+const isStandalone=()=>matchMedia("(display-mode: standalone)").matches||navigator.standalone===true;
+let installEvt=null;
+window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();installEvt=e;updateInstallUI()});
+window.addEventListener("appinstalled",()=>{installEvt=null;save("installed",true);updateInstallUI();toast("Added! Find Fuel Log on your home screen")});
+function updateInstallUI(){
+  const done=isStandalone()||load("installed");
+  document.querySelectorAll(".installGo").forEach(b=>b.closest("#installBar")||(b.hidden=done));
+  const snooze=load("installSnooze");
+  const show=!done&&(isIOS||isAndroid||installEvt)&&!(snooze&&Date.now()<snooze)&&load("onboarded")&&$("ob").hidden;
+  $("installBar").hidden=!show;
+}
+const SHARE_ICO=`<span class="ico" aria-label="Share"><svg viewBox="0 0 24 24"><path d="M12 15V3M8 7l4-4 4 4"/><path d="M6 11H5v10h14V11h-1"/></svg></span>`;
+const PLUS_ICO=`<span class="ico" aria-label="Add"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M12 8v8M8 12h8"/></svg></span>`;
+const DOTS_ICO=`<span class="ico" aria-label="Menu"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></span>`;
+function showInstallHelp(){
+  let steps, note="";
+  if(isIOS){
+    steps=[`Tap the Share button ${SHARE_ICO} in the toolbar. In Safari it's at the bottom of the screen (or top right on iPad). In Chrome it's at the top, next to the address bar.`,
+      `Scroll down and tap <b>Add to Home Screen</b> ${PLUS_ICO}.`,
+      `Tap <b>Add</b> in the top right. Fuel Log shows up on your home screen.`];
+    note="If you don't see Add to Home Screen, tap Edit Actions at the bottom of the share menu and turn it on.";
+  }else if(isAndroid){
+    steps=[`Tap the menu ${DOTS_ICO} in the top right of your browser.`,
+      `Tap <b>Add to Home screen</b> or <b>Install app</b>.`,
+      `Tap <b>Install</b> or <b>Add</b> to confirm.`];
+    note="In Samsung Internet, open the menu (☰) at the bottom and tap Add page to → Home screen.";
+  }else{
+    steps=[`Open this page on your phone: <b>${esc(location.host+location.pathname)}</b>`,
+      `On iPhone, use Share → Add to Home Screen. On Android, use the browser menu → Install app.`];
+    note="On a computer, Chrome and Edge show an install icon at the right end of the address bar.";
+  }
+  $("instSteps").innerHTML=steps.map(s=>`<li>${s}</li>`).join(""); $("instNote").textContent=note;
+  $("instSheet").hidden=false;
+}
+document.addEventListener("click",async ev=>{
+  if(!ev.target.closest(".installGo")) return;
+  if(installEvt){installEvt.prompt(); const c=await installEvt.userChoice.catch(()=>null); installEvt=null; if(c&&c.outcome==="accepted") save("installed",true); updateInstallUI()}
+  else showInstallHelp();
+});
+$("instClose").onclick=()=>{$("instSheet").hidden=true};
+$("instSheet").onclick=ev=>{if(ev.target===$("instSheet"))$("instSheet").hidden=true};
+$("installX").onclick=()=>{save("installSnooze",Date.now()+14*864e5);updateInstallUI()};
+if("serviceWorker" in navigator&&location.protocol==="https:") navigator.serviceWorker.register("sw.js").catch(()=>{});
+
 /* ---------- boot ---------- */
 async function boot(){
   S.settings=migrate(load("settings"));
@@ -1441,6 +1524,7 @@ async function boot(){
   S.days={}; S.ready=true; await getDay(S.date);
   render(); if(S.view==="me") renderMe();
   if(!(S.settings.profile.weightKg>0)&&!load("onboarded")) obOpen();
+  updateInstallUI();
 }
 // a new day starts when the app is reopened after midnight
 document.addEventListener("visibilitychange",()=>{if(!document.hidden&&S.date<todayKey()&&S.lastToday!==todayKey()){S.lastToday=todayKey();S.date=todayKey();getDay(S.date).then(render)}});
