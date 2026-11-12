@@ -12,7 +12,7 @@ A one-page food, water and supplement tracker that runs in your phone's browser.
 - **Add to home screen:** a one-tap install on Android and step-by-step instructions on iPhone. Works offline once installed.
 - **Quick-add bar** pinned to the top: add food or water without scrolling.
 - **Automatic logging:** type "bagel with avocado and 4 strips bacon" and all three foods go straight in, with Undo. The app only asks when it isn't sure. You can switch to checking every food first.
-- **3,200 built-in foods** from USDA's Standard Reference database (public domain), so everyday foods work offline and instantly.
+- **8,400 built-in foods** from USDA's Standard Reference database and USDA's FNDDS survey foods (both public domain). That covers everyday foods and mixed dishes like pad thai, burrito bowls, General Tso chicken and shepherd's pie, with household portions, all offline and instant.
 - **Portion words:** "a bowl of cheerios", "a handful of almonds", "2 large eggs", "small fries", "a plate of spaghetti", "a scoop of ice cream", using each food's own household measures where USDA lists them.
 - **Learns from you:** when you pick a different match or correct an entry, that phrase comes out your way next time. Online results are remembered for 60 days so repeat searches are instant and work offline.
 - **Food search:** type what you ate, like "2 Little Debbie Nutty Buddy" or "Chipotle chicken bowl". The app searches your saved foods, a built-in list of common restaurant items, USDA FoodData Central and Open Food Facts, then multiplies by the servings, pieces or grams you enter.
@@ -49,7 +49,12 @@ The nutrition targets are estimates, not medical advice.
 
 ## Data
 
-`foods.json` is built from the USDA National Nutrient Database for Standard Reference, Release 26 (public domain). Values are per 100 g, with USDA household measures.
+`foods.json` combines two public-domain USDA sources. Values are per 100 g, with USDA household measures.
+
+- **SR26:** USDA National Nutrient Database for Standard Reference, Release 26 (3,185 foods).
+- **FNDDS:** USDA Food and Nutrient Database for Dietary Studies, October 2024 release, from FoodData Central survey foods (5,218 foods not already in SR26). Baby foods and infant formulas are left out.
+
+To refresh the FNDDS foods when USDA publishes a new release, open **Actions → Build food list → Run workflow** and paste the new survey foods JSON link from [FoodData Central downloads](https://fdc.nal.usda.gov/download-datasets). The workflow runs `tools/build_foods.py` and commits the new `foods.json`. Re-running it replaces the earlier FNDDS foods, and the SR26 foods are kept as they are.
 
 ## Support
 

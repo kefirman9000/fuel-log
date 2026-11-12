@@ -1012,7 +1012,7 @@ details.panel[open] summary h3::after{content:" −"}
 
 <script>
 (() => {
-const APP_VERSION="3.9.2";
+const APP_VERSION="3.10.0";
 const REPO="kefirman9000/fuel-log";
 const $ = id => document.getElementById(id);
 const OZ=29.5735, LB=0.45359237, IN=2.54;
@@ -2103,7 +2103,7 @@ function parseQuery(raw){
   const q0=applyAlias(t.join(" ").trim()), q=spellFix(q0);
   return {amt,unit,size,q:q||raw.trim(),q0:q0||raw.trim()};
 }
-/* ---------- built-in USDA foods: ~3,200 everyday foods from SR26 (public domain), loaded from foods.json ---------- */
+/* ---------- built-in USDA foods: ~8,400 foods from SR26 and FNDDS survey foods (public domain), loaded from foods.json ---------- */
 let DBF=[];
 const CHAIN_RE=/^(McDonald's|Burger King|Wendy's|Taco Bell|Pizza Hut|Domino's|Papa John's|Little Caesars|Kfc|Popeyes|Subway|Denny's|Applebee's|Olive Garden|Cracker Barrel|Carrabba's|On The Border|T\.G\.I\. Friday's|Dairy Queen|Arby's|Sonic|Jack In The Box|Starbucks|Chick-Fil-A|Chick-fil-A|Restaurant, (?:Chinese|Italian|Mexican|Latino|family style))/i;
 const fmtAmt=a=>a===.5?"1/2":a===.25?"1/4":a===.75?"3/4":a===1/3||String(a).startsWith("0.33")?"1/3":String(r1(a));
@@ -2119,7 +2119,7 @@ async function loadDB(){
       const o={name,key:name+" "+(alias||""),serving:dm?`${fmtAmt(dm[0])} ${dm[1]} (${Math.round(g)} g)`:"100 g",g,v:[r1(p*q),r1(c*q),r1(f*q),Math.round(k*q)],
         per100:{p,c,f,k,fi,su,na},measures:ms,db:true,chain:ch?norm(ch[1]).split(" ")[0]:null};
       if(fi!=null) o.fi=r1(fi*q); if(su!=null) o.su=r1(su*q); if(na!=null) o.na=Math.round(na*q); return o});
-    VOCAB=null;
+    VOCAB=null; DISHES=null;
   }catch(e){}
 }
 
@@ -2170,14 +2170,14 @@ const ALIAS=[[/\bdiet (coke|pepsi|soda)\b/,"diet soda"],[/\b(coke|pepsi|coca col
   [/\b(polly ?-?o|pollyo|polly)\b/,"polly-o"],[/\bpolly-o (?:mozz\w* )?(?:string )?(?:cheese )?(?:sticks?)?\b/,"polly-o string cheese "],
   [/\b(babybel|baby bel)\b/,"babybel cheese"],[/\bslate(?: milk)?(?: protein)?(?: (?:shake|drink|milk))?\b/,"slate milk protein shake"],
   [/\bpremier(?: protein)?(?: (?:shake|drink))?\b/,"premier protein shake"],[/\b(?:fairlife )?core power(?: (?:protein|shake|26g?))*\b/,"fairlife core power protein shake"],[/\b(laughing cow)\b/,"laughing cow cheese"],[/\b(big mac|mc ?(?:chicken|muffin|flurry|rib|double|nuggets?|griddles?)|quarter pounder|filet-o-fish|egg mcmuffin)\b/,"mcdonald's $1"],[/\bwhopper\b/,"burger king whopper"],[/\bgrilled cheese\b(?! sandwich)/,"grilled cheese sandwich"],
-  [/\b(frosty|baconator)\b/,"wendy's $1"],[/\b(crunchwrap|chalupa|gordita|doritos locos)\b/,"taco bell $1"],[/\bmcdonald's mcdonald's\b/,"mcdonald's"],[/\bhamburgers?\b/,"burger"],[/\bbrekkie\b/,"breakfast"],[/\bpbr\b/,"beer"]];
+  [/\b(frosty|baconator)\b/,"wendy's $1"],[/\b(crunchwrap|chalupa|gordita|doritos locos)\b/,"taco bell $1"],[/\bmcdonald's mcdonald's\b/,"mcdonald's"],[/\bmac (?:and|n|&|'n') ?cheese\b/,"macaroni and cheese"],[/\bhamburgers?\b/,"burger"],[/\bbrekkie\b/,"breakfast"],[/\bpbr\b/,"beer"]];
 /* Fix misspelled words before searching online ("mozzerella" -> "mozzarella"), using known food words and brands. */
 const EXTRA_WORDS="slate premier fairlife core power muscle orgain quest oikos ghost celsius bang alani liquid iv mozzarella cheddar parmesan provolone swiss american ricotta feta gouda brie string cheese sticks yogurt oatmeal cereal granola cheerios frosted flakes waffles waffle pancakes sausage ham turkey salami pepperoni hotdog bratwurst burrito quesadilla nachos tortilla chips doritos cheetos pringles pretzels crackers goldfish ritz oreo oreos cookies cookie brownie muffin croissant donut doughnut bagel english biscuit biscuits sandwich burger cheeseburger wings tenders nuggets spaghetti lasagna macaroni ravioli noodles ramen sushi teriyaki curry salmon shrimp tilapia steak pork chicken broccoli spinach lettuce cucumber tomato potato potatoes sweet carrots celery peppers onion onions mushrooms avocado guacamole salsa hummus almonds cashews peanuts walnuts pistachios raisins strawberries blueberries raspberries grapes watermelon pineapple mango peach pear cherries banana bananas apple apples orange oranges smoothie milkshake latte cappuccino espresso frappuccino gatorade powerade monster lemonade kombucha protein whey casein creatine jerky popcorn edamame tofu quinoa couscous lentils chickpeas beans rice pasta bread toast butter honey syrup jelly nutella ketchup mayonnaise mustard ranch dressing gravy soup chili stew salad wrap pita naan pizza calzone cupcake cheesecake pie cream gelato sherbet popsicle chocolate vanilla caramel cinnamon pudding applesauce coffee milk water juice soda beer wine tillamook kraft sargento chobani fage oikos yoplait dannon quest clif kind fairlife kelloggs nabisco hostess debbie nutty buddy tombstone digiorno totinos lunchables starbucks dunkin wendys chipotle subway popeyes arbys panera babybel".split(" ");
 let VOCAB=null;
-function vocab(){if(VOCAB) return VOCAB; VOCAB=new Set(EXTRA_WORDS); [...LOCAL,...COMMON,...SNACKS].forEach(x=>norm(x.name).split(" ").forEach(w=>{if(w.length>2) VOCAB.add(w)})); return VOCAB}
+function vocab(){if(VOCAB) return VOCAB; VOCAB=new Set(EXTRA_WORDS); [...LOCAL,...COMMON,...SNACKS,...DBF].forEach(x=>toksOf(x.name).forEach(w=>{if(w.length>2) VOCAB.add(w)})); return VOCAB}
 function spellFix(q){
   const V=vocab();
-  return q.split(" ").map(w=>{const n=w.toLowerCase(); if(n.length<5||V.has(n)||/\d/.test(n)||V.has(n.replace(/e?s$/,""))) return w;
+  return q.split(" ").map(w=>{const n=w.toLowerCase(); if(n.length<5||V.has(n)||/[\d'’]/.test(n)||V.has(n.replace(/e?s$/,""))) return w;
     const max=n.length>=8?2:1; let best=null,bd=9;
     for(const v of V){if(Math.abs(v.length-n.length)>max||UNITS[v]) continue; const d=typoDist(n,v,max); if(d<bd){bd=d;best=v; if(d===1&&max===1) break}}
     return best&&bd<=max?best:w}).join(" ");
@@ -2238,7 +2238,11 @@ function understand(raw){
   return out;
 }
 const exactHit=(w,toks)=>toks.some(t=>t===w||t===w.replace(/e?s$/,"")||t.replace(/e?s$/,"")===w||(w.length>=4&&t.startsWith(w)));
-const hits=(words,name)=>{const toks=norm(name).split(" ");return words.reduce((s,w)=>s+(exactHit(w,toks)?1:wordHit(w,toks)?.9:0),0)};
+const TOKS=new Map(), toksOf=n=>{let t=TOKS.get(n); if(!t){t=norm(n).split(" "); TOKS.set(n,t)} return t};
+const WSC=new Map();
+function tokScore(w,t){let m=WSC.get(w); if(!m){if(WSC.size>300) WSC.clear(); m=new Map(); WSC.set(w,m)}
+  let v=m.get(t); if(v===undefined){v=exactHit(w,[t])?1:wordHit(w,[t])?.9:0; m.set(t,v)} return v}
+const hits=(words,name)=>{const toks=toksOf(name); let s=0; for(const w of words){let b=0; for(const t of toks){const v=tokScore(w,t); if(v>b){b=v; if(b===1) break}} s+=b} return s};
 function localMatches(q){
   const words=qwords(q); if(!words.length) return [];
   const score=n=>hits(words,n);
@@ -2321,7 +2325,7 @@ async function searchOFFnet(q){
 }
 /* Pick the one result that best fits the words typed. Generic foods win when the words are generic ("pizza");
    a brand result wins when a brand word is present ("tombstone pizza"), because generic names don't contain it. */
-const ODD=["meatless","vegetarian","veggie","vegan","bits","with","cakes","chips","crackers","bar","bars","pudding","noodles","soup","salad","sandwich","pie","cookies","candies","dessert","chilies","peppers","leaves","seeds","seed","oil","flour","juice","sauce","powder","paste","dehydrated","dry","uncooked","frozen","canned","stems","peel","pickled","syrup","raw","unprepared","concentrate","imitation","substitute","glutinous","spinach","whole-wheat","whole","lowfat","nonfat","diet","reduced","light","sweetened","unsweetened","salted","unsalted","candied","dried"];
+const ODD=["tongue","puerto","rican","meatless","vegetarian","veggie","vegan","bits","with","cakes","chips","crackers","bar","bars","pudding","noodles","soup","salad","sandwich","pie","cookies","candies","dessert","chilies","peppers","leaves","seeds","seed","oil","flour","juice","sauce","powder","paste","dehydrated","dry","uncooked","frozen","canned","stems","peel","pickled","syrup","raw","unprepared","concentrate","imitation","substitute","glutinous","spinach","whole-wheat","whole","lowfat","nonfat","diet","reduced","light","sweetened","unsweetened","salted","unsalted","candied","dried"];
 /* The main food in a name is the last word of its first part: "White rice, cooked" -> rice; "Rice cakes" -> cakes. */
 function headBonus(q,name){const qt=norm(q).split(" ").filter(w=>w.length>1&&!STOP.has(w)&&!PREP.has(w)), last=qt[qt.length-1]; if(!last) return 0;
   const seg=norm(String(name).split(/[,(]/)[0]).split(" "), head=seg[seg.length-1]; return head===last||head===last.replace(/e?s$/,"")||head.replace(/e?s$/,"")===last?.05:0}
@@ -2330,7 +2334,7 @@ function prepBonus(q,name){const nt=new Set(norm(name).split(" ")); return norm(
 function oddPenalty(q,name){const qt=new Set(norm(q).split(" ")); return norm(name).split(" ").filter(w=>ODD.includes(w)&&!qt.has(w)).length*.04}
 function bestMatch(q,all){
   const words=qwords(q); if(!words.length) return null;
-  const bonus={learned:.6,saved:.3,common:.05,"USDA built-in":.03,"USDA brand":.02,restaurant:0};
+  const bonus={learned:.6,saved:.3,common:.05,"USDA built-in":.03,"USDA brand":.02,restaurant:.05};
   // chain menu items only count when the chain is named ("chick-fil-a sandwich", not just "sandwich")
   const qn=" "+norm(q)+" ", chainOk=r=>r.chain?qn.includes(" "+r.chain+" "):(r.src!=="restaurant"||qn.includes(" "+norm(r.name).split(" ")[0]+" "));
   const scored=all.filter(chainOk).map(r=>({r,s:r.src==="learned"?1:hits(words,r.key||r.name)/words.length}));
@@ -2348,12 +2352,27 @@ const COMBOS=["coffee with milk","coffee with cream and sugar","coffee with crea
   "bacon egg and cheese","bacon, egg and cheese","sausage egg and cheese","sausage, egg and cheese","egg and cheese","surf and turf","franks and beans","pork and beans",
   "cheese and crackers","shrimp and grits","salt and vinegar","sour cream and onion","bangers and mash","steak and cheese","meat and potatoes","oil and vinegar",
   "and a half","with cheese","with bacon","with egg"];
+/* Built-in dish names joined by "with" or "and" ("Pad Thai with chicken", "Bagel with cream cheese") stay whole when typed. */
+let DISHES=null;
+function dishes(){if(DISHES) return DISHES; DISHES=new Set();
+  DBF.forEach(x=>{const h=norm(x.name.split(/[,(]/)[0]); const w=h.split(" "); if(w.length<=6&&/ (with|and) /.test(" "+h+" ")) DISHES.add(h)}); return DISHES}
+function keepDishes(s){
+  const D=dishes(); if(!D.size) return s;
+  const w=s.trim().split(" ");
+  for(let i=1;i<w.length-1;i++){const cj=w[i].toLowerCase(); if(cj!=="with"&&cj!=="and") continue;
+    let hit=false;
+    for(let a=Math.max(0,i-3);a<i&&!hit;a++) for(let b=Math.min(w.length,i+4);b>i+1&&!hit;b--)
+      if(D.has(norm(w.slice(a,b).join(" ")))) hit=true;
+    if(hit) w[i]=cj==="and"?"\u0001":"\u0002"}
+  return " "+w.join(" ")+" ";
+}
 /* Split "bagel with avocado and 4 strips bacon" into separate foods, but keep dishes like "mac and cheese" whole. */
 function splitMeal(text){
   let s=" "+text.trim().replace(/\s+/g," ")+" ";
+  s=keepDishes(s);
   COMBOS.forEach(c=>{const re=new RegExp(" "+c.replace(/[.*+?^${}()|[\]\\]/g,"\\$&").replace(/ /g,"\\s+")+"(?=[ ,])","gi"); s=s.replace(re,m=>m.replace(/,/g,"¸").replace(/\s+(and|with)\s+/gi,(x,w)=>w.toLowerCase()==="and"?"\u0001":"\u0002").replace(/&/g,"¤"))});
   const out=s.split(/\s*(?:,|;|\+|&|\bplus\b|\bthen\b|\band\b|\bwith\b|\balso\b)\s*/i)
-    .map(p=>p.replace(/\u0001/g," and ").replace(/\u0002/g," with ").replace(/¸/g,",").replace(/¤/g,"&").trim()).filter(p=>p&&!/^(a|an|some|the)$/i.test(p));
+    .map(p=>p.replace(/\u0001/g," and ").replace(/\u0002/g," with ").replace(/¸/g,",").replace(/¤/g,"&").replace(/\s+/g," ").trim()).filter(p=>p&&!/^(a|an|some|the)$/i.test(p));
   return out.length?out:[text.trim()];
 }
 const MQ={list:[],i:0};
