@@ -643,7 +643,7 @@ details.panel[open] summary h3::after{content:" −"}
       <label class="f"><span class="lbl p">Protein g</span><input id="mP" type="number" inputmode="decimal" min="0" step="0.1" placeholder="0"></label>
       <label class="f"><span class="lbl c">Carbs g</span><input id="mC" type="number" inputmode="decimal" min="0" step="0.1" placeholder="0"></label>
       <label class="f"><span class="lbl">Fat g</span><input id="mF" type="number" inputmode="decimal" min="0" step="0.1" placeholder="0"></label>
-      <label class="f"><span class="lbl">kcal</span><input id="mK" type="number" inputmode="numeric" min="0" placeholder="auto"></label>
+      <label class="f"><span class="lbl cuL">Calories</span><input id="mK" type="number" inputmode="numeric" min="0" placeholder="auto"></label>
       <details class="full more"><summary class="hint">More nutrients (optional)</summary>
         <div class="grid" style="margin-top:8px">
           <label class="f"><span class="lbl">Fiber g</span><input id="mFi" type="number" inputmode="decimal" min="0" step="0.1"></label>
@@ -729,7 +729,7 @@ details.panel[open] summary h3::after{content:" −"}
   <section class="panel ringcard" id="ringCard" aria-label="Today at a glance">
     <div class="bigring">
       <svg viewBox="0 0 120 120" aria-hidden="true"><circle class="trk" cx="60" cy="60" r="52"/><circle class="val" id="rK" cx="60" cy="60" r="52" pathLength="100"/></svg>
-      <div class="rc"><b class="num" id="rKv">0</b><span id="rKs">kcal left</span></div>
+      <div class="rc"><b class="num" id="rKv">0</b><span id="rKs">cal left</span></div>
     </div>
     <div class="minis">
       <div class="mini" style="--rc:var(--protein)"><svg viewBox="0 0 40 40" aria-hidden="true"><circle class="trk" cx="20" cy="20" r="16"/><circle class="val" id="rP" cx="20" cy="20" r="16" pathLength="100"/></svg><div><b class="num" id="rPv">0g</b><span id="rPs">Protein</span></div></div>
@@ -799,6 +799,8 @@ details.panel[open] summary h3::after{content:" −"}
     <div class="prof" id="profForm">
       <div class="f"><span class="lbl">Units</span>
         <div class="seg" id="pUnitSeg"><button type="button" data-unit="oz">US (lb, ft, oz)</button><button type="button" data-unit="ml">Metric (kg, cm, ml)</button></div></div>
+      <div class="f"><span class="lbl">Show energy as</span>
+        <div class="seg" id="calUnitSeg"><button type="button" data-cu="cal">Calories (cal)</button><button type="button" data-cu="kcal">Kilocalories (kcal)</button></div></div>
       <div class="grid">
         <label class="f half"><span class="lbl">Age</span><input id="pAge" type="number" min="10" max="110" inputmode="numeric" placeholder="Years"></label>
         <label class="f half"><span class="lbl">Weight <span class="pWtU">lb</span></span><input id="pWt" type="number" min="0" step="0.1" inputmode="decimal"></label>
@@ -867,7 +869,7 @@ details.panel[open] summary h3::after{content:" −"}
         <button type="button" class="opt check" data-mode="custom">Set my own numbers<small>Type any goal below</small></button>
       </div></div>
     <div class="grid" id="goalsForm">
-      <label class="f half"><span class="lbl">Calories kcal</span><input id="gK" type="number" min="0" inputmode="numeric"></label>
+      <label class="f half"><span class="lbl">Calories</span><input id="gK" type="number" min="0" inputmode="numeric"></label>
       <label class="f half"><span class="lbl">Water <span id="gWUnit">oz</span></span><input id="gW" type="number" min="0" inputmode="numeric"></label>
       <label class="f"><span class="lbl p">Protein g</span><input id="gP" type="number" min="0" inputmode="numeric"></label>
       <label class="f"><span class="lbl c">Carbs g</span><input id="gC" type="number" min="0" inputmode="numeric"></label>
@@ -1012,7 +1014,7 @@ details.panel[open] summary h3::after{content:" −"}
 
 <script>
 (() => {
-const APP_VERSION="3.10.0";
+const APP_VERSION="3.11.0";
 const REPO="kefirman9000/fuel-log";
 const $ = id => document.getElementById(id);
 const OZ=29.5735, LB=0.45359237, IN=2.54;
@@ -1097,6 +1099,8 @@ function totals(day){
 }
 const fmtW=ml=>S.settings.unit==="oz"?Math.round(ml/OZ):Math.round(ml);
 const uW=()=>S.settings.unit==="oz"?"oz":"ml";
+/* Energy label: "cal" (what US food labels call Calories) or "kcal", set under Me → Profile. Same number either way. */
+const CU=()=>S.settings.calUnit==="kcal"?"kcal":"cal", CUL=()=>S.settings.calUnit==="kcal"?"kcal":"Calories";
 const fmtKg=kg=>S.settings.unit==="oz"?r1(kg/LB)+" lb":r1(kg)+" kg";
 const pct=(v,g)=>g>0?Math.round(v/g*100):0;
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -1169,6 +1173,7 @@ function setRow(id,v,g,unit){
   else{$(id+"Pct").textContent="—";$(id+"Bar").style.width="0"}
 }
 function render(){
+  markCalUnit();
   const day=S.days[S.date]||emptyDay(), g=G(), t=totals(day);
   $("dateLabel").textContent=niceDate(S.date);
   $("next").disabled=S.date>=todayKey();
@@ -1176,13 +1181,13 @@ function render(){
   $("entryCount").textContent=day.entries.length+(day.entries.length===1?" item":" items")+" logged";
   countTo($("kcal"),Math.round(t.k));
   if(g.kcal){const kp=pct(t.k,g.kcal);$("kGoal").textContent=`of ${(+g.kcal).toLocaleString()} goal · ${kp}%`;$("kBar").style.width=Math.min(100,kp)+"%"}
-  else{$("kGoal").textContent="kcal eaten";$("kBar").style.width="0"}
+  else{$("kGoal").textContent=CU()+" eaten";$("kBar").style.width="0"}
   setRow("p",r1(t.p),g.protein,"g"); setRow("c",r1(t.c),g.carbs,"g"); setRow("f",r1(t.f),g.fat,"g");
   setRow("fi",r1(t.fi),g.fiber,"g"); $("suVal").textContent=r1(t.su)+"g"; setRow("na",Math.round(t.na),g.sodium,"mg");
   const ring=(id,v,goal)=>{const el=$(id),p=goal?v/goal*100:0; el.style.strokeDashoffset=100-Math.min(100,p); el.classList.toggle("over",p>110&&id==="rK")};
   ring("rK",t.k,g.kcal); ring("rP",t.p,g.protein); ring("rC",t.c,g.carbs); ring("rF",t.f,g.fat);
-  if(g.kcal){const l=Math.round(g.kcal-t.k); countTo($("rKv"),Math.abs(l)); $("rKs").textContent=l>=0?"kcal left":"kcal over"}
-  else{countTo($("rKv"),Math.round(t.k)); $("rKs").textContent="kcal eaten"}
+  if(g.kcal){const l=Math.round(g.kcal-t.k); countTo($("rKv"),Math.abs(l)); $("rKs").textContent=l>=0?CU()+" left":CU()+" over"}
+  else{countTo($("rKv"),Math.round(t.k)); $("rKs").textContent=CU()+" eaten"}
   const mini=(k,v,goal,name)=>{$("r"+k+"v").textContent=Math.round(v)+(goal?" / "+goal:"")+"g"; $("r"+k+"s").textContent=name+(goal?" · "+pct(v,goal)+"%":"")};
   mini("P",t.p,g.protein,"Protein"); mini("C",t.c,g.carbs,"Carbs"); mini("F",t.f,g.fat,"Fat");
   if(statStyle()==="bars") renderBars(t,g);
@@ -1211,14 +1216,14 @@ function render(){
   renderCopyChips();
   const itemHTML=e=>e.id===S.editId?editHTML(e):`
     <div class="item${e.id===S.newId?" new":""}"><span class="nm"><span class="fi" aria-hidden="true">${foodIcon(e.name)}</span>${esc(e.name)}${e.src?`<span class="tag">${esc(e.src)}</span>`:""}<button class="star" data-star-entry="${e.id}" aria-pressed="${isFavName(e.name)}" aria-label="Favorite ${esc(e.name)}">${isFavName(e.name)?"★":"☆"}</button></span>
-    <span class="sm">${esc(e.t||"")} · ${kcalOf(e)} kcal${e.f?` · ${r1(+e.f)}g fat`:""}</span>
+    <span class="sm">${esc(e.t||"")} · ${kcalOf(e)} ${CU()}${e.f?` · ${r1(+e.f)}g fat`:""}</span>
     <span class="mac"><span class="p">${r1(+e.p||0)}g P</span><br><span class="c">${r1(+e.c||0)}g C</span></span>
     <button class="del" data-del="${e.id}" aria-label="Remove ${esc(e.name)}">×</button></div>`;
   if(day.entries.length){
     const groups={}; day.entries.forEach(e=>{const m=e.meal||mealFromTime(e.t);(groups[m]=groups[m]||[]).push(e)});
     $("logList").innerHTML=MEALS.filter(([k])=>groups[k]).map(([k,label,ic,col])=>{const es=groups[k], kc=es.reduce((s,e)=>s+kcalOf(e),0), pr=es.reduce((s,e)=>s+(+e.p||0),0);
       const head=S.saveMeal===k?`<form class="mealsave" data-save-meal="${k}"><input name="nm" value="My ${label.toLowerCase()}" aria-label="Name for this meal" maxlength="60"><button class="primary" type="submit">Save</button><button type="button" class="chip ghost" data-save-cancel>Cancel</button></form>`
-        :`<div class="mealh"><b>${ic} ${label}</b><span>${kc.toLocaleString()} kcal · ${Math.round(pr)}g P</span></div>
+        :`<div class="mealh"><b>${ic} ${label}</b><span>${kc.toLocaleString()} ${CU()} · ${Math.round(pr)}g P</span></div>
           <div class="mealacts">${S.date!==todayKey()?`<button type="button" class="chip" data-copy-meal="${S.date}|${k}">↻ Copy to today</button>`:""}${es.length>1?`<button type="button" class="chip ghost" data-save-start="${k}">★ Save as one meal</button>`:""}</div>`;
       return `<div class="meal" style="--mc:${col}">${head}${es.map(itemHTML).join("")}</div>`}).join("");
   }else $("logList").innerHTML=`<p class="empty" style="display:none"></p>`+`<p class="empty">Nothing logged ${S.date===todayKey()?"yet today":"on this day"}. Type a food in the bar at the top, or tap Scan.</p>`;
@@ -1244,8 +1249,8 @@ function renderCoach(day,t,g){
   if(g.protein){const l=g.protein-t.p;
     tips.push(l>3?`<b>${Math.round(l)} g protein</b> to go${today&&$("fitPanel").hidden?": "+proteinIdea(l):today?". See ideas above.":""}.`:`<b>Protein goal hit.</b>`)}
   if(g.kcal){const l=Math.round(g.kcal-t.k);
-    if(l>=0) tips.push(`<b>${l.toLocaleString()} kcal</b> left of your target${p.goal==="gain"&&today&&l>400?". Building muscle needs the surplus, so don't skip it":""}.`);
-    else tips.push(`<b>${(-l).toLocaleString()} kcal over</b> your target${p.goal==="lose"?". One day won't undo a week; pick it back up tomorrow":""}.`)}
+    if(l>=0) tips.push(`<b>${l.toLocaleString()} ${CU()}</b> left of your target${p.goal==="gain"&&today&&l>400?". Building muscle needs the surplus, so don't skip it":""}.`);
+    else tips.push(`<b>${(-l).toLocaleString()} ${CU()} over</b> your target${p.goal==="lose"?". One day won't undo a week; pick it back up tomorrow":""}.`)}
   if(today&&g.waterMl){
     const n=new Date(), h=n.getHours()+n.getMinutes()/60, frac=Math.min(1,Math.max(0,(h-7)/15)), behind=g.waterMl*frac-t.w;
     if(t.w>=g.waterMl) tips.push(`<b>Water goal reached.</b>`);
@@ -1264,7 +1269,7 @@ function renderSaved(){
   const items=Object.entries(S.foods.items).filter(([,f])=>!q||f.name.toLowerCase().includes(q)).sort((a,b)=>(b[1].used||0)-(a[1].used||0));
   $("savedList").innerHTML=items.length?items.map(([id,f])=>`
     <div class="item"><span class="nm">${esc(f.name)}${f.code?`<span class="tag">barcode</span>`:""}<button class="star" data-star-saved="${esc(id)}" aria-pressed="${!!f.fav}" aria-label="Favorite ${esc(f.name)}">${f.fav?"★":"☆"}</button></span>
-    <span class="sm">${f.serving?esc(f.serving)+" · ":""}${kcalOf(f)} kcal</span>
+    <span class="sm">${f.serving?esc(f.serving)+" · ":""}${kcalOf(f)} ${CU()}</span>
     <span class="mac"><span class="p">${r1(+f.p||0)}g P</span><br><span class="c">${r1(+f.c||0)}g C</span></span>
     <button class="chip" data-quick="${esc(id)}" style="grid-row:1/3;grid-column:3">Log</button></div>`).join("")
     :`<p class="empty">${q?"No saved food matches.":"Foods you save, search or scan show up here for one-tap logging."}</p>`;
@@ -1318,6 +1323,9 @@ function writeBody(u,b){
   $("hUS").hidden=!us; $("hMet").hidden=us; profUnit=u;
   document.querySelectorAll("#pUnitSeg [data-unit]").forEach(x=>x.setAttribute("aria-pressed",x.dataset.unit===u));
 }
+function markCalUnit(){const v=S.settings.calUnit==="kcal"?"kcal":"cal";
+  document.querySelectorAll("#calUnitSeg [data-cu]").forEach(x=>x.setAttribute("aria-pressed",x.dataset.cu===v));
+  document.querySelectorAll(".cuL").forEach(x=>x.textContent=CUL())}
 function markProfileOpts(){const p=S.settings.profile;
   document.querySelectorAll("#profForm .opt[data-pk]").forEach(b=>b.setAttribute("aria-pressed",(p[b.dataset.pk]||"")===b.dataset.v))}
 function fillProfile(){
@@ -1344,13 +1352,13 @@ function renderPlan(){
   const a=ACT[p.activity]||ACT.moderate, gl=GOALS[p.goal]||GOALS.maintain, cur=s.auto?null:s.goals;
   const row=(k,v,why,cv)=>`<div class="prow"><div><b>${k}</b><span class="sm">${why}</span></div><div class="num pv">${v}${cv!=null&&cv!==""?`<span class="sm">your goal: ${cv}</span>`:""}</div></div>`;
   $("plan").innerHTML=[
-    row("Calories",sg.kcal.toLocaleString()+" kcal",
+    row("Calories",sg.kcal.toLocaleString()+" "+CU(),
       sg.bmr?`Resting burn ~${Math.round(sg.bmr).toLocaleString()} × ${a[0]} for activity = ${Math.round(sg.tdee).toLocaleString()} to maintain${sg.adj}`:"Added up from the macros below",
       cur&&cur.kcal?(+cur.kcal).toLocaleString():null),
     row("Protein",sg.protein+" g",`${sg.pk} g per kg of body weight for ${gl.word}`,cur&&cur.protein?cur.protein+" g":null),
     row("Carbs",sg.carbs+" g",sg.bmr?"The calories left after protein and fat":"Based on how active you are",cur&&cur.carbs?cur.carbs+" g":null),
     row("Fat",sg.fat+" g","At least 0.8 g per kg, or 25% of calories",cur&&cur.fat?cur.fat+" g":null),
-    row("Fiber",Math.round(sg.kcal/1000*14)+" g","14 g per 1,000 kcal",null),
+    row("Fiber",Math.round(sg.kcal/1000*14)+" g","14 g per 1,000 "+CU(),null),
     row("Water",fmtW(sg.waterMl)+" "+uW(),"About 35 ml per kg, plus extra for activity",cur&&cur.waterMl?fmtW(cur.waterMl)+" "+uW():null),
   ].join("");
   $("planNotes").innerHTML=sg.notes.map(n=>`<li>${esc(n)}</li>`).join("");
@@ -1521,7 +1529,7 @@ function renderBars(t,g){
   if(t.su>0) rows.splice(5,0,["Sugars",t.su,0,"g","var(--carbs)"]);
   const prev=[...document.querySelectorAll("#bigBars .bt i")].map(i=>i.style.width);
   $("bigBars").innerHTML=rows.map(([name,v,goal,u,c],i)=>{
-    const isW=u==="ml", show=x=>isW?fmtW(x)+" "+uW():Math.round(x).toLocaleString()+(u==="g"?"g":u==="mg"?" mg":" kcal");
+    const isW=u==="ml", show=x=>isW?fmtW(x)+" "+uW():Math.round(x).toLocaleString()+(u==="g"?"g":u==="mg"?" mg":" "+CU());
     const p=goal?v/goal*100:0, left=goal?goal-v:0;
     const limit=name==="Calories"||name==="Fat"||name==="Sodium";
     const foot=!goal?"":name==="Sodium"?(left>=0?`${show(left)} under the limit`:`${show(-left)} over the limit`):left>0?`${show(left)} to go`:limit?`${show(-left)} over`:"Goal reached ✓";
@@ -1545,7 +1553,7 @@ function goalStatus(t,g,day){
   const list=[
     {k:"p",name:"Protein",c:"var(--protein)",pct:g.protein?t.p/g.protein:0,done:!!g.protein&&t.p>=g.protein,left:g.protein?`${Math.max(0,Math.round(g.protein-t.p))} g protein`:""},
     {k:"k",name:"Calories",c:"var(--accent)",pct:Math.min(kp,1),done:!!g.kcal&&kp>=lo&&kp<=hi,over:kp>hi,
-      left:g.kcal&&kp<lo?`${Math.round(g.kcal*lo-t.k).toLocaleString()} kcal`:""},
+      left:g.kcal&&kp<lo?`${Math.round(g.kcal*lo-t.k).toLocaleString()} ${CU()}`:""},
     {k:"w",name:"Water",c:"var(--water)",pct:g.waterMl?t.w/g.waterMl:0,done:!!g.waterMl&&t.w>=g.waterMl,left:g.waterMl?`${fmtW(Math.max(0,g.waterMl-t.w))} ${uW()} water`:""},
     {k:"fi",name:"Fiber",c:"var(--good)",pct:g.fiber?t.fi/g.fiber:0,done:!!g.fiber&&t.fi>=g.fiber,left:g.fiber?`${Math.max(0,Math.round(g.fiber-t.fi))} g fiber`:""},
   ];
@@ -1612,15 +1620,15 @@ function renderFit(t,g){
   panel.hidden=false;
   const when=hr<10?"Breakfast ideas":hr<11?"Morning snack ideas":hr<14?"Lunch ideas":hr<17?"Snack ideas":hr<21?"Dinner ideas":bigGap?"A meal still fits":"Light evening snacks";
   $("fitMeta").textContent=when;
-  $("fitMsg").innerHTML=`You have <b>${Math.max(0,kl).toLocaleString()} kcal</b>${pl>0?` and <b>${Math.round(pl)} g protein</b>`:""} left. These fit:`;
+  $("fitMsg").innerHTML=`You have <b>${Math.max(0,kl).toLocaleString()} ${CU()}</b>${pl>0?` and <b>${Math.round(pl)} g protein</b>`:""} left. These fit:`;
   const tag=x=>x.src==="fav"?"⭐ favorite":x.src==="recent"?"🕘 recent":x.kcal<300?"snack":"meal";
   const row=(x,i)=>`<div class="item fit"><span class="nm"><span class="fi" aria-hidden="true">${foodIcon(x.name)}</span>${esc(x.name)}<span class="tag">${tag(x)}</span></span>
-    <span class="sm">${x.serving?esc(x.serving)+" · ":""}${x.kcal} kcal</span><span class="mac"><span class="p">${r1(x.p)}g P</span></span>
+    <span class="sm">${x.serving?esc(x.serving)+" · ":""}${x.kcal} ${CU()}</span><span class="mac"><span class="p">${r1(x.p)}g P</span></span>
     <button class="chip" data-fit="${i}" style="grid-row:1/3;grid-column:3">+ Log</button></div>`;
   S.fit=[...picks]; let html=picks.map(row).join("");
   if(combo&&!picks.slice(0,2).every(x=>x===combo.a||x===combo.b)){S.fit.push({combo:[combo.a,combo.b]});
     html+=`<div class="item fit combo"><span class="nm"><span class="fi" aria-hidden="true">✨</span>${esc(combo.a.name)} + ${esc(combo.b.name)}<span class="tag">combo</span></span>
-      <span class="sm">${combo.k} kcal together</span><span class="mac"><span class="p">${r1(combo.p)}g P</span></span>
+      <span class="sm">${combo.k} ${CU()} together</span><span class="mac"><span class="p">${r1(combo.p)}g P</span></span>
       <button class="chip" data-fit="${S.fit.length-1}" style="grid-row:1/3;grid-column:3">+ Log both</button></div>`}
   $("fitList").innerHTML=html;
 }
@@ -1769,13 +1777,13 @@ async function renderHistory(){
   const n=logged.filter(Boolean).length||1, avg=k=>Math.round(ts.reduce((s,t,i)=>s+(logged[i]?t[k]:0),0)/n);
   const wd=ts.filter(t=>t.w>0).length||1, wAvg=ts.reduce((s,t)=>s+t.w,0)/wd;
   $("histMeta").textContent=`${logged.filter(Boolean).length} of 30 days logged`;
-  $("avgs").innerHTML=[["Avg calories",avg("k").toLocaleString()+" kcal"],["Avg protein",avg("p")+" g"],["Avg water",fmtW(wAvg)+" "+uW()],
+  $("avgs").innerHTML=[["Avg calories",avg("k").toLocaleString()+" "+CU()],["Avg protein",avg("p")+" g"],["Avg water",fmtW(wAvg)+" "+uW()],
     ["Protein goal hit",g.protein?ts.filter(t=>t.p>=g.protein).length+" days":"—"]].map(([k,v])=>`<div><span>${k}</span><b>${v}</b></div>`).join("");
   const maxK=Math.max(g.kcal||0,...ts.map(t=>t.k))||1;
   $("histDays").innerHTML=keys.map((k,i)=>{const t=ts[i], has=logged[i]||t.w>0;
     return `<button type="button" class="dayrow${has?"":" empty"}" data-day="${k}"><span class="dd">${niceDate(k)}</span>
       <span class="dbar"><i style="width:${has?t.k/maxK*100:0}%"></i></span>
-      <span class="dv">${has?`${Math.round(t.k).toLocaleString()} kcal · ${Math.round(t.p)}g P${g.protein&&t.p>=g.protein?" ✓":""}`:"—"}</span></button>`}).join("");
+      <span class="dv">${has?`${Math.round(t.k).toLocaleString()} ${CU()} · ${Math.round(t.p)}g P${g.protein&&t.p>=g.protein?" ✓":""}`:"—"}</span></button>`}).join("");
 }
 $("histDays").onclick=async ev=>{const b=ev.target.closest("[data-day]");if(!b)return;S.date=b.dataset.day;await getDay(S.date);setView("today")};
 $("csvBtn").onclick=async()=>{
@@ -1954,7 +1962,7 @@ function editHTML(e){
       <label class="f"><span class="lbl p">Protein g</span><input name="p" type="number" min="0" step="0.1" value="${v(e.p)}" inputmode="decimal"></label>
       <label class="f"><span class="lbl c">Carbs g</span><input name="c" type="number" min="0" step="0.1" value="${v(e.c)}" inputmode="decimal"></label>
       <label class="f"><span class="lbl">Fat g</span><input name="f" type="number" min="0" step="0.1" value="${v(e.f)}" inputmode="decimal"></label>
-      <label class="f"><span class="lbl">kcal</span><input name="k" type="number" min="0" value="${e.kcal==null?"":Math.round(e.kcal)}" placeholder="auto" inputmode="numeric"></label>
+      <label class="f"><span class="lbl">${CUL()}</span><input name="k" type="number" min="0" value="${e.kcal==null?"":Math.round(e.kcal)}" placeholder="auto" inputmode="numeric"></label>
     </div>
     <div class="f"><span class="lbl">Meal</span><select name="meal">${MEALS.map(([k,l,ic])=>`<option value="${k}"${(e.meal||mealFromTime(e.t))===k?" selected":""}>${ic} ${l}</option>`).join("")}</select></div>
     <p class="hint">Change "Amount ×" to scale everything (2 = double, 0.5 = half), or edit any number directly.</p>
@@ -2179,7 +2187,7 @@ function spellFix(q){
   const V=vocab();
   return q.split(" ").map(w=>{const n=w.toLowerCase(); if(n.length<5||V.has(n)||/[\d'’]/.test(n)||V.has(n.replace(/e?s$/,""))) return w;
     const max=n.length>=8?2:1; let best=null,bd=9;
-    for(const v of V){if(Math.abs(v.length-n.length)>max||UNITS[v]) continue; const d=typoDist(n,v,max); if(d<bd){bd=d;best=v; if(d===1&&max===1) break}}
+    for(const v of V){if(v[0]!==n[0]||Math.abs(v.length-n.length)>max||UNITS[v]) continue; const d=typoDist(n,v,max); if(d<bd){bd=d;best=v; if(d===1&&max===1) break}}
     return best&&bd<=max?best:w}).join(" ");
 }
 function applyAlias(q){if(/^\s*chickens?\s*$/i.test(q)) q="chicken breast"; let s=" "+q.toLowerCase()+" "; ALIAS.forEach(([re,to])=>{s=s.replace(re,to)}); return s.replace(/\s+/g," ").trim()}
@@ -2237,6 +2245,8 @@ function understand(raw){
   }
   return out;
 }
+/* Words you typed that only match this food because a typo was allowed. Matches like that are offered as "Did you mean…?", never logged on their own. */
+function typoWords(q,r){if(!r||r.src==="learned"||r.src==="saved") return []; const toks=toksOf(r.key||r.name); return qwords(q).filter(w=>!exactHit(w,toks)&&wordHit(w,toks))}
 const exactHit=(w,toks)=>toks.some(t=>t===w||t===w.replace(/e?s$/,"")||t.replace(/e?s$/,"")===w||(w.length>=4&&t.startsWith(w)));
 const TOKS=new Map(), toksOf=n=>{let t=TOKS.get(n); if(!t){t=norm(n).split(" "); TOKS.set(n,t)} return t};
 const WSC=new Map();
@@ -2388,9 +2398,9 @@ function isSure(best,pq,st){
   if(best.alt){const a=best.alt, both=a.per100&&r.per100&&a.per100.k!=null&&r.per100.k!=null, ka=both?a.per100.k:a.kcal, kr=both?r.per100.k:r.kcal;
     if(ka!=null&&kr!=null&&Math.abs(ka-kr)>150&&Math.max(ka,kr)/Math.max(1,Math.min(ka,kr))>1.6) return false}
   // one vague word ("a sandwich", "salad", "soup") could be almost anything: ask
-  const qw=qwords(pq.q); if(qw.length===1&&VAGUE.has(qw[0].replace(/e?s$/,""))&&r.src!=="learned"&&r.src!=="saved") return false;
+  const qw=qwords(pq.q0); if(qw.length===1&&VAGUE.has(qw[0].replace(/e?s$/,""))&&r.src!=="learned"&&r.src!=="saved") return false;
   if(["learned","saved","common","restaurant","USDA built-in"].includes(r.src)) return true;
-  return qwords(pq.q).length>=2;
+  return qwords(pq.q0).length>=2;
 }
 async function handleTyped(text){
   const u=understand(text), done=[], labels=[], day=await getDay(S.date);
@@ -2425,22 +2435,22 @@ async function autoLog(parts,meal,done=[],labels=[]){
     for(const part of parts){
       const pq=parseQuery(part); if(!pq.q) continue;
       lastReq={amt:pq.amt,unit:pq.unit,size:pq.size};
-      let pool=localMatches(pq.q), best=bestMatch(pq.q,pool);
-      if(!(best&&isSure(best,pq,startAmount(best.r)))){
-        // your exact words first (brand names), the spelling-corrected words only if that finds nothing
-        let [f,o]=await Promise.all([searchFDC(pq.q0),searchOFF(pq.q0)]);
-        if(!f.items.length&&!o.items.length&&pq.q0!==pq.q) [f,o]=await Promise.all([searchFDC(pq.q),searchOFF(pq.q)]);
-        pool=[...pool,...f.items,...o.items]; best=bestMatch(pq.q,pool); if(!(best&&best.exact)&&pq.q0!==pq.q){const b0=bestMatch(pq.q0,pool); if(b0&&b0.exact) best=b0}
+      // search exactly what you typed; spelling guesses are only ever offered as "Did you mean…?"
+      let pool=localMatches(pq.q0), best=bestMatch(pq.q0,pool);
+      if(!(best&&isSure(best,pq,startAmount(best.r))&&!typoWords(pq.q0,best.r).length)){
+        const [f,o]=await Promise.all([searchFDC(pq.q0),searchOFF(pq.q0)]);
+        pool=[...pool,...f.items,...o.items]; best=bestMatch(pq.q0,pool);
       }
+      if(best&&typoWords(pq.q0,best.r).length){unsure.push(part); continue}
       let st=best?startAmount(best.r):null, generic=null;
       if(best&&!best.exact&&best.r.src==="common"){
-        const ws=qwords(pq.q), toks=norm(best.r.name).split(" "), miss=ws.filter(w=>!wordHit(w,toks));
+        const ws=qwords(pq.q0), toks=toksOf(best.r.name), miss=ws.filter(w=>!wordHit(w,toks));
         if(ws.length>=2&&miss.length===1&&!vocab().has(miss[0])){generic=miss[0]; best={...best,exact:true}}
       }
       if(best&&isSure(best,pq,st)){
         const r=best.r, m=macrosFor(r,st.amt,st.mode);
         if(r.savedId){const f=S.foods.items[r.savedId]; if(f){f.used=(f.used||0)+1;save("foods",S.foods)}}
-        const id=await addEntry({name:(m.label+r.name).trim(),p:m.p,c:m.c,f:m.f,kcal:m.kcal,...extras(m),...(meal?{meal}:{}),src:r.src==="saved"?"saved":"auto",q:pq.q,qa:st.mode==="serv"?st.amt:undefined},true);
+        const id=await addEntry({name:(m.label+r.name).trim(),p:m.p,c:m.c,f:m.f,kcal:m.kcal,...extras(m),...(meal?{meal}:{}),src:r.src==="saved"?"saved":"auto",q:pq.q0,qa:st.mode==="serv"?st.amt:undefined},true);
         logged.push({id,name:(m.label+r.name).trim(),p:m.p}); done.push({t:"e",id}); labels.push((m.label+r.name).trim()+(generic?` (generic, couldn't find ${titleCase(generic.replace(/-/g," "))})`:""));
       }else unsure.push(part);
     }
@@ -2454,7 +2464,7 @@ async function autoLog(parts,meal,done=[],labels=[]){
 let lastResults=[], lastReq={amt:null,unit:null}, searchSeq=0;
 const SEARCH_HINT="Type what you ate in the bar at the top, like \"2 nutty buddy\", \"slice of pizza\" or \"cup of tillamook ice cream\". The amount is worked out for you.";
 function resHTML(r,i){return `<button type="button" class="res" data-ri="${i}"><span class="nm">${esc(r.name)}</span>
-  <span class="sm">${esc(r.serving)}</span><span class="mac"><span class="p">${r1(r.p)}g P</span><br>${r.kcal??kcalOf(r)} kcal</span></button>`}
+  <span class="sm">${esc(r.serving)}</span><span class="mac"><span class="p">${r1(r.p)}g P</span><br>${r.kcal??kcalOf(r)} ${CU()}</span></button>`}
 function showResults(groups){
   lastResults=[]; let html="";
   groups.forEach(([label,list])=>{ if(!list.length) return;
@@ -2465,16 +2475,26 @@ $("searchForm").onsubmit=async ev=>{ev.preventDefault();
   let raw=$("sq").value.trim(); if(!raw) return;
   if(!(S.clarify&&MQ.list[MQ.i]===raw)&&(!MQ.list.length||MQ.list[MQ.i]!==raw)){const parts=splitMeal(raw); MQ.list=parts.length>1?parts:[]; MQ.i=0; if(MQ.list.length) raw=MQ.list[0], $("sq").value=raw}
   const pq=parseQuery(raw); if(!pq.q) return;
-  lastReq={amt:pq.amt,unit:pq.unit,size:pq.size}; const seq=++searchSeq, q=pq.q;
+  if(S.forceQ){pq.q0=pq.q=S.forceQ; S.forceQ=null}
+  lastReq={amt:pq.amt,unit:pq.unit,size:pq.size}; const seq=++searchSeq, q=pq.q0, guessQ=pq.q!==pq.q0?pq.q:null;
   $("searchPick").innerHTML="";
-  const local=localMatches(q);
+  let local=localMatches(q);
   showResults([["Your foods, restaurants & common foods",local]]);
   S.lastQ=q;
-  if(navigator.onLine===false&&!cacheGet("fdc|"+learnKey(q))&&!cacheGet("off|"+learnKey(q))){const b=bestMatch(q,local); if(b) openPick(b.r,b.exact?"Best match":"Closest match"); $("searchMsg").textContent=local.length?"You're offline, so only your saved foods and the built-in list were searched.":"You're offline. Try the Enter tab to type the numbers in.";return}
+  if(navigator.onLine===false&&!cacheGet("fdc|"+learnKey(q))&&!cacheGet("off|"+learnKey(q))){
+    let b=bestMatch(q,local), dym=null;
+    if(guessQ&&!(b&&b.exact&&!typoWords(q,b.r).length)){const l2=localMatches(guessQ), b2=bestMatch(guessQ,l2); if(b2&&b2.exact){dym=guessQ; b=b2; local=[...l2,...local]; showResults([["Your foods, restaurants & common foods",local]])}}
+    if(b) openPick(b.r,dym||typoWords(q,b.r).length?`Did you mean ${b.r.name}?`:b.exact?"Best match":"Closest match");
+    $("searchMsg").textContent=(dym?`Nothing matches "${q}" exactly. Did you mean "${dym}"? `:"")+(local.length?"You're offline, so only your saved foods and the built-in list were searched.":"You're offline. Try the Enter tab to type the numbers in.");return}
   $("searchMsg").textContent=`Searching for "${q}"…`;
-  let [fdc,off]=await Promise.all([searchFDC(pq.q0),searchOFF(pq.q0)]);
-  if(!fdc.items.length&&!off.items.length&&pq.q0!==q) [fdc,off]=await Promise.all([searchFDC(q),searchOFF(q)]);
-  let usedQ=q;
+  let [fdc,off]=await Promise.all([searchFDC(q),searchOFF(q)]);
+  // nothing for your exact words: look up the spelling guess, but only to ask "Did you mean…?"
+  let dym=null, b0=bestMatch(q,[...local,...fdc.items,...off.items]);
+  if(guessQ&&!(b0&&b0.exact&&!typoWords(q,b0.r).length)){
+    const l2=localMatches(guessQ), [f2,o2]=await Promise.all([searchFDC(guessQ),searchOFF(guessQ)]), b2=bestMatch(guessQ,[...l2,...f2.items,...o2.items]);
+    if(b2&&b2.exact){dym=guessQ; local=[...l2,...local]; fdc={...fdc,items:[...f2.items,...fdc.items]}; off={...off,items:[...o2.items,...off.items]}}
+  }
+  let usedQ=dym||q;
   const words=q.split(" ");
   if(!fdc.items.length&&!off.items.length&&words.length>2&&(fdc.status==="ok"||off.status==="ok")){
     usedQ=words.slice(1).join(" "); [fdc,off]=await Promise.all([searchFDC(usedQ),searchOFF(usedQ)]);
@@ -2483,19 +2503,25 @@ $("searchForm").onsubmit=async ev=>{ev.preventDefault();
   showResults([["Your foods, restaurants & common foods",local],["USDA FoodData Central",fdc.items],["Open Food Facts",off.items]]);
   const n=lastResults.length, amtTxt=pq.amt?` Amount: ${r1(pq.amt)}${pq.unit?" "+pq.unit:""}.`:"";
   let msg=n?`Tap the closest match.${amtTxt}`:"No matches. Try fewer words or just the brand and food, like \"tillamook ice cream\", or use the Enter tab.";
-  if(usedQ!==q&&(fdc.items.length||off.items.length)) msg=`Nothing for "${q}", so here's "${usedQ}". `+msg;
+  if(usedQ!==q&&!dym&&(fdc.items.length||off.items.length)) msg=`Nothing for "${q}", so here's "${usedQ}". `+msg;
   const down=[];
   if(fdc.status==="limit") down.push("USDA's shared demo key is out of searches for this hour (add your own free key under Me & goals → Food search)");
   else if(fdc.status==="fail") down.push("USDA didn't respond");
   if(off.status!=="ok") down.push("Open Food Facts didn't respond");
   if(down.length) msg+=" "+down.join(", and ")+". Try again in a moment.";
-  const best=bestMatch(usedQ,lastResults);
-  if(best){openPick(best.r,S.clarify?"Is this it?":best.exact?"Best match":"Closest match");
-    msg=(best.exact?`Here's the best match.`:`Couldn't find that exact product, so this is a generic version.`)+`${amtTxt} Not right? Pick another below.`+(down.length?" "+down.join(", and ")+".":"")}
+  const best=bestMatch(usedQ,lastResults), typo=best&&!dym?typoWords(q,best.r):[];
+  if(best){const guess=dym||typo.length;
+    openPick(best.r,guess?`Did you mean ${best.r.name}?`:S.clarify?"Is this it?":best.exact?"Best match":"Closest match");
+    msg=(dym?`Nothing matches "${q}" exactly. Did you mean "${dym}"? Tap Log it if so, or pick another below.`
+      :typo.length?`Nothing matches "${typo.join(" ")}" exactly. Did you mean ${best.r.name}? Tap Log it if so, or pick another below.`
+      :(best.exact?`Here's the best match.`:`Couldn't find that exact product, so this is a generic version.`)+` Not right? Pick another below.`)+amtTxt+(down.length?" "+down.join(", and ")+".":"")}
   if(S.clarify&&!n) msg=`Couldn't find "${MQ.list[MQ.i]}". Try other words, or use the Enter tab to type the numbers in.`;
+  else if(S.clarify&&best&&(dym||typo.length)) msg=(MQ.list.length>1?`Food ${MQ.i+1} of ${MQ.list.length}. `:"")+msg;
   else if(S.clarify) msg=`Not sure which "${MQ.list[MQ.i]}" you meant${MQ.list.length>1?` (${MQ.i+1} of ${MQ.list.length})`:""}. Is this it? If not, tap the right one below, or Skip.`;
   else if(MQ.list.length) msg=`Food ${MQ.i+1} of ${MQ.list.length}: "${MQ.list[MQ.i]}". `+msg;
   $("searchMsg").textContent=msg;
+  if(guessQ&&!dym){const b=document.createElement("button"); b.type="button"; b.className="chip dym"; b.textContent=`Did you mean "${guessQ}"?`;
+    b.onclick=()=>{S.forceQ=guessQ; $("searchForm").requestSubmit()}; $("searchMsg").append(" ",b)}
 };
 function nextInMeal(){
   if(MQ.list.length&&MQ.i<MQ.list.length-1){MQ.i++; $("sq").value=MQ.list[MQ.i]; setTimeout(()=>$("searchForm").requestSubmit(),350); return true}
@@ -2564,7 +2590,7 @@ function openPick(r,isBest){
       <button class="chip" id="pkFav" type="button" aria-pressed="false">☆ Favorite</button>
       <button class="chip ghost" id="pkClose" type="button">Cancel</button></div></div>`;
   const calc=()=>macrosFor(r,+$("pkAmt").value||0,$("pkUnit").value==="g"?"g":"serv");
-  const show=()=>{const m=calc();$("pkMac").innerHTML=`<span class="p">${m.p}g protein</span><span class="c">${m.c}g carbs</span><span>${m.f}g fat</span><span>${m.kcal??kcalOf(m)} kcal</span>`};
+  const show=()=>{const m=calc();$("pkMac").innerHTML=`<span class="p">${m.p}g protein</span><span class="c">${m.c}g carbs</span><span>${m.f}g fat</span><span>${m.kcal??kcalOf(m)} ${CU()}</span>`};
   $("pkAmt").oninput=show;
   let favOn=false;
   $("pkFav").onclick=()=>{favOn=!favOn;$("pkFav").setAttribute("aria-pressed",favOn);$("pkFav").textContent=favOn?"★ Favorite":"☆ Favorite"};
@@ -2679,7 +2705,7 @@ async function showCode(code){
   if(f){
     $("scanResult").innerHTML=`<div class="product">
       <div><div class="t">${esc(f.name)}</div><div class="code">${esc(code)}${f.serving?" · "+esc(f.serving):""}</div></div>
-      <div class="macros"><span class="p">${r1(+f.p||0)}g protein</span><span class="c">${r1(+f.c||0)}g carbs</span><span>${r1(+f.f||0)}g fat</span><span>${kcalOf(f)} kcal</span></div>
+      <div class="macros"><span class="p">${r1(+f.p||0)}g protein</span><span class="c">${r1(+f.c||0)}g carbs</span><span>${r1(+f.f||0)}g fat</span><span>${kcalOf(f)} ${CU()}</span></div>
       <div class="actions"><div class="stepper"><span class="lbl">Servings</span><div class="f"><input id="servIn" type="number" min="0.25" step="0.25" value="1" inputmode="decimal" aria-label="Servings"></div></div>
       <button class="primary" id="logScan">Log it</button></div></div>`;
     $("logScan").onclick=()=>{useFood(id,+$("servIn").value||1);closeAdd()};
@@ -2699,7 +2725,7 @@ async function showCode(code){
       <label class="f"><span class="lbl p">Protein g</span><input id="npP" type="number" step="0.1" min="0" inputmode="decimal"></label>
       <label class="f"><span class="lbl c">Carbs g</span><input id="npC" type="number" step="0.1" min="0" inputmode="decimal"></label>
       <label class="f"><span class="lbl">Fat g</span><input id="npF" type="number" step="0.1" min="0" inputmode="decimal"></label>
-      <label class="f"><span class="lbl">kcal</span><input id="npK" type="number" min="0" inputmode="numeric" placeholder="auto"></label>
+      <label class="f"><span class="lbl">${CUL()}</span><input id="npK" type="number" min="0" inputmode="numeric" placeholder="auto"></label>
     </div>
     ${off&&off.per100?`<p class="hint">No per-serving data listed, so these numbers are per 100 g. Edit the serving to match what you ate.</p>`:""}
     <div class="actions"><button class="primary" type="submit">Save and log 1 serving</button>
@@ -2729,6 +2755,8 @@ function saveProfile(quiet){
 }
 $("profForm").addEventListener("input",ev=>{if(ev.target.matches("input")){clearTimeout(profT);profT=setTimeout(saveProfile,600)}});
 $("profForm").addEventListener("click",ev=>{
+  const cu=ev.target.closest("[data-cu]");
+  if(cu){S.settings.calUnit=cu.dataset.cu; saveSettings(); markCalUnit(); render(); renderMe(); toast(cu.dataset.cu==="kcal"?"Showing kcal":"Showing calories"); return}
   const u=ev.target.closest("[data-unit]");
   if(u&&u.dataset.unit!==profUnit){const b=readBody(profUnit); writeBody(u.dataset.unit,b); saveProfile(); return}
   const o=ev.target.closest(".opt[data-pk]"); if(!o) return;
@@ -2846,7 +2874,7 @@ function obShow(){
   if(OB.step===3){const sug=suggestSupps(obProfile());
     $("obSupps").innerHTML=PRESET_SUPPS.map(x=>`<button type="button" class="opt" data-sp="${x.id}" aria-pressed="${OB.supps.has(x.id)}">${esc(x.name)}${sug[x.id]?`<span class="tag">Suggested</span>`:""}<small>${sug[x.id]?esc(sug[x.id]):esc(x.dose)+" a day"}</small></button>`).join("")}
   if(OB.step===4){const g=suggest(S.settings.profile)||G();
-    const cells=[["Calories",(+g.kcal).toLocaleString()+" kcal"],["Protein",g.protein+" g"],["Carbs",g.carbs+" g"],["Fat",g.fat+" g"],["Water",fmtW(g.waterMl)+" "+uW()]];
+    const cells=[["Calories",(+g.kcal).toLocaleString()+" "+CU()],["Protein",g.protein+" g"],["Carbs",g.carbs+" g"],["Fat",g.fat+" g"],["Water",fmtW(g.waterMl)+" "+uW()]];
     $("obSum").innerHTML=cells.map(([k,v],i)=>`<div style="animation-delay:${i*.08}s"><span>${k}</span><b>${v}</b></div>`).join("")}
   $("ob").scrollTop=0;
 }

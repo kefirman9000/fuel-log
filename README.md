@@ -20,6 +20,8 @@ A one-page food, water and supplement tracker that runs in your phone's browser.
 - **Supplements:** turn on creatine, vitamin D, fish oil, magnesium, electrolytes, a multivitamin, or add your own. Each one has a daily check-off and a 7-day streak, and the app marks which ones suit your profile.
 - **Daily suggestions:** protein left (with food ideas), calories left, whether you're on pace for water, and supplements still to take.
 - **Meals:** the log groups food into breakfast, lunch, dinner and snacks, each with a food icon. Tap any entry to edit it.
+- **Did you mean…?** Your exact words are searched first. If a food only matches after fixing a typo ("avacado"), the app asks before logging it, then remembers your answer so the same typo logs instantly next time.
+- **Calories or kcal:** energy shows as "cal" by default. Switch to "kcal" under **Me → Profile → Show energy as**.
 - **Understands everyday typing:** "I had a couple scrambled eggs and toast for breakfast", typos like "avacado", shorthand like "oj" or "pb&j", "16 oz water", "took my creatine", or your own numbers like "protein shake 30g protein 160 cal".
 - **Recent foods and copy meals:** one-tap chips for what you ate lately, "Same as yesterday?" chips for meals, and copy any past meal to today.
 - **Save a meal:** combine a meal's foods into one item you can log by name.
