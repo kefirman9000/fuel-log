@@ -37,7 +37,7 @@ html{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset
 body{margin:0}
 img,video{max-width:100%}
 body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.45;
-  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px calc(96px + env(safe-area-inset-bottom,0px))}
 .wrap{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
 .view{display:flex;flex-direction:column;gap:18px}
 button,input,select{font:inherit;color:inherit}
@@ -210,7 +210,7 @@ details.panel summary{cursor:pointer;list-style:none}
 details.panel summary::-webkit-details-marker{display:none}
 details.panel summary h3::after{content:" +";color:var(--muted)}
 details.panel[open] summary h3::after{content:" −"}
-.toast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(20px);opacity:0;background:var(--ink);color:var(--paper);padding:9px 16px;border-radius:999px;font-weight:600;font-size:14px;transition:.25s;pointer-events:none;z-index:20;max-width:calc(100% - 32px)}
+.toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(20px);opacity:0;background:var(--ink);color:var(--paper);padding:9px 16px;border-radius:999px;font-weight:600;font-size:14px;transition:.25s;pointer-events:none;z-index:20;max-width:calc(100% - 32px)}
 .toast.show{opacity:1;transform:translateX(-50%)}
 /* Motion: small rewards for logging */
 .jug{transform-origin:50% 100%}
@@ -312,6 +312,72 @@ details.panel[open] summary h3::after{content:" −"}
 .badgepop b{font-family:var(--display);font-weight:900;font-stretch:75%;font-size:24px;text-transform:uppercase}
 .badgepop span{font-size:14px;color:var(--muted)}
 @keyframes bpop{from{transform:translate(-50%,-50%) scale(.6);opacity:0}}
+/* Accent + theme */
+:root{--accent:var(--protein)}
+.quick .qfood{background:var(--accent);box-shadow:0 3px 0 color-mix(in srgb,var(--accent) 60%,#000),0 6px 16px color-mix(in srgb,var(--accent) 35%,transparent)}
+.quick .qfood:active{box-shadow:0 1px 0 color-mix(in srgb,var(--accent) 60%,#000)}
+.qtype input:focus{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 20%,transparent)}
+.seg{display:flex;background:var(--soft);border-radius:8px;padding:3px;gap:2px}
+.seg button{flex:1;border:0;background:transparent;padding:8px 4px;border-radius:6px;font-weight:650;font-size:14px;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--paper);color:var(--ink);box-shadow:0 1px 2px rgb(0 0 0 / .12)}
+.swatches{display:flex;gap:10px;flex-wrap:wrap}
+.swatches button{width:38px;height:38px;border-radius:50%;border:3px solid var(--paper);box-shadow:0 0 0 1.5px var(--line);background:var(--sw)}
+.swatches button[aria-pressed="true"]{box-shadow:0 0 0 2.5px var(--ink)}
+/* Bottom tab bar */
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:25;display:flex;justify-content:center;gap:4px;background:color-mix(in srgb,var(--paper) 92%,transparent);
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-top:1px solid var(--line);padding:6px 12px calc(6px + env(safe-area-inset-bottom,0px))}
+.tabbar button{flex:1;max-width:170px;border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 4px;border-radius:10px;font-size:11.5px;font-weight:700;color:var(--muted);transition:color .2s,background .2s}
+.tabbar svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:transform .2s}
+.tabbar button[aria-selected="true"]{color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,transparent)}
+.tabbar button[aria-selected="true"] svg{transform:translateY(-1px) scale(1.08)}
+/* View and day changes */
+.view.enter{animation:viewin .28s ease}
+@keyframes viewin{from{opacity:0;transform:translateY(8px)}}
+.daymove-l{animation:dayl .3s ease}.daymove-r{animation:dayr .3s ease}
+@keyframes dayl{from{opacity:.2;transform:translateX(28px)}}
+@keyframes dayr{from{opacity:.2;transform:translateX(-28px)}}
+/* Rings */
+.ringcard{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:center}
+.bigring{position:relative;width:132px;height:132px}
+.bigring svg,.mini svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ringcard circle{fill:none}
+.ringcard .trk{stroke:var(--soft);stroke-width:12}
+.ringcard .val{stroke:var(--accent);stroke-width:12;stroke-linecap:round;stroke-dasharray:100;stroke-dashoffset:100;transition:stroke-dashoffset .8s cubic-bezier(.3,.9,.3,1),stroke .3s}
+.ringcard .val.over{stroke:var(--warn)}
+.bigring .rc{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.bigring .rc b{font-size:27px;font-weight:600;line-height:1}
+.bigring .rc span{font-size:11.5px;color:var(--muted);font-weight:600;margin-top:3px}
+.minis{display:flex;flex-direction:column;gap:9px;min-width:0}
+.mini{display:flex;align-items:center;gap:10px}
+.mini svg{width:40px;height:40px;flex:none}
+.mini .trk,.mini .val{stroke-width:6}
+.mini .val{stroke:var(--rc)}
+.mini b{display:block;font-size:15px;font-weight:600;line-height:1.1}
+.mini span{font-size:12px;color:var(--muted)}
+.labeltoggle{grid-column:1/-1;justify-self:center;font-size:13px}
+@media (max-width:360px){.bigring{width:112px;height:112px}.bigring .rc b{font-size:22px}}
+/* Meals and food icons */
+.meal{border-left:3px solid var(--mc);padding-left:10px;margin-bottom:10px}
+.meal:last-child{margin-bottom:0}
+.mealh{display:flex;justify-content:space-between;align-items:baseline;gap:8px;padding:4px 0 2px}
+.mealh b{font-family:var(--display);font-weight:850;font-stretch:80%;font-size:16px;text-transform:uppercase;letter-spacing:.03em;color:var(--mc)}
+.mealh span{font-size:12px;color:var(--muted);font-family:var(--mono)}
+.fi{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:8px;background:var(--soft);margin-right:8px;font-size:16px;vertical-align:middle}
+/* History */
+.avgs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.avgs div{border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+.avgs b{display:block;font-family:var(--mono);font-size:20px;font-weight:600}
+.avgs span{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700}
+.days{display:flex;flex-direction:column}
+.dayrow{display:grid;grid-template-columns:5.5em 1fr auto;gap:10px;align-items:center;padding:9px 4px;border:0;border-top:1px solid var(--line);background:none;text-align:left;width:100%}
+.dayrow:first-child{border-top:0}
+.dayrow:hover{background:var(--soft)}
+.dayrow .dd{font-weight:700;font-size:13px}
+.dayrow .dbar{height:8px;background:var(--soft);border-radius:4px;overflow:hidden;position:relative}
+.dayrow .dbar i{position:absolute;inset:0 auto 0 0;background:var(--accent);border-radius:4px}
+.dayrow .dv{font-family:var(--mono);font-size:12px;color:var(--muted);text-align:right;white-space:nowrap}
+.dayrow .ck{font-size:12px}
+.dayrow.empty .dd{color:var(--muted);font-weight:500}
 /* Install */
 .install{display:flex;align-items:center;gap:10px;background:var(--paper);border:1.5px solid var(--water);border-radius:10px;padding:10px 12px;animation:obin .45s ease}
 .install img{border-radius:9px;flex:none}
@@ -336,12 +402,17 @@ details.panel[open] summary h3::after{content:" −"}
 .obdots i{height:4px;flex:1;border-radius:2px;background:var(--soft);transition:background .3s}
 .obdots i.on{background:var(--ink)}
 .opts{display:flex;flex-wrap:wrap;gap:8px}
-.opts.col{flex-direction:column}
+.opts.stack{flex-direction:column}
 .opt{border:1.5px solid var(--line);background:var(--bg);border-radius:8px;padding:9px 13px;font-weight:650;text-align:left;transition:transform .15s,background .15s}
 .opt:active{transform:scale(.97)}
-.opts.col .opt{width:100%}
+.opts.stack .opt{width:100%}
 .opt small{display:block;font-weight:500;opacity:.75;font-size:12px}
 .opt[aria-pressed="true"]{border-color:var(--ink);background:var(--ink);color:var(--paper)}
+.opt:disabled{opacity:.45}
+.opts.stack .opt{position:relative;padding-right:40px}
+.opts.stack .opt::after{content:"";position:absolute;right:12px;top:50%;width:20px;height:20px;margin-top:-10px;border-radius:50%;border:2px solid var(--line);box-sizing:border-box}
+.opts.stack .opt[aria-pressed="true"]::after{content:"✓";border-color:var(--paper);background:var(--paper);color:var(--ink);display:grid;place-items:center;font-size:13px;font-weight:900;line-height:1}
+.prof{display:flex;flex-direction:column;gap:14px}
 .opt .tag{color:inherit;border-color:currentColor;opacity:.8}
 .obsum{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .obsum div{border:1px solid var(--line);border-radius:8px;padding:10px 12px;animation:obstep .4s ease backwards}
@@ -365,10 +436,6 @@ details.panel[open] summary h3::after{content:" −"}
       <button class="iconbtn" id="next" aria-label="Next day">›</button>
     </div>
   </header>
-  <div class="tabs nav" id="nav" role="tablist">
-    <button role="tab" data-view="today" aria-selected="true">Today</button>
-    <button role="tab" data-view="me" aria-selected="false">Me &amp; goals</button>
-  </div>
   <div class="update" id="updateBar" hidden><span id="updateText">A new version is available.</span><span class="actions"><button id="updateGo">Update now</button><button class="ghost" id="updateLater">Later</button></span></div>
   <div class="status"><span class="dot" id="sDot"></span><span id="sText">Loading your log…</span><span id="sStreak"></span></div>
   <div class="install" id="installBar" hidden>
@@ -454,7 +521,19 @@ details.panel[open] summary h3::after{content:" −"}
     <button type="button" class="chip w" id="wNudgeAdd"></button>
     <button type="button" class="x" id="wNudgeX" aria-label="Remind me later">×</button>
   </div>
-  <section class="label" aria-label="Daily totals">
+  <section class="panel ringcard" aria-label="Today at a glance">
+    <div class="bigring">
+      <svg viewBox="0 0 120 120" aria-hidden="true"><circle class="trk" cx="60" cy="60" r="52"/><circle class="val" id="rK" cx="60" cy="60" r="52" pathLength="100"/></svg>
+      <div class="rc"><b class="num" id="rKv">0</b><span id="rKs">kcal left</span></div>
+    </div>
+    <div class="minis">
+      <div class="mini" style="--rc:var(--protein)"><svg viewBox="0 0 40 40" aria-hidden="true"><circle class="trk" cx="20" cy="20" r="16"/><circle class="val" id="rP" cx="20" cy="20" r="16" pathLength="100"/></svg><div><b class="num" id="rPv">0g</b><span id="rPs">Protein</span></div></div>
+      <div class="mini" style="--rc:var(--carbs)"><svg viewBox="0 0 40 40" aria-hidden="true"><circle class="trk" cx="20" cy="20" r="16"/><circle class="val" id="rC" cx="20" cy="20" r="16" pathLength="100"/></svg><div><b class="num" id="rCv">0g</b><span id="rCs">Carbs</span></div></div>
+      <div class="mini" style="--rc:var(--fat)"><svg viewBox="0 0 40 40" aria-hidden="true"><circle class="trk" cx="20" cy="20" r="16"/><circle class="val" id="rF" cx="20" cy="20" r="16" pathLength="100"/></svg><div><b class="num" id="rFv">0g</b><span id="rFs">Fat</span></div></div>
+    </div>
+    <button type="button" class="chip ghost labeltoggle" id="labelToggle" aria-expanded="false">Full nutrition label ▾</button>
+  </section>
+  <section class="label" id="labelBox" aria-label="Daily totals" hidden>
     <h2>Nutrition Facts</h2>
     <div class="sub"><span id="entryCount">0 items logged</span><span id="labelDate"></span></div>
     <div class="calend">
@@ -467,7 +546,7 @@ details.panel[open] summary h3::after{content:" −"}
     <div class="row"><span class="n"><b>Total Fat</b> <span class="num" id="fVal">0g</span> <span class="num muted" id="fGoal"></span></span><span class="pct" id="fPct">—</span><div class="bar" style="--c:var(--fat)"><i id="fBar"></i></div></div>
     <div class="row"><span class="n"><b>Water</b> <span class="num" id="wVal">0 oz</span> <span class="num muted" id="wGoal"></span></span><span class="pct" id="wPct">0%</span><div class="bar" style="--c:var(--water)"><i id="wBar"></i></div></div>
     <div class="row"><span class="n"><b>Supplements</b> <span class="num" id="sVal">0 of 0</span></span><span class="pct" id="sPct">—</span><div class="bar" style="--c:var(--creatine)"><i id="sBar"></i></div></div>
-    <div class="foot">Goals come from your profile under Me &amp; goals. Calories count 4 per gram of protein and carbs and 9 per gram of fat unless a food lists its own.</div>
+    <div class="foot">Goals come from your profile in the Me tab. Calories count 4 per gram of protein and carbs and 9 per gram of fat unless a food lists its own.</div>
   </section>
 
   <section class="panel tips" id="coachPanel" aria-labelledby="hCoach">
@@ -504,53 +583,87 @@ details.panel[open] summary h3::after{content:" −"}
     <div class="list" id="logList"></div>
   </section>
 
+  </div>
+
+  <!-- ================= ME & GOALS ================= -->
+  <div class="view" id="view-history" hidden>
+  <section class="panel" aria-labelledby="hAvg">
+    <div class="ph"><h3 id="hAvg">Last 30 days</h3><span class="meta" id="histMeta"></span></div>
+    <div class="avgs" id="avgs"></div>
+  </section>
   <section class="panel" aria-labelledby="hWeek">
     <div class="ph"><h3 id="hWeek">Last 7 days</h3><span class="meta" id="weekMeta"></span></div>
     <div class="legend"><span><i style="background:var(--protein)"></i>Protein</span><span><i style="background:var(--water)"></i>Water</span><span>Dashed line = goal</span></div>
     <div class="week" id="week"></div>
   </section>
+  <section class="panel" aria-labelledby="hDays">
+    <div class="ph"><h3 id="hDays">Day by day</h3><span class="meta">Tap a day to open it</span></div>
+    <div class="days" id="histDays"></div>
+    <div class="actions"><button type="button" class="secondary" id="csvBtn">Export CSV</button></div>
+  </section>
   </div>
 
-  <!-- ================= ME & GOALS ================= -->
   <div class="view" id="view-me" hidden>
   <section class="panel" aria-labelledby="hProf">
     <div class="ph"><h3 id="hProf">Profile</h3><span class="meta" id="profMeta">Used to suggest your targets</span></div>
-    <form class="grid" id="profForm" autocomplete="off">
-      <label class="f"><span class="lbl">Age</span><input id="pAge" type="number" min="10" max="110" inputmode="numeric"></label>
-      <label class="f"><span class="lbl">Sex</span><select id="pSex"><option value="">Prefer not to say</option><option value="m">Male</option><option value="f">Female</option></select></label>
-      <label class="f half"><span class="lbl">Units</span><select id="pUnit"><option value="oz">US (lb, ft, fl oz)</option><option value="ml">Metric (kg, cm, ml)</option></select></label>
-      <label class="f half"><span class="lbl">Weight <span class="pWtU">lb</span></span><input id="pWt" type="number" min="0" step="0.1" inputmode="decimal"></label>
-      <div class="f half"><span class="lbl">Height</span>
-        <div class="pair" id="hUS"><input id="hFt" type="number" min="0" max="8" inputmode="numeric" placeholder="ft" aria-label="Height, feet"><input id="hIn" type="number" min="0" max="11" inputmode="numeric" placeholder="in" aria-label="Height, inches"></div>
-        <div id="hMet" hidden><input id="hCm" type="number" min="0" inputmode="numeric" placeholder="cm" aria-label="Height, centimeters"></div>
+    <div class="prof" id="profForm">
+      <div class="f"><span class="lbl">Units</span>
+        <div class="seg" id="pUnitSeg"><button type="button" data-unit="oz">US (lb, ft, oz)</button><button type="button" data-unit="ml">Metric (kg, cm, ml)</button></div></div>
+      <div class="grid">
+        <label class="f half"><span class="lbl">Age</span><input id="pAge" type="number" min="10" max="110" inputmode="numeric" placeholder="Years"></label>
+        <label class="f half"><span class="lbl">Weight <span class="pWtU">lb</span></span><input id="pWt" type="number" min="0" step="0.1" inputmode="decimal"></label>
+        <div class="f half"><span class="lbl">Height</span>
+          <div class="pair" id="hUS"><input id="hFt" type="number" min="0" max="8" inputmode="numeric" placeholder="ft" aria-label="Height, feet"><input id="hIn" type="number" min="0" max="11" inputmode="numeric" placeholder="in" aria-label="Height, inches"></div>
+          <div id="hMet" hidden><input id="hCm" type="number" min="0" inputmode="numeric" placeholder="cm" aria-label="Height, centimeters"></div>
+        </div>
+        <label class="f half"><span class="lbl">Target weight <span class="pWtU">lb</span></span><input id="pTgt" type="number" min="0" step="0.1" inputmode="decimal" placeholder="Optional"></label>
       </div>
-      <label class="f full"><span class="lbl">Activity</span><select id="pAct">
-        <option value="sedentary">Mostly sitting, little exercise</option>
-        <option value="light">Light: exercise 1–3 days a week</option>
-        <option value="moderate">Moderate: exercise 3–5 days a week</option>
-        <option value="very">Very active: hard exercise 6–7 days a week</option>
-        <option value="athlete">Athlete: twice-a-day training or a physical job</option>
-      </select></label>
-      <label class="f half"><span class="lbl">Goal</span><select id="pGoal"><option value="lose">Lose fat</option><option value="maintain">Maintain</option><option value="gain">Build muscle</option></select></label>
-      <label class="f half"><span class="lbl">Training</span><select id="pTrain"><option value="strength">Mostly lifting</option><option value="endurance">Mostly cardio / endurance</option><option value="mixed">A mix of both</option><option value="none">Not training</option></select></label>
-      <label class="f half"><span class="lbl">Target weight <span class="pWtU">lb</span> (optional)</span><input id="pTgt" type="number" min="0" step="0.1" inputmode="decimal"></label>
-      <div class="actions full"><button class="primary" type="submit">Save profile</button><button class="chip ghost" type="button" id="obRedo">Walk me through setup</button></div>
-    </form>
+      <div class="f"><span class="lbl">Sex (for the calorie formula)</span>
+        <div class="opts"><button type="button" class="opt" data-pk="sex" data-v="m">Male</button><button type="button" class="opt" data-pk="sex" data-v="f">Female</button><button type="button" class="opt" data-pk="sex" data-v="">Prefer not to say</button></div></div>
+      <div class="f"><span class="lbl">Goal</span>
+        <div class="opts stack">
+          <button type="button" class="opt" data-pk="goal" data-v="lose">Lose fat<small>A moderate calorie deficit with high protein</small></button>
+          <button type="button" class="opt" data-pk="goal" data-v="maintain">Maintain<small>Eat about what you burn</small></button>
+          <button type="button" class="opt" data-pk="goal" data-v="gain">Build muscle<small>A small surplus and plenty of protein</small></button>
+        </div></div>
+      <div class="f"><span class="lbl">Activity</span>
+        <div class="opts stack">
+          <button type="button" class="opt" data-pk="activity" data-v="sedentary">Mostly sitting<small>Little or no exercise</small></button>
+          <button type="button" class="opt" data-pk="activity" data-v="light">Light<small>Exercise 1–3 days a week</small></button>
+          <button type="button" class="opt" data-pk="activity" data-v="moderate">Moderate<small>Exercise 3–5 days a week</small></button>
+          <button type="button" class="opt" data-pk="activity" data-v="very">Very active<small>Hard exercise 6–7 days a week</small></button>
+          <button type="button" class="opt" data-pk="activity" data-v="athlete">Athlete<small>Twice-a-day training or a physical job</small></button>
+        </div></div>
+      <div class="f"><span class="lbl">Training style</span>
+        <div class="opts"><button type="button" class="opt" data-pk="training" data-v="strength">Lifting</button><button type="button" class="opt" data-pk="training" data-v="endurance">Cardio</button><button type="button" class="opt" data-pk="training" data-v="mixed">Both</button><button type="button" class="opt" data-pk="training" data-v="none">None</button></div></div>
+      <div class="actions"><span class="hint" id="profSaved">Changes save automatically.</span><button class="chip ghost" type="button" id="obRedo" style="margin-left:auto">Walk me through setup</button></div>
+    </div>
+  </section>
+
+  <section class="panel" aria-labelledby="hLook">
+    <div class="ph"><h3 id="hLook">Appearance</h3></div>
+    <div class="f"><span class="lbl">Theme</span>
+      <div class="seg" id="themeSeg"><button type="button" data-theme-set="auto">Auto</button><button type="button" data-theme-set="light">☀️ Light</button><button type="button" data-theme-set="dark">🌙 Dark</button></div></div>
+    <div class="f"><span class="lbl">Accent color</span><div class="swatches" id="swatches"></div></div>
   </section>
 
   <section class="panel" aria-labelledby="hPlan">
     <div class="ph"><h3 id="hPlan">Your plan</h3><span class="meta" id="planMeta"></span></div>
     <div id="plan"></div>
     <ul class="notes" id="planNotes"></ul>
-    <label class="hint" style="display:flex;gap:8px;align-items:center;color:var(--ink);font-size:14px;font-weight:600"><input type="checkbox" id="autoGoals" style="width:18px;height:18px"> Set my daily goals from this plan</label>
-    <form class="grid" id="goalsForm" autocomplete="off">
+    <div class="f"><span class="lbl">Daily goals</span>
+      <div class="opts stack" id="goalMode">
+        <button type="button" class="opt check" data-mode="auto">Use this plan<small>Goals update when your profile changes</small></button>
+        <button type="button" class="opt check" data-mode="custom">Set my own numbers<small>Type any goal below</small></button>
+      </div></div>
+    <div class="grid" id="goalsForm">
       <label class="f half"><span class="lbl">Calories kcal</span><input id="gK" type="number" min="0" inputmode="numeric"></label>
       <label class="f half"><span class="lbl">Water <span id="gWUnit">oz</span></span><input id="gW" type="number" min="0" inputmode="numeric"></label>
       <label class="f"><span class="lbl p">Protein g</span><input id="gP" type="number" min="0" inputmode="numeric"></label>
       <label class="f"><span class="lbl c">Carbs g</span><input id="gC" type="number" min="0" inputmode="numeric"></label>
       <label class="f"><span class="lbl">Fat g</span><input id="gF" type="number" min="0" inputmode="numeric"></label>
-      <div class="actions full" id="goalsSaveRow"><button class="primary" type="submit">Save custom goals</button></div>
-    </form>
+    </div>
+    <p class="hint" id="goalsNote"></p>
     <p class="hint">Estimates from standard formulas (Mifflin-St Jeor for calories, body-weight ranges for protein and water). They're a starting point, not medical advice. Check with a doctor if you're pregnant, under 18, or managing a health condition.</p>
   </section>
 
@@ -626,13 +739,13 @@ details.panel[open] summary h3::after{content:" −"}
 
     <div class="obstep" data-step="2" hidden>
       <h2>What are you working toward?</h2>
-      <div class="opts col">
+      <div class="opts stack">
         <button type="button" class="opt" data-k="goal" data-v="lose">Lose fat<small>A moderate calorie deficit with high protein to keep muscle</small></button>
         <button type="button" class="opt" data-k="goal" data-v="maintain">Maintain<small>Eat about what you burn</small></button>
         <button type="button" class="opt" data-k="goal" data-v="gain">Build muscle<small>A small surplus and plenty of protein</small></button>
       </div>
       <div class="f"><span class="lbl">How active are you?</span>
-        <div class="opts col">
+        <div class="opts stack">
           <button type="button" class="opt" data-k="activity" data-v="sedentary">Mostly sitting<small>Little or no exercise</small></button>
           <button type="button" class="opt" data-k="activity" data-v="light">Light<small>Exercise 1–3 days a week</small></button>
           <button type="button" class="opt" data-k="activity" data-v="moderate">Moderate<small>Exercise 3–5 days a week</small></button>
@@ -646,7 +759,7 @@ details.panel[open] summary h3::after{content:" −"}
     <div class="obstep" data-step="3" hidden>
       <h2>Any supplements?</h2>
       <p class="hint">Pick what you take and you'll get a daily check-off and streak for each. You can change these later.</p>
-      <div class="opts col" id="obSupps"></div>
+      <div class="opts stack" id="obSupps"></div>
     </div>
 
     <div class="obstep" data-step="4" hidden>
@@ -662,6 +775,11 @@ details.panel[open] summary h3::after{content:" −"}
     </div>
   </div>
 </div>
+<nav class="tabbar" id="nav" aria-label="Sections">
+  <button type="button" data-view="today" aria-selected="true"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg><span>Today</span></button>
+  <button type="button" data-view="history" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span>History</span></button>
+  <button type="button" data-view="me" aria-selected="false"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg><span>Me</span></button>
+</nav>
 <div class="ob" id="instSheet" hidden role="dialog" aria-modal="true" aria-labelledby="instTitle">
   <div class="obcard">
     <div class="actions" style="justify-content:space-between;align-items:center">
@@ -678,7 +796,7 @@ details.panel[open] summary h3::after{content:" −"}
 
 <script>
 (() => {
-const APP_VERSION="2.7.0";
+const APP_VERSION="3.0.0";
 const REPO="kefirman9000/fuel-log";
 const $ = id => document.getElementById(id);
 const OZ=29.5735, LB=0.45359237, IN=2.54;
@@ -841,6 +959,12 @@ function render(){
   if(g.kcal){const kp=pct(t.k,g.kcal);$("kGoal").textContent=`of ${(+g.kcal).toLocaleString()} goal · ${kp}%`;$("kBar").style.width=Math.min(100,kp)+"%"}
   else{$("kGoal").textContent="kcal eaten";$("kBar").style.width="0"}
   setRow("p",r1(t.p),g.protein,"g"); setRow("c",r1(t.c),g.carbs,"g"); setRow("f",r1(t.f),g.fat,"g");
+  const ring=(id,v,goal)=>{const el=$(id),p=goal?v/goal*100:0; el.style.strokeDashoffset=100-Math.min(100,p); el.classList.toggle("over",p>110&&id==="rK")};
+  ring("rK",t.k,g.kcal); ring("rP",t.p,g.protein); ring("rC",t.c,g.carbs); ring("rF",t.f,g.fat);
+  if(g.kcal){const l=Math.round(g.kcal-t.k); countTo($("rKv"),Math.abs(l)); $("rKs").textContent=l>=0?"kcal left":"kcal over"}
+  else{countTo($("rKv"),Math.round(t.k)); $("rKs").textContent="kcal eaten"}
+  const mini=(k,v,goal,name)=>{$("r"+k+"v").textContent=Math.round(v)+(goal?" / "+goal:"")+"g"; $("r"+k+"s").textContent=name+(goal?" · "+pct(v,goal)+"%":"")};
+  mini("P",t.p,g.protein,"Protein"); mini("C",t.c,g.carbs,"Carbs"); mini("F",t.f,g.fat,"Fat");
   $("wVal").textContent=fmtW(t.w)+" "+uW(); $("wGoal").textContent=g.waterMl?"/ "+fmtW(g.waterMl)+" "+uW():"";
   const wp=pct(t.w,g.waterMl); $("wPct").textContent=g.waterMl?wp+"%":"—"; $("wBar").style.width=Math.min(100,wp)+"%";
   const onS=S.settings.supps.filter(s=>s.on), took=onS.filter(s=>day.supps[s.id]).length;
@@ -863,12 +987,16 @@ function render(){
 
   // log
   $("logMeta").innerHTML=day.entries.length?`<span class="edithint">Tap an entry to edit</span>`:esc(niceDate(S.date));
-  $("logList").innerHTML=day.entries.length?day.entries.map(e=>e.id===S.editId?editHTML(e):`
-    <div class="item${e.id===S.newId?" new":""}"><span class="nm">${esc(e.name)}${e.src?`<span class="tag">${esc(e.src)}</span>`:""}<button class="star" data-star-entry="${e.id}" aria-pressed="${isFavName(e.name)}" aria-label="Favorite ${esc(e.name)}">${isFavName(e.name)?"★":"☆"}</button></span>
+  const itemHTML=e=>e.id===S.editId?editHTML(e):`
+    <div class="item${e.id===S.newId?" new":""}"><span class="nm"><span class="fi" aria-hidden="true">${foodIcon(e.name)}</span>${esc(e.name)}${e.src?`<span class="tag">${esc(e.src)}</span>`:""}<button class="star" data-star-entry="${e.id}" aria-pressed="${isFavName(e.name)}" aria-label="Favorite ${esc(e.name)}">${isFavName(e.name)?"★":"☆"}</button></span>
     <span class="sm">${esc(e.t||"")} · ${kcalOf(e)} kcal${e.f?` · ${r1(+e.f)}g fat`:""}</span>
     <span class="mac"><span class="p">${r1(+e.p||0)}g P</span><br><span class="c">${r1(+e.c||0)}g C</span></span>
-    <button class="del" data-del="${e.id}" aria-label="Remove ${esc(e.name)}">×</button></div>`).join("")
-    :`<p class="empty">Nothing logged ${S.date===todayKey()?"yet today":"on this day"}. Type a food in the bar at the top, or tap Scan.</p>`;
+    <button class="del" data-del="${e.id}" aria-label="Remove ${esc(e.name)}">×</button></div>`;
+  if(day.entries.length){
+    const groups={}; day.entries.forEach(e=>{const m=e.meal||mealFromTime(e.t);(groups[m]=groups[m]||[]).push(e)});
+    $("logList").innerHTML=MEALS.filter(([k])=>groups[k]).map(([k,label,ic,col])=>{const es=groups[k], kc=es.reduce((s,e)=>s+kcalOf(e),0), pr=es.reduce((s,e)=>s+(+e.p||0),0);
+      return `<div class="meal" style="--mc:${col}"><div class="mealh"><b>${ic} ${label}</b><span>${kc.toLocaleString()} kcal · ${Math.round(pr)}g P</span></div>${es.map(itemHTML).join("")}</div>`}).join("");
+  }else $("logList").innerHTML=`<p class="empty">Nothing logged ${S.date===todayKey()?"yet today":"on this day"}. Type a food in the bar at the top, or tap Scan.</p>`;
 
   S.newId=null;
   checkGoals({p:!!g.protein&&t.p>=g.protein, c:!!g.carbs&&t.c>=g.carbs, w:!!g.waterMl&&t.w>=g.waterMl, s:onS.length>0&&took===onS.length});
@@ -946,12 +1074,13 @@ async function renderWeek(){
 }
 
 /* ---------- render: me & goals ---------- */
+let profUnit="oz";
 function readBody(u){
   const us=u==="oz", wt=+$("pWt").value, tg=+$("pTgt").value;
-  let h=null;
-  if(us){const ft=+$("hFt").value||0, inch=+$("hIn").value||0; if(ft||inch) h=(ft*12+inch)*IN}
-  else{const cm=+$("hCm").value; if(cm>0) h=cm}
-  return {weightKg:wt>0?(us?wt*LB:wt):null, targetKg:tg>0?(us?tg*LB:tg):null, heightCm:h};
+  let ht=null;
+  if(us){const ft=+$("hFt").value||0, inch=+$("hIn").value||0; if(ft||inch) ht=(ft*12+inch)*IN}
+  else{const cm=+$("hCm").value; if(cm>0) ht=cm}
+  return {weightKg:wt>0?(us?wt*LB:wt):null, targetKg:tg>0?(us?tg*LB:tg):null, heightCm:ht};
 }
 function writeBody(u,b){
   const us=u==="oz", w=kg=>kg>0?(us?r1(kg/LB):r1(kg)):"";
@@ -960,24 +1089,25 @@ function writeBody(u,b){
   if(b.heightCm>0){const tin=b.heightCm/IN;let ft=Math.floor(tin/12),inch=Math.round(tin-ft*12);if(inch===12){ft++;inch=0}
     $("hFt").value=ft;$("hIn").value=inch;$("hCm").value=Math.round(b.heightCm)}
   else{$("hFt").value="";$("hIn").value="";$("hCm").value=""}
-  $("hUS").hidden=!us; $("hMet").hidden=us; $("pUnit").dataset.u=u;
+  $("hUS").hidden=!us; $("hMet").hidden=us; profUnit=u;
+  document.querySelectorAll("#pUnitSeg [data-unit]").forEach(x=>x.setAttribute("aria-pressed",x.dataset.unit===u));
 }
+function markProfileOpts(){const p=S.settings.profile;
+  document.querySelectorAll("#profForm .opt[data-pk]").forEach(b=>b.setAttribute("aria-pressed",(p[b.dataset.pk]||"")===b.dataset.v))}
 function fillProfile(){
   const s=S.settings, p=s.profile;
-  $("pAge").value=p.age??""; $("pSex").value=p.sex||""; $("pUnit").value=s.unit;
-  $("pAct").value=p.activity; $("pGoal").value=p.goal; $("pTrain").value=p.training;
-  writeBody(s.unit,p);
+  $("pAge").value=p.age??""; writeBody(s.unit,p); markProfileOpts();
   const wk=Object.keys(s.weights||{}).sort().pop();
-  $("profMeta").textContent=wk?"Weight updated "+niceDate(wk).replace(/^T/,"t").replace(/^Y/,"y"):"Used to suggest your targets";
+  $("profMeta").textContent=wk?"Weight updated "+niceDate(wk).toLowerCase():"Used to suggest your targets";
   $("fdcKey").value=s.fdcKey||"";
 }
 function fillGoals(){
-  const s=S.settings, auto=s.auto&&!!suggest(s.profile), g=G();
-  $("autoGoals").checked=auto;
-  $("gK").value=g.kcal??""; $("gP").value=g.protein??""; $("gC").value=g.carbs??""; $("gF").value=g.fat??"";
-  $("gW").value=g.waterMl?fmtW(g.waterMl):""; $("gWUnit").textContent=uW();
-  ["gK","gP","gC","gF","gW"].forEach(id=>$(id).disabled=auto);
-  $("goalsSaveRow").hidden=auto;
+  const s=S.settings, hasPlan=!!suggest(s.profile), auto=s.auto&&hasPlan, g=G();
+  document.querySelectorAll("#goalMode [data-mode]").forEach(b=>{b.setAttribute("aria-pressed",(b.dataset.mode==="auto")===auto); if(b.dataset.mode==="auto") b.disabled=!hasPlan});
+  const set=(id,v)=>{if(document.activeElement!==$(id)) $(id).value=v??""};
+  set("gK",g.kcal); set("gP",g.protein); set("gC",g.carbs); set("gF",g.fat); set("gW",g.waterMl?fmtW(g.waterMl):"");
+  $("gWUnit").textContent=uW();
+  $("goalsNote").textContent=!hasPlan?"Add your weight above to get a suggested plan.":auto?"Typing a number switches you to your own goals.":"Your own goals are saved as you type.";
 }
 function renderPlan(){
   const s=S.settings, p=s.profile, sg=suggest(p);
@@ -1052,7 +1182,7 @@ function checkGoals(hits){
   const prev=S.hitsDate===S.date?S.hits:null;
   if(prev&&S.view==="today") Object.keys(hits).forEach(k=>{ if(hits[k]&&!prev[k]){
     const pc=$(k+"Pct"), row=pc.closest(".row"); row.classList.remove("hit"); void row.offsetWidth; row.classList.add("hit");
-    burst(pc,CHEERS[k][1]); if(k==="w") setTimeout(()=>burst(document.querySelector(".jug"),"var(--water)"),250);
+    const ringEl={p:"rP",c:"rC"}[k]; burst($("labelBox").hidden?(ringEl?$(ringEl).closest("svg"):k==="w"?document.querySelector(".jug"):$("suppList")):pc,CHEERS[k][1]); if(k==="w") setTimeout(()=>burst(document.querySelector(".jug"),"var(--water)"),250);
     setTimeout(()=>toast(CHEERS[k][0]),650);
   }});
   S.hits=hits; S.hitsDate=S.date;
@@ -1061,7 +1191,7 @@ function checkGoals(hits){
 async function addEntry(e){
   const day=await getDay(S.date);
   const id=Math.random().toString(36).slice(2,9);
-  day.entries.push({id,t:now(),...e}); S.newId=id;
+  day.entries.push({id,t:now(),meal:mealFor(new Date().getHours()),...e}); S.newId=id;
   saveDay(S.date); render(); toast("Logged "+e.name);
   const pv=$("pVal"); if(pv&&+e.p>0){const r=pv.getBoundingClientRect(); if(r.top>0) floaty(r.left+r.width/2,r.top-2,"+"+r1(+e.p)+"g","var(--protein)")}
 }
@@ -1093,11 +1223,57 @@ function showBadge(ic,title,text){
   clearTimeout(showBadge._t); showBadge._t=setTimeout(()=>{$("badgePop").hidden=true},3200);
 }
 $("badgePop").onclick=()=>{$("badgePop").hidden=true};
+function setLabel(open){$("labelBox").hidden=!open; $("labelToggle").setAttribute("aria-expanded",open); $("labelToggle").textContent=open?"Hide nutrition label ▴":"Full nutrition label ▾"}
+$("labelToggle").onclick=()=>{const open=$("labelBox").hidden; setLabel(open); save("labelOpen",open)};
 function renderBadges(){
   const b=load("badges")||{}, best=load("bestStreak")||0, st=currentStreak();
   $("badgeMeta").textContent=`Current ${st} · Best ${best}`;
   $("badges").innerHTML=BADGES.map(([n,ic,title])=>`<div class="badge ${b[n]?"got":"locked"}"><span class="bi">${ic}</span><b>${title}</b><small>${b[n]?"Earned "+niceDate(b[n]):n===1?"Log once":n+" days"}</small></div>`).join("");
 }
+
+/* ---------- history ---------- */
+async function renderHistory(){
+  const keys=[...Array(30)].map((_,i)=>shift(todayKey(),-i)), days=await Promise.all(keys.map(getDay)), g=G();
+  const ts=days.map(totals), logged=ts.map((t,i)=>days[i].entries.length>0);
+  const n=logged.filter(Boolean).length||1, avg=k=>Math.round(ts.reduce((s,t,i)=>s+(logged[i]?t[k]:0),0)/n);
+  const wd=ts.filter(t=>t.w>0).length||1, wAvg=ts.reduce((s,t)=>s+t.w,0)/wd;
+  $("histMeta").textContent=`${logged.filter(Boolean).length} of 30 days logged`;
+  $("avgs").innerHTML=[["Avg calories",avg("k").toLocaleString()+" kcal"],["Avg protein",avg("p")+" g"],["Avg water",fmtW(wAvg)+" "+uW()],
+    ["Protein goal hit",g.protein?ts.filter(t=>t.p>=g.protein).length+" days":"—"]].map(([k,v])=>`<div><span>${k}</span><b>${v}</b></div>`).join("");
+  const maxK=Math.max(g.kcal||0,...ts.map(t=>t.k))||1;
+  $("histDays").innerHTML=keys.map((k,i)=>{const t=ts[i], has=logged[i]||t.w>0;
+    return `<button type="button" class="dayrow${has?"":" empty"}" data-day="${k}"><span class="dd">${niceDate(k)}</span>
+      <span class="dbar"><i style="width:${has?t.k/maxK*100:0}%"></i></span>
+      <span class="dv">${has?`${Math.round(t.k).toLocaleString()} kcal · ${Math.round(t.p)}g P${g.protein&&t.p>=g.protein?" ✓":""}`:"—"}</span></button>`}).join("");
+}
+$("histDays").onclick=async ev=>{const b=ev.target.closest("[data-day]");if(!b)return;S.date=b.dataset.day;await getDay(S.date);setView("today")};
+$("csvBtn").onclick=async()=>{
+  const rows=[["date","meal","time","food","protein_g","carbs_g","fat_g","kcal"]];
+  const keys=[]; for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i); if(k&&k.startsWith("fuel:day-")) keys.push(k.slice(9))}
+  keys.sort();
+  for(const k of keys){const d=await getDay(k);
+    d.entries.forEach(e=>rows.push([k,e.meal||mealFromTime(e.t),e.t||"",e.name,r1(+e.p||0),r1(+e.c||0),r1(+e.f||0),kcalOf(e)]));
+    if(d.water.length) rows.push([k,"","","Water ("+uW()+")","","","",fmtW(d.water.reduce((s,m)=>s+m,0))]);}
+  const csv=rows.map(r=>r.map(v=>{const s=String(v);return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s}).join(",")).join("\n");
+  const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"})); a.download="fuel-log-"+todayKey()+".csv";
+  document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500); toast("CSV exported");
+};
+
+/* ---------- appearance ---------- */
+const ACCENTS={red:"var(--protein)",blue:"var(--water)",green:"var(--good)",purple:"var(--creatine)",gold:"var(--carbs)",orange:"var(--warn)"};
+function applyLook(){
+  const th=load("theme")||"auto", ac=load("accent")||"red", root=document.documentElement;
+  if(th==="auto") delete root.dataset.theme; else root.dataset.theme=th;
+  root.style.setProperty("--accent",ACCENTS[ac]||ACCENTS.red);
+  const dark=th==="dark"||(th==="auto"&&matchMedia("(prefers-color-scheme: dark)").matches);
+  document.querySelector('meta[name="theme-color"]').setAttribute("content",dark?"#101211":"#eef0ec");
+  document.querySelectorAll("[data-theme-set]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.themeSet===th));
+  $("swatches").innerHTML=Object.entries(ACCENTS).map(([k,v])=>`<button type="button" data-accent="${k}" style="--sw:${v}" aria-label="${k}" aria-pressed="${k===ac}"></button>`).join("");
+}
+$("themeSeg").onclick=ev=>{const b=ev.target.closest("[data-theme-set]");if(!b)return;save("theme",b.dataset.themeSet);applyLook()};
+$("swatches").onclick=ev=>{const b=ev.target.closest("[data-accent]");if(!b)return;save("accent",b.dataset.accent);applyLook();toast("Accent updated")};
+matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change",applyLook);
+applyLook();
 
 /* ---------- water reminder ---------- */
 function renderWaterNudge(){
@@ -1138,17 +1314,31 @@ function useFood(id,servings=1){
 }
 
 function setView(v){
-  S.view=v;
+  const changed=S.view!==v; S.view=v;
   document.querySelectorAll("#nav button").forEach(b=>b.setAttribute("aria-selected",b.dataset.view===v));
-  $("view-today").hidden=v!=="today"; $("view-me").hidden=v!=="me"; $("datebar").style.visibility=v==="today"?"visible":"hidden";
-  if(v==="me"){stopCam();renderMe()} else render();
+  ["today","history","me"].forEach(x=>{const el=$("view-"+x); el.hidden=x!==v; if(x===v&&changed&&!calm){el.classList.remove("enter");void el.offsetWidth;el.classList.add("enter")}});
+  $("datebar").style.visibility=v==="today"?"visible":"hidden";
+  if(v!=="today") stopCam();
+  if(v==="me") renderMe(); else if(v==="history"){render();renderHistory()} else render();
   window.scrollTo({top:0});
 }
 $("nav").onclick=ev=>{const b=ev.target.closest("[data-view]");if(b)setView(b.dataset.view)};
 document.addEventListener("click",ev=>{const b=ev.target.closest("[data-goto]");if(b)setView(b.dataset.goto)});
 
-$("prev").onclick=async()=>{S.date=shift(S.date,-1);await getDay(S.date);render()};
-$("next").onclick=async()=>{if(S.date<todayKey()){S.date=shift(S.date,1);await getDay(S.date);render()}};
+async function goDay(n){
+  const k=shift(S.date,n); if(n>0&&k>todayKey()) return;
+  S.date=k; S.editId=null; await getDay(S.date); render();
+  if(!calm){const v=$("view-today"); v.classList.remove("daymove-l","daymove-r"); void v.offsetWidth; v.classList.add(n>0?"daymove-l":"daymove-r")}
+}
+$("prev").onclick=()=>goDay(-1);
+$("next").onclick=()=>goDay(1);
+/* swipe left/right on Today to change the day */
+(()=>{let x0=null,y0=0,t0=0;
+  const skip=el=>el.closest("input,textarea,select,button,.favs,.quick,.addsheet,video,.ob");
+  $("view-today").addEventListener("touchstart",e=>{if(e.touches.length!==1||skip(e.target)){x0=null;return}x0=e.touches[0].clientX;y0=e.touches[0].clientY;t0=Date.now()},{passive:true});
+  $("view-today").addEventListener("touchend",e=>{if(x0==null)return;const dx=e.changedTouches[0].clientX-x0,dy=e.changedTouches[0].clientY-y0;x0=null;
+    if(Date.now()-t0<600&&Math.abs(dx)>70&&Math.abs(dy)<45) goDay(dx<0?1:-1)},{passive:true});
+})();
 
 const addWater=async ev=>{const b=ev.target.closest("[data-ml]");if(!b)return;
   const d=await getDay(S.date);d.water.push(Math.round(+b.dataset.ml));saveDay(S.date);pour(b,"+"+b.textContent.replace(/[^\d.a-z ]/gi,"").trim());render()};
@@ -1167,7 +1357,8 @@ $("qScan").onclick=()=>{
 function openAdd(tab){
   $("addPanel").hidden=false;
   document.querySelector(`#foodTabs [data-tab="${tab}"]`).click();
-  $("addPanel").scrollIntoView({behavior:calm?"auto":"smooth",block:"start"});
+  const q=document.querySelector(".quick"), y=$("addPanel").getBoundingClientRect().top+scrollY-q.offsetHeight-16;
+  window.scrollTo({top:Math.max(0,y),behavior:calm?"auto":"smooth"});
 }
 function closeAdd(){
   $("addPanel").hidden=true; stopCam(); $("searchPick").innerHTML=""; $("searchResults").innerHTML=""; $("scanResult").innerHTML="";
@@ -1190,6 +1381,18 @@ $("suppList").onclick=async ev=>{const b=ev.target.closest("[data-supp]");if(!b)
   if(d.supps[id]) delete d.supps[id]; else {d.supps[id]={dose:s?s.dose:"",at:S.date===todayKey()?now():""}; S.popSupp=id;}
   saveDay(S.date); render()};
 
+const MEALS=[["breakfast","Breakfast","🌅","var(--carbs)"],["lunch","Lunch","☀️","var(--good)"],["dinner","Dinner","🌙","var(--water)"],["snack","Snacks","🍿","var(--creatine)"]];
+const mealFor=hr=>hr<4?"snack":hr<11?"breakfast":hr<15?"lunch":hr<17?"snack":hr<21?"dinner":"snack";
+function mealFromTime(t){const m=String(t||"").match(/(\d{1,2}):(\d{2})\s*([ap])?/i); if(!m) return "snack"; let hr=+m[1]; if(m[3]){const pm=/p/i.test(m[3]); if(pm&&hr<12)hr+=12; if(!pm&&hr===12)hr=0} return mealFor(hr)}
+const ICONS=[[/pizza/,"🍕"],[/burger|big mac|whopper|quarter pounder|cheeseburger/,"🍔"],[/fries|fry\b/,"🍟"],[/taco/,"🌮"],[/burrito|bowl|chipotle|wrap/,"🌯"],
+  [/sandwich|\bsub\b|mcchicken|blt/,"🥪"],[/hot ?dog/,"🌭"],[/salad|lettuce|broccoli|spinach|veg/,"🥗"],[/egg/,"🥚"],[/bacon/,"🥓"],[/chicken|nugget|turkey|wing/,"🍗"],
+  [/steak|beef|barbacoa|carnitas|pork|ham\b/,"🥩"],[/salmon|tuna|fish|shrimp|sushi/,"🐟"],[/rice/,"🍚"],[/pasta|spaghetti|noodle|ramen|\bmac\b/,"🍝"],
+  [/ice cream|frozen yogurt|gelato|sundae/,"🍦"],[/cookie/,"🍪"],[/donut|doughnut/,"🍩"],[/cake|cupcake|brownie|nutty buddy|debbie|honey bun|muffin/,"🧁"],
+  [/chocolate|candy|snickers|kit ?kat|m&m/,"🍫"],[/yogurt|oat|cereal|granola/,"🥣"],[/bagel|bread|toast|bun\b|roll\b/,"🍞"],[/pancake|waffle/,"🥞"],
+  [/coffee|espresso|latte|cappuccino|starbucks/,"☕"],[/shake|whey|protein powder|smoothie/,"🥤"],[/milk/,"🥛"],[/beer/,"🍺"],[/wine/,"🍷"],[/soda|cola|coke|pepsi|sprite|dr pepper/,"🥤"],
+  [/juice/,"🧃"],[/apple/,"🍎"],[/banana/,"🍌"],[/orange/,"🍊"],[/berr|strawberr/,"🍓"],[/grape/,"🍇"],[/avocado|guac/,"🥑"],[/potato/,"🥔"],
+  [/cheese|queso/,"🧀"],[/peanut|almond|cashew|\bnuts?\b/,"🥜"],[/\bbar\b|quest|clif/,"🍫"],[/water/,"💧"]];
+const foodIcon=n=>{const s=String(n).toLowerCase();for(const[re,ic]of ICONS)if(re.test(s))return ic;return "🍽️"};
 function editHTML(e){
   const v=x=>x==null||x===""?"":r1(+x);
   return `<form class="item editing" data-edit="${e.id}" autocomplete="off">
@@ -1201,6 +1404,7 @@ function editHTML(e){
       <label class="f"><span class="lbl">Fat g</span><input name="f" type="number" min="0" step="0.1" value="${v(e.f)}" inputmode="decimal"></label>
       <label class="f"><span class="lbl">kcal</span><input name="k" type="number" min="0" value="${e.kcal==null?"":Math.round(e.kcal)}" placeholder="auto" inputmode="numeric"></label>
     </div>
+    <div class="f"><span class="lbl">Meal</span><select name="meal">${MEALS.map(([k,l,ic])=>`<option value="${k}"${(e.meal||mealFromTime(e.t))===k?" selected":""}>${ic} ${l}</option>`).join("")}</select></div>
     <p class="hint">Change "Amount ×" to scale everything (2 = double, 0.5 = half), or edit any number directly.</p>
     <div class="actions"><button class="primary" type="submit">Save</button><button type="button" class="chip ghost" data-edit-cancel>Cancel</button>
       <button type="button" class="chip ghost" data-del="${e.id}" style="margin-left:auto;color:var(--warn)">Delete</button></div></form>`;
@@ -1216,7 +1420,7 @@ $("logList").addEventListener("submit",async ev=>{
   const m=+form.x.value||1; let name=form.n.value.trim()||e.name;
   if(name===e.name&&m!==1){const pm=name.match(/^(\d+(?:\.\d+)?)× (.*)$/), n0=pm?+pm[1]:1, base=pm?pm[2]:name, n1=r1(n0*m); name=(n1!==1?n1+"× ":"")+base}
   const num=x=>x===""?0:+x;
-  Object.assign(e,{name,p:num(form.p.value),c:num(form.c.value),f:num(form.f.value),kcal:form.k.value===""?null:+form.k.value});
+  Object.assign(e,{name,meal:form.meal.value,p:num(form.p.value),c:num(form.c.value),f:num(form.f.value),kcal:form.k.value===""?null:+form.k.value});
   S.editId=null; saveDay(S.date); render(); toast("Entry updated");
 });
 $("logList").onclick=async ev=>{
@@ -1642,28 +1846,39 @@ async function showCode(code){
 }
 
 /* ---------- profile, plan, goals ---------- */
-$("pUnit").onchange=()=>{const b=readBody($("pUnit").dataset.u||S.settings.unit);writeBody($("pUnit").value,b)};
-$("profForm").onsubmit=ev=>{ev.preventDefault();
-  const s=S.settings, u=$("pUnit").value, b=readBody(u), age=+$("pAge").value, prevW=s.profile.weightKg;
-  s.unit=u;
-  s.profile={...s.profile,age:age>0?Math.round(age):null,sex:$("pSex").value,activity:$("pAct").value,goal:$("pGoal").value,training:$("pTrain").value,...b};
+let profT=null;
+function saveProfile(quiet){
+  const s=S.settings, b=readBody(profUnit), age=+$("pAge").value, prevW=s.profile.weightKg;
+  s.unit=profUnit;
+  s.profile={...s.profile,age:age>0?Math.round(age):null,...b};
   if(b.weightKg&&(!prevW||Math.abs(b.weightKg-prevW)>.05)){s.weights=s.weights||{};s.weights[todayKey()]=r1(b.weightKg)}
-  let msg="Profile saved";
-  if(!prevW&&b.weightKg&&!s.auto){s.auto=true;msg="Profile saved. Goals now follow your plan"}
-  else if(s.auto&&suggest(s.profile)) msg="Profile saved. Goals updated";
-  saveSettings(); renderMe(); render(); toast(msg);
-};
-$("autoGoals").onchange=()=>{const s=S.settings;
-  if($("autoGoals").checked){
-    if(!suggest(s.profile)){$("autoGoals").checked=false;toast("Add your weight first");return}
-    s.auto=true; toast("Goals now follow your plan");
-  }else{const g=G(); s.goals={kcal:g.kcal,protein:g.protein,carbs:g.carbs,fat:g.fat,waterMl:g.waterMl}; s.auto=false}
+  if(!prevW&&b.weightKg) s.auto=true;
+  saveSettings(); renderPlan(); renderSuppManage(); render();
+  $("profSaved").textContent="Saved ✓"; clearTimeout(saveProfile._t); saveProfile._t=setTimeout(()=>{$("profSaved").textContent="Changes save automatically."},1800);
+}
+$("profForm").addEventListener("input",ev=>{if(ev.target.matches("input")){clearTimeout(profT);profT=setTimeout(saveProfile,600)}});
+$("profForm").addEventListener("click",ev=>{
+  const u=ev.target.closest("[data-unit]");
+  if(u&&u.dataset.unit!==profUnit){const b=readBody(profUnit); writeBody(u.dataset.unit,b); saveProfile(); return}
+  const o=ev.target.closest(".opt[data-pk]"); if(!o) return;
+  S.settings.profile[o.dataset.pk]=o.dataset.v; markProfileOpts(); saveProfile();
+});
+$("goalMode").onclick=ev=>{const b=ev.target.closest("[data-mode]"); if(!b||b.disabled) return; const s=S.settings;
+  if(b.dataset.mode==="auto"){s.auto=true; toast("Goals now follow your plan")}
+  else{const g=G(); s.goals={kcal:g.kcal,protein:g.protein,carbs:g.carbs,fat:g.fat,waterMl:g.waterMl}; s.auto=false}
   saveSettings(); renderPlan(); render();
 };
-$("goalsForm").onsubmit=ev=>{ev.preventDefault();const s=S.settings,us=s.unit==="oz",n=id=>+$(id).value||null;
-  s.goals={kcal:n("gK"),protein:n("gP"),carbs:n("gC"),fat:n("gF"),waterMl:n("gW")?Math.round(us?n("gW")*OZ:n("gW")):null};
-  s.auto=false; saveSettings(); renderPlan(); render(); toast("Custom goals saved")};
-
+let goalT=null;
+$("goalsForm").addEventListener("input",()=>{
+  const s=S.settings;
+  if(s.auto){const g=G(); s.goals={kcal:g.kcal,protein:g.protein,carbs:g.carbs,fat:g.fat,waterMl:g.waterMl}; s.auto=false;
+    document.querySelectorAll("#goalMode [data-mode]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.mode==="custom"))}
+  clearTimeout(goalT); goalT=setTimeout(()=>{
+    const us=s.unit==="oz", n=id=>+$(id).value||null;
+    s.goals={kcal:n("gK"),protein:n("gP"),carbs:n("gC"),fat:n("gF"),waterMl:n("gW")?Math.round(us?n("gW")*OZ:n("gW")):null};
+    saveSettings(); renderPlan(); render(); $("goalsNote").textContent="Saved ✓";
+  },600);
+});
 /* supplements manager */
 $("suppManage").onchange=ev=>{const s=S.settings;
   const c=ev.target.closest("[data-on]"); if(c){const x=s.supps.find(y=>y.id===c.dataset.on); if(x) x.on=c.checked}
@@ -1839,6 +2054,7 @@ async function boot(){
   $("sDot").classList.add("ok");
   $("sText").textContent="Saved in this browser. Works offline (search needs internet).";
   S.days={}; S.ready=true; await getDay(S.date);
+  setLabel(!!load("labelOpen"));
   render(); if(S.view==="me") renderMe();
   if(!(S.settings.profile.weightKg>0)&&!load("onboarded")) obOpen();
   updateInstallUI();

@@ -6,7 +6,7 @@ A one-page food, water and supplement tracker that runs in your phone's browser.
 
 ## Features
 
-- **Nutrition Facts label** shows calories, protein, carbs, fat, water and supplements against your daily goals.
+- **Calorie and macro rings** on Today, with the full Nutrition Facts label one tap away. The label calories, protein, carbs, fat, water and supplements against your daily goals.
 - **Profile-based plan:** enter your age, sex, height, weight, activity, goal and training style. The app suggests calorie, protein, carb, fat and water targets (Mifflin-St Jeor plus body-weight ranges) and explains how it got each one.
 - **First-run setup** walks new users through their profile, goal and supplements.
 - **Add to home screen:** a one-tap install on Android and step-by-step instructions on iPhone. Works offline once installed.
@@ -15,6 +15,11 @@ A one-page food, water and supplement tracker that runs in your phone's browser.
 - **Barcode scanning** with the camera or a photo, or by typing the number.
 - **Supplements:** turn on creatine, vitamin D, fish oil, magnesium, electrolytes, a multivitamin, or add your own. Each one has a daily check-off and a 7-day streak, and the app marks which ones suit your profile.
 - **Daily suggestions:** protein left (with food ideas), calories left, whether you're on pace for water, and supplements still to take.
+- **Meals:** the log groups food into breakfast, lunch, dinner and snacks, each with a food icon. Tap any entry to edit it.
+- **Favorites:** star a food and it's pinned under the search bar for one-tap logging.
+- **History tab:** 30-day averages, the 7-day chart, a day-by-day list and CSV export.
+- **Streak badges** from your first log up to a full year, plus a water reminder when you fall behind.
+- **Themes:** auto, light or dark, and six accent colors. Swipe left or right on Today to change the day.
 - **Small animations** when you log water, hit a goal or check off a supplement.
 - **Backup:** export and import your data as JSON.
 - **In-app updates:** the app checks this repo for a newer version and asks before updating.
