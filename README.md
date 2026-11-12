@@ -19,6 +19,7 @@ A one-page food, water and supplement tracker that runs in your phone's browser.
 - **Favorites:** star a food and it's pinned under the search bar for one-tap logging.
 - **History tab:** 30-day averages, the 7-day chart, a day-by-day list and CSV export.
 - **Streak badges** from your first log up to a full year, plus a water reminder when you fall behind.
+- **Stat styles:** show your day as rings, bars or the full Nutrition Facts label.
 - **Themes:** auto, light or dark, and six accent colors. Swipe left or right on Today to change the day.
 - **Small animations** when you log water, hit a goal or check off a supplement.
 - **Backup:** export and import your data as JSON.

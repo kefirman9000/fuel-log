@@ -356,6 +356,24 @@ details.panel[open] summary h3::after{content:" −"}
 .mini span{font-size:12px;color:var(--muted)}
 .labeltoggle{grid-column:1/-1;justify-self:center;font-size:13px}
 @media (max-width:360px){.bigring{width:112px;height:112px}.bigring .rc b{font-size:22px}}
+/* Stat style picker and bars */
+.statbar{display:flex;justify-content:flex-end;margin-bottom:-10px}
+.statseg{padding:2px;border-radius:999px;width:auto}
+.statseg button{display:flex;align-items:center;gap:5px;padding:5px 11px;border-radius:999px;font-size:12.5px}
+.statseg svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round}
+.statseg.big button{padding:9px 6px;font-size:14px;justify-content:center;border-radius:6px}
+.statseg.big{border-radius:8px;padding:3px}
+.barscard{gap:14px}
+#bigBars{display:flex;flex-direction:column;gap:16px}
+.bb{display:flex;flex-direction:column;gap:5px}
+.bb .bh{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.bb .bh b{font-size:15px}
+.bb .bh span{font-family:var(--mono);font-size:13px;color:var(--muted)}
+.bb .bh span strong{color:var(--ink);font-weight:600}
+.bb .bt{height:14px;background:var(--soft);border-radius:7px;overflow:hidden;position:relative}
+.bb .bt i{position:absolute;inset:0 auto 0 0;width:0;border-radius:7px;background:var(--bc);transition:width .7s cubic-bezier(.3,.9,.3,1)}
+.bb.over .bt i{background:repeating-linear-gradient(45deg,var(--bc) 0 8px,color-mix(in srgb,var(--bc) 70%,#000) 8px 16px)}
+.bb .bf{font-size:12px;color:var(--muted)}
 /* Meals and food icons */
 .meal{border-left:3px solid var(--mc);padding-left:10px;margin-bottom:10px}
 .meal:last-child{margin-bottom:0}
@@ -521,7 +539,16 @@ details.panel[open] summary h3::after{content:" −"}
     <button type="button" class="chip w" id="wNudgeAdd"></button>
     <button type="button" class="x" id="wNudgeX" aria-label="Remind me later">×</button>
   </div>
-  <section class="panel ringcard" aria-label="Today at a glance">
+  <div class="statbar"><div class="seg statseg" role="group" aria-label="How to show your stats">
+      <button type="button" data-stat="rings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 8 8"/></svg>Rings</button>
+      <button type="button" data-stat="bars"><svg viewBox="0 0 24 24"><path d="M4 7h12M4 12h16M4 17h8"/></svg>Bars</button>
+      <button type="button" data-stat="label"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="1"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>Label</button>
+    </div></div>
+  <section class="panel barscard" id="barsCard" aria-label="Today at a glance" hidden>
+    <div id="bigBars"></div>
+    <button type="button" class="chip ghost labeltoggle" aria-expanded="false">Full nutrition label ▾</button>
+  </section>
+  <section class="panel ringcard" id="ringCard" aria-label="Today at a glance">
     <div class="bigring">
       <svg viewBox="0 0 120 120" aria-hidden="true"><circle class="trk" cx="60" cy="60" r="52"/><circle class="val" id="rK" cx="60" cy="60" r="52" pathLength="100"/></svg>
       <div class="rc"><b class="num" id="rKv">0</b><span id="rKs">kcal left</span></div>
@@ -531,7 +558,7 @@ details.panel[open] summary h3::after{content:" −"}
       <div class="mini" style="--rc:var(--carbs)"><svg viewBox="0 0 40 40" aria-hidden="true"><circle class="trk" cx="20" cy="20" r="16"/><circle class="val" id="rC" cx="20" cy="20" r="16" pathLength="100"/></svg><div><b class="num" id="rCv">0g</b><span id="rCs">Carbs</span></div></div>
       <div class="mini" style="--rc:var(--fat)"><svg viewBox="0 0 40 40" aria-hidden="true"><circle class="trk" cx="20" cy="20" r="16"/><circle class="val" id="rF" cx="20" cy="20" r="16" pathLength="100"/></svg><div><b class="num" id="rFv">0g</b><span id="rFs">Fat</span></div></div>
     </div>
-    <button type="button" class="chip ghost labeltoggle" id="labelToggle" aria-expanded="false">Full nutrition label ▾</button>
+    <button type="button" class="chip ghost labeltoggle" aria-expanded="false">Full nutrition label ▾</button>
   </section>
   <section class="label" id="labelBox" aria-label="Daily totals" hidden>
     <h2>Nutrition Facts</h2>
@@ -644,6 +671,12 @@ details.panel[open] summary h3::after{content:" −"}
     <div class="ph"><h3 id="hLook">Appearance</h3></div>
     <div class="f"><span class="lbl">Theme</span>
       <div class="seg" id="themeSeg"><button type="button" data-theme-set="auto">Auto</button><button type="button" data-theme-set="light">☀️ Light</button><button type="button" data-theme-set="dark">🌙 Dark</button></div></div>
+    <div class="f"><span class="lbl">Show my stats as</span>
+      <div class="seg statseg big" role="group" aria-label="How to show your stats">
+      <button type="button" data-stat="rings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 8 8"/></svg>Rings</button>
+      <button type="button" data-stat="bars"><svg viewBox="0 0 24 24"><path d="M4 7h12M4 12h16M4 17h8"/></svg>Bars</button>
+      <button type="button" data-stat="label"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="1"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>Label</button>
+    </div></div>
     <div class="f"><span class="lbl">Accent color</span><div class="swatches" id="swatches"></div></div>
   </section>
 
@@ -796,7 +829,7 @@ details.panel[open] summary h3::after{content:" −"}
 
 <script>
 (() => {
-const APP_VERSION="3.0.0";
+const APP_VERSION="3.1.0";
 const REPO="kefirman9000/fuel-log";
 const $ = id => document.getElementById(id);
 const OZ=29.5735, LB=0.45359237, IN=2.54;
@@ -965,6 +998,7 @@ function render(){
   else{countTo($("rKv"),Math.round(t.k)); $("rKs").textContent="kcal eaten"}
   const mini=(k,v,goal,name)=>{$("r"+k+"v").textContent=Math.round(v)+(goal?" / "+goal:"")+"g"; $("r"+k+"s").textContent=name+(goal?" · "+pct(v,goal)+"%":"")};
   mini("P",t.p,g.protein,"Protein"); mini("C",t.c,g.carbs,"Carbs"); mini("F",t.f,g.fat,"Fat");
+  if(statStyle()==="bars") renderBars(t,g);
   $("wVal").textContent=fmtW(t.w)+" "+uW(); $("wGoal").textContent=g.waterMl?"/ "+fmtW(g.waterMl)+" "+uW():"";
   const wp=pct(t.w,g.waterMl); $("wPct").textContent=g.waterMl?wp+"%":"—"; $("wBar").style.width=Math.min(100,wp)+"%";
   const onS=S.settings.supps.filter(s=>s.on), took=onS.filter(s=>day.supps[s.id]).length;
@@ -1182,7 +1216,9 @@ function checkGoals(hits){
   const prev=S.hitsDate===S.date?S.hits:null;
   if(prev&&S.view==="today") Object.keys(hits).forEach(k=>{ if(hits[k]&&!prev[k]){
     const pc=$(k+"Pct"), row=pc.closest(".row"); row.classList.remove("hit"); void row.offsetWidth; row.classList.add("hit");
-    const ringEl={p:"rP",c:"rC"}[k]; burst($("labelBox").hidden?(ringEl?$(ringEl).closest("svg"):k==="w"?document.querySelector(".jug"):$("suppList")):pc,CHEERS[k][1]); if(k==="w") setTimeout(()=>burst(document.querySelector(".jug"),"var(--water)"),250);
+    const ringEl={p:"rP",c:"rC"}[k], st=statStyle(), barIdx={p:1,c:2,w:4}[k];
+    const target=st==="label"||!$("labelBox").hidden?pc:st==="bars"&&barIdx!=null?document.querySelectorAll("#bigBars .bb")[barIdx]:ringEl?$(ringEl).closest("svg"):k==="w"?document.querySelector(".jug"):$("suppList");
+    burst(target,CHEERS[k][1]); if(k==="w") setTimeout(()=>burst(document.querySelector(".jug"),"var(--water)"),250);
     setTimeout(()=>toast(CHEERS[k][0]),650);
   }});
   S.hits=hits; S.hitsDate=S.date;
@@ -1223,8 +1259,35 @@ function showBadge(ic,title,text){
   clearTimeout(showBadge._t); showBadge._t=setTimeout(()=>{$("badgePop").hidden=true},3200);
 }
 $("badgePop").onclick=()=>{$("badgePop").hidden=true};
-function setLabel(open){$("labelBox").hidden=!open; $("labelToggle").setAttribute("aria-expanded",open); $("labelToggle").textContent=open?"Hide nutrition label ▴":"Full nutrition label ▾"}
-$("labelToggle").onclick=()=>{const open=$("labelBox").hidden; setLabel(open); save("labelOpen",open)};
+const statStyle=()=>load("statStyle")||"rings";
+function setLabel(open){
+  if(statStyle()==="label") open=true;
+  $("labelBox").hidden=!open;
+  document.querySelectorAll(".labeltoggle").forEach(b=>{b.setAttribute("aria-expanded",open);b.textContent=open?"Hide nutrition label ▴":"Full nutrition label ▾"});
+}
+document.addEventListener("click",ev=>{
+  if(ev.target.closest(".labeltoggle")){const open=$("labelBox").hidden; setLabel(open); save("labelOpen",open); return}
+  const s=ev.target.closest("[data-stat]"); if(!s) return;
+  save("statStyle",s.dataset.stat); applyStatStyle(); render();
+});
+function applyStatStyle(){
+  const st=statStyle();
+  $("ringCard").hidden=st!=="rings"; $("barsCard").hidden=st!=="bars";
+  setLabel(st==="label"||!!load("labelOpen"));
+  document.querySelectorAll("[data-stat]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.stat===st));
+}
+function renderBars(t,g){
+  const rows=[["Calories",t.k,g.kcal,"kcal","var(--accent)"],["Protein",t.p,g.protein,"g","var(--protein)"],["Carbs",t.c,g.carbs,"g","var(--carbs)"],
+    ["Fat",t.f,g.fat,"g","var(--fat)"],["Water",t.w,g.waterMl,"ml","var(--water)"]];
+  const prev=[...document.querySelectorAll("#bigBars .bt i")].map(i=>i.style.width);
+  $("bigBars").innerHTML=rows.map(([name,v,goal,u,c],i)=>{
+    const isW=u==="ml", show=x=>isW?fmtW(x)+" "+uW():Math.round(x).toLocaleString()+(u==="g"?"g":" kcal");
+    const p=goal?v/goal*100:0, left=goal?goal-v:0;
+    const foot=!goal?"":left>0?`${show(left)} to go`:name==="Calories"||name==="Fat"?`${show(-left)} over`:"Goal reached ✓";
+    return `<div class="bb${p>105&&(name==="Calories"||name==="Fat")?" over":""}" style="--bc:${c}"><div class="bh"><b>${name}</b><span><strong>${show(v)}</strong>${goal?" / "+show(goal):""}${goal?" · "+Math.round(p)+"%":""}</span></div>
+      <div class="bt"><i style="width:${prev[i]||"0%"}" data-w="${Math.min(100,p)}%"></i></div>${foot?`<span class="bf">${foot}</span>`:""}</div>`}).join("");
+  requestAnimationFrame(()=>document.querySelectorAll("#bigBars .bt i").forEach(i=>i.style.width=i.dataset.w));
+}
 function renderBadges(){
   const b=load("badges")||{}, best=load("bestStreak")||0, st=currentStreak();
   $("badgeMeta").textContent=`Current ${st} · Best ${best}`;
@@ -2054,7 +2117,7 @@ async function boot(){
   $("sDot").classList.add("ok");
   $("sText").textContent="Saved in this browser. Works offline (search needs internet).";
   S.days={}; S.ready=true; await getDay(S.date);
-  setLabel(!!load("labelOpen"));
+  applyStatStyle();
   render(); if(S.view==="me") renderMe();
   if(!(S.settings.profile.weightKg>0)&&!load("onboarded")) obOpen();
   updateInstallUI();
