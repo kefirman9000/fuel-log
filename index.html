@@ -140,7 +140,7 @@ button{cursor:pointer}
 .grid .full{grid-column:1/-1}
 .grid .half{grid-column:span 2}
 .f{display:flex;flex-direction:column;gap:4px;min-width:0}
-.f input,.f select,textarea{width:100%;border:1px solid var(--line);background:var(--bg);border-radius:6px;padding:9px 10px;font-size:15px}
+.f input,.f select,textarea{width:100%;border:1px solid var(--line);background:var(--bg);border-radius:6px;padding:9px 10px;font-size:16px}
 .f input[type=number]{font-family:var(--mono)}
 .f input:disabled{opacity:.7}
 .f .lbl.p{color:var(--protein)} .f .lbl.c{color:var(--carbs)}
@@ -255,7 +255,12 @@ details.panel[open] summary h3::after{content:" −"}
 .qscan svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
 .qscan:active{transform:translateY(2px);box-shadow:0 1px 0 var(--ink)}
 .qwater{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
-@media (max-width:460px){.qbtns{flex:1 1 100%}.qbtns .qfood{flex:1;justify-content:center}.qwater{flex:1 1 100%}.qwater .btns .chip{flex:1}}
+.qtype{flex:1 1 100%;display:flex;gap:8px;align-items:stretch;min-width:0}
+.qtype input{flex:1;min-width:0;border:1.5px solid var(--line);background:var(--bg);border-radius:9px;padding:11px 12px;font-size:16px;font-weight:500}
+.qtype input:focus{border-color:var(--protein);outline:none;box-shadow:0 0 0 3px color-mix(in srgb,var(--protein) 20%,transparent)}
+.quick .qtype .qfood{padding:10px 14px;font-size:16px}
+.qwater{flex:1 1 100%}
+.qwater .btns .chip{flex:1}
 .qwater .btns{gap:6px;flex-wrap:nowrap}
 .qwater .chip{padding:6px 10px;font-size:13px;white-space:nowrap}
 .qbar{height:4px;background:var(--soft);border-radius:2px;overflow:hidden}
@@ -331,10 +336,11 @@ details.panel[open] summary h3::after{content:" −"}
   <!-- ================= TODAY ================= -->
   <div class="view" id="view-today">
   <div class="quick" role="toolbar" aria-label="Quick add">
-    <div class="qbtns">
-      <button class="qfood" id="qFood" type="button"><span class="plus" aria-hidden="true">+</span>Add food</button>
+    <form class="qtype" id="qForm" autocomplete="off">
+      <input id="qIn" placeholder="What did you eat? e.g. 2 eggs and a slice of toast" enterkeyhint="go" aria-label="What did you eat?">
+      <button class="qfood" id="qFood" type="submit"><span class="plus" aria-hidden="true">+</span><span class="qlbl">Add</span></button>
       <button class="qscan" id="qScan" type="button" aria-label="Scan a barcode"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7V4h3M18 4h3v3M21 17v3h-3M6 20H3v-3"/><path d="M7 8v8M10 8v8M13 8v8M16 8v8" stroke-width="1.6"/></svg><span>Scan</span></button>
-    </div>
+    </form>
     <div class="qwater"><div class="btns" id="qWater"></div>
       <div class="qbar" aria-hidden="true"><i id="qBar"></i></div><span class="num qtxt" id="qTxt"></span></div>
   </div>
@@ -615,7 +621,7 @@ details.panel[open] summary h3::after{content:" −"}
 
 <script>
 (() => {
-const APP_VERSION="2.4.0";
+const APP_VERSION="2.5.0";
 const REPO="kefirman9000/fuel-log";
 const $ = id => document.getElementById(id);
 const OZ=29.5735, LB=0.45359237, IN=2.54;
@@ -1035,10 +1041,12 @@ $("qScan").onclick=()=>{
   $("hAdd").closest(".panel").scrollIntoView({behavior:calm?"auto":"smooth",block:"start"});
   $("camBtn").click(); // starts the camera right away; falls back to photo/typing if it can't
 };
-$("qFood").onclick=()=>{
+$("qForm").onsubmit=ev=>{ev.preventDefault();
+  const text=$("qIn").value.trim();
   document.querySelector('#foodTabs [data-tab="search"]').click();
   $("hAdd").closest(".panel").scrollIntoView({behavior:calm?"auto":"smooth",block:"start"});
-  setTimeout(()=>$("sq").focus({preventScroll:true}),calm?0:350);
+  if(!text){setTimeout(()=>$("sq").focus({preventScroll:true}),calm?0:350);return}
+  $("qIn").value=""; $("qIn").blur(); $("sq").value=text; $("searchForm").requestSubmit();
 };
 $("wUndo").onclick=async()=>{const d=await getDay(S.date);d.water.pop();saveDay(S.date);render()};
 $("wCustomBtn").onclick=()=>{$("wCustom").hidden=!$("wCustom").hidden;if(!$("wCustom").hidden)$("wCustomIn").focus()};
@@ -1224,6 +1232,18 @@ function bestMatch(q,all){
   const part=scored.filter(x=>x.r.src==="common"&&x.s>=.5).sort((a,b)=>b.s-a.s);
   return part[0]?{r:part[0].r,exact:false}:null;
 }
+/* Split "2 eggs, toast and a coffee" into separate foods. Only splits on "and"/"with" when the next part starts with an amount,
+   so "mac and cheese" or "peanut butter and jelly" stay whole. Commas, "plus" and "then" always split. */
+function splitMeal(text){
+  const parts=text.split(/\s*(?:,|;|\+|\bplus\b|\bthen\b)\s*/i).filter(Boolean);
+  const out=[];
+  parts.forEach(p=>{
+    const bits=p.split(/\s+(?:and|with|&)\s+(?=(?:\d|a\b|an\b|one\b|two\b|three\b|four\b|five\b|half\b|some\b|[½¼¾]))/i);
+    out.push(...bits.map(b=>b.trim()).filter(Boolean));
+  });
+  return out.length?out:[text];
+}
+const MQ={list:[],i:0};
 let lastResults=[], lastReq={amt:null,unit:null}, searchSeq=0;
 const SEARCH_HINT="Type what you ate, like \"2 nutty buddy\", \"slice of pizza\" or \"cup of tillamook ice cream\". The amount is worked out for you.";
 function resHTML(r,i){return `<button type="button" class="res" data-ri="${i}"><span class="nm">${esc(r.name)}</span>
@@ -1235,7 +1255,9 @@ function showResults(groups){
   $("searchResults").innerHTML=html;
 }
 $("searchForm").onsubmit=async ev=>{ev.preventDefault();
-  const pq=parseQuery($("sq").value); if(!pq.q) return;
+  let raw=$("sq").value.trim(); if(!raw) return;
+  if(!MQ.list.length||MQ.list[MQ.i]!==raw){const parts=splitMeal(raw); MQ.list=parts.length>1?parts:[]; MQ.i=0; if(MQ.list.length) raw=MQ.list[0], $("sq").value=raw}
+  const pq=parseQuery(raw); if(!pq.q) return;
   lastReq={amt:pq.amt,unit:pq.unit}; const seq=++searchSeq, q=pq.q;
   $("searchPick").innerHTML="";
   const local=localMatches(q);
@@ -1261,8 +1283,13 @@ $("searchForm").onsubmit=async ev=>{ev.preventDefault();
   const best=bestMatch(usedQ,lastResults);
   if(best){openPick(best.r,best.exact?"Best match":"Closest match");
     msg=(best.exact?`Here's the best match.`:`Couldn't find that exact product, so this is a generic version.`)+`${amtTxt} Not right? Pick another below.`+(down.length?" "+down.join(", and ")+".":"")}
+  if(MQ.list.length) msg=`Food ${MQ.i+1} of ${MQ.list.length}: "${MQ.list[MQ.i]}". `+msg;
   $("searchMsg").textContent=msg;
 };
+function nextInMeal(){
+  if(MQ.list.length&&MQ.i<MQ.list.length-1){MQ.i++; $("sq").value=MQ.list[MQ.i]; setTimeout(()=>$("searchForm").requestSubmit(),350); return true}
+  MQ.list=[]; MQ.i=0; return false;
+}
 $("searchResults").onclick=ev=>{const b=ev.target.closest("[data-ri]");if(!b)return;openPick(lastResults[+b.dataset.ri])};
 
 /* Work out the starting amount from what the user typed: "1 cup" against a "2/3 cup" serving is 1.5 servings. */
@@ -1299,13 +1326,15 @@ function openPick(r,isBest){
   $("pkAmt").oninput=show;
   $("pkUnit").onchange=()=>{ if($("pkUnit").value==="g") $("pkAmt").value=Math.round((+$("pkAmt").value||1)*(r.grams||100)); else $("pkAmt").value=r1((+$("pkAmt").value||100)/(r.grams||100))||1; show()};
   show();
-  $("pkClose").onclick=()=>{$("searchPick").innerHTML=""};
+  $("pkClose").textContent=MQ.list.length&&MQ.i<MQ.list.length-1?"Skip":"Cancel";
+  $("pkClose").onclick=()=>{$("searchPick").innerHTML=""; nextInMeal()};
   $("pkLog").onclick=()=>{const m=calc(); if(!(+$("pkAmt").value>0)) return;
     if($("pkSave").checked&&!r.savedId) saveFood({name:r.name,serving:r.serving,p:r.p,c:r.c,f:r.f,kcal:r.kcal});
     if(r.savedId){const f=S.foods.items[r.savedId]; if(f){f.used=(f.used||0)+1;save("foods",S.foods)}}
     addEntry({name:m.label+r.name,p:m.p,c:m.c,f:m.f,kcal:m.kcal,src:r.src==="saved"?"saved":"search"});
     $("searchPick").innerHTML=""; $("searchResults").innerHTML=""; $("sq").value=""; lastReq={amt:null,unit:null};
     $("searchMsg").textContent=SEARCH_HINT;
+    if(!nextInMeal()&&$("hAdd").getBoundingClientRect().top<0) window.scrollTo({top:0,behavior:calm?"auto":"smooth"});
   };
   $("searchPick").scrollIntoView({block:"nearest",behavior:calm?"auto":"smooth"});
 }
