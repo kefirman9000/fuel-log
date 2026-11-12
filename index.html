@@ -401,6 +401,27 @@ details.panel[open] summary h3::after{content:" −"}
 .sw input:checked+span{background:var(--good)}
 .sw input:checked+span::after{transform:translateX(18px)}
 .sw input:disabled+span{opacity:.5}
+/* Water & supplements card */
+.habits{gap:0;padding:0;overflow:hidden}
+.habits.pending{border:1.5px solid color-mix(in srgb,var(--creatine) 50%,var(--line))}
+.hsec{padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.hsec+.hsec{border-top:1px solid var(--line)}
+.hsec .ph h3{font-size:17px}
+.hwater{display:flex;gap:12px;align-items:center}
+.jug.small{width:44px;height:78px;border-radius:8px 8px 11px 11px}
+.jug.small::before{width:18px;height:6px}
+.hwbody{flex:1;min-width:0;display:flex;flex-direction:column;gap:7px}
+.hwbody .wstat{font-size:22px}
+.hwbody .btns .chip{flex:1;padding:7px 6px;text-align:center}
+.hwlinks{display:flex;gap:14px}
+.linkbtn.subtle{color:var(--muted);font-weight:600;font-size:12.5px;text-decoration:none}
+.linkbtn.subtle:disabled{opacity:.4}
+.wnote{margin:0;font-size:13px;color:var(--water);background:color-mix(in srgb,var(--water) 10%,transparent);border-radius:8px;padding:6px 10px}
+.wnote b{color:inherit}
+.schips{display:flex;flex-wrap:wrap;gap:8px}
+.schip{padding:7px 11px;border-radius:10px}
+.schip .box{width:20px;height:20px}
+.supps.alldone .ph .meta{color:var(--good);font-weight:700}
 /* Goal checklist */
 .goalstrip{display:flex;flex-direction:column;gap:7px;margin-bottom:-6px}
 .gpills{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:6px}
@@ -669,31 +690,31 @@ details.panel[open] summary h3::after{content:" −"}
     <button type="button" class="chip" id="bNudgeGo">Back up</button>
     <button type="button" class="x" id="bNudgeX" aria-label="Remind me later">×</button>
   </div>
-  <div class="wnudge" id="wNudge" hidden>
+  <div class="wnudge" id="wNudge" hidden style="display:none!important">
     <span class="wdrop" aria-hidden="true">💧</span><span class="wtxt" id="wNudgeTxt"></span>
     <button type="button" class="chip w" id="wNudgeAdd"></button>
     <button type="button" class="x" id="wNudgeX" aria-label="Remind me later">×</button>
   </div>
-  <section class="panel supppanel" id="suppPanel" aria-labelledby="hSupp">
-    <div class="ph"><h3 id="hSupp">Supplements</h3><span class="meta" id="suppMeta"></span></div>
-    <div id="suppList"></div>
-  </section>
-  <section class="panel" id="waterPanel" aria-labelledby="hWater">
-    <div class="ph"><h3 id="hWater">Water</h3><span class="meta" id="wLeft"></span></div>
-    <div class="water">
-      <div class="jug" aria-hidden="true"><i id="jugFill"></i><div class="ticks"></div></div>
-      <div style="display:flex;flex-direction:column;gap:10px;min-width:0">
-        <div class="wstat"><span id="wBig">0</span> <small id="wUnit">oz</small></div>
-        <div class="btns" id="waterBtns"></div>
-        <div class="btns">
-          <button class="chip ghost" id="wUndo">Undo last</button>
-          <button class="chip ghost" id="wCustomBtn">Custom amount</button>
-        </div>
-        <div class="actions" id="wCustom" hidden>
-          <div class="f" style="width:110px"><input id="wCustomIn" type="number" inputmode="decimal" min="0" placeholder="Amount" aria-label="Custom water amount"></div>
-          <button class="secondary" id="wCustomAdd">Add</button>
+  <section class="panel habits" id="habitCard" aria-label="Water and supplements">
+    <div class="hsec">
+      <div class="ph"><h3 id="hWater">💧 Water</h3><span class="meta" id="wLeft"></span></div>
+      <div class="hwater">
+        <div class="jug small" aria-hidden="true"><i id="jugFill"></i><div class="ticks"></div></div>
+        <div class="hwbody">
+          <div class="wstat"><span id="wBig">0</span> <small id="wUnit">oz</small></div>
+          <div class="btns" id="waterBtns"></div>
+          <div class="hwlinks"><button class="linkbtn subtle" id="wUndo">Undo last</button><button class="linkbtn subtle" id="wCustomBtn">Custom amount</button></div>
+          <div class="actions" id="wCustom" hidden>
+            <div class="f" style="width:110px"><input id="wCustomIn" type="number" inputmode="decimal" min="0" placeholder="Amount" aria-label="Custom water amount"></div>
+            <button class="secondary" id="wCustomAdd">Add</button>
+          </div>
         </div>
       </div>
+      <p class="wnote" id="wNote" hidden></p>
+    </div>
+    <div class="hsec supps" id="suppPanel">
+      <div class="ph"><h3 id="hSupp">💊 Supplements</h3><span class="meta" id="suppMeta"></span></div>
+      <div class="schips" id="suppList"></div>
     </div>
   </section>
   <div class="statbar"><div class="seg statseg" role="group" aria-label="How to show your stats">
@@ -991,7 +1012,7 @@ details.panel[open] summary h3::after{content:" −"}
 
 <script>
 (() => {
-const APP_VERSION="3.9.0";
+const APP_VERSION="3.9.1";
 const REPO="kefirman9000/fuel-log";
 const $ = id => document.getElementById(id);
 const OZ=29.5735, LB=0.45359237, IN=2.54;
@@ -1267,18 +1288,15 @@ async function renderWeek(){
   const on=S.settings.supps.filter(s=>s.on), day=days[6];
   const takenN=on.filter(s=>day.supps[s.id]).length;
   $("suppMeta").textContent=on.length?(takenN===on.length?"All taken ✓":`${takenN} of ${on.length} taken`):"";
-  $("suppPanel").classList.toggle("pending",on.length>0&&takenN<on.length&&S.date===todayKey());
   $("suppPanel").classList.toggle("alldone",on.length>0&&takenN===on.length);
   $("suppList").innerHTML=on.length?on.map(s=>{
     const took=day.supps[s.id];
     let streak=0; for(let i=6;i>=0;i--){if(days[i].supps[s.id])streak++;else if(i===6&&keys[6]===todayKey())continue;else break}
-    return `<div class="srow2">
-      <button class="toggle${took?" on":""}${S.popSupp===s.id?" pop":""}" data-supp="${esc(s.id)}" aria-pressed="${!!took}"><span class="box">${took?"✓":""}</span>
-        <span class="tl"><span>${esc(s.name)}</span><small>${took?`Took ${esc(took.dose||s.dose)}${took.at?" at "+esc(took.at):""}`:esc(s.dose)}</small></span></button>
-      <div class="streakwrap"><div class="streak" aria-label="Last 7 days">${keys.map((k,i)=>`<span class="${days[i].supps[s.id]?"y":""}${k===S.date?" today":""}${k===S.date&&S.popSupp===s.id?" fresh":""}"><i></i><b>${dn(k)}</b></span>`).join("")}</div>
-      <span class="sm">${streak?(streak>=3?"🔥 ":"")+streak+"-day streak":""}</span></div></div>`}).join("")
+    return `<button class="toggle schip${took?" on":""}${S.popSupp===s.id?" pop":""}" data-supp="${esc(s.id)}" aria-pressed="${!!took}"><span class="box">${took?"✓":""}</span>
+        <span class="tl"><span>${esc(s.name.replace(/ \(.*\)$/,""))}</span><small>${took?`Took ${esc(took.dose||s.dose)}${took.at?" · "+esc(took.at):""}`:esc(s.dose)}${streak>=2?` · 🔥${streak}`:""}</small></span></button>`}).join("")
     :`<p class="empty">No supplements turned on. <button class="linkbtn" data-goto="me">Choose supplements</button></p>`;
   S.popSupp=null;
+  $("habitCard").classList.toggle("pending",on.length>0&&takenN<on.length&&S.date===todayKey());
 }
 
 /* ---------- render: me & goals ---------- */
@@ -1714,16 +1732,15 @@ const SECTIONS=[
   ["streak","Streak","Your day count and last 7 days",["#streakCard"]],
   ["goals","Goal checklist","Protein, calories, water, fiber, supplements",["#goalStrip"]],
   ["search","Search bar","Type, scan, favorites (can't be hidden)",[".quick",".qextras","#addPanel","#bNudge","#wNudge"],true],
-  ["supps","Supplements","Daily check-offs",["#suppPanel"]],
-  ["water","Water","Jug and quick-add buttons",["#waterPanel"]],
+  ["habits","Water & supplements","Water jug and daily check-offs",["#habitCard"]],
   ["stats","Stats","Rings, bars or the nutrition label",[".statbar","#barsCard","#ringCard","#labelBox"]],
   ["log","Food log","Everything you ate today",["#logPanel"]],
   ["fit","What fits now","Snack and meal ideas",["#fitPanel"]],
   ["coach","Suggestions","Tips for the rest of the day",["#coachPanel"]],
 ];
 const DEFAULT_ORDER=SECTIONS.map(s=>s[0]);
-function getLayout(){const L=load("layout")||{}; let order=(L.order||[]).filter(k=>DEFAULT_ORDER.includes(k)); DEFAULT_ORDER.forEach(k=>{if(!order.includes(k)) order.push(k)});
-  return {order,hide:(L.hide||[]).filter(k=>k!=="search")}}
+function getLayout(){const L=load("layout")||{}; let order=(L.order||[]).map(k=>k==="supps"||k==="water"?"habits":k).filter((k,i,a)=>a.indexOf(k)===i).filter(k=>DEFAULT_ORDER.includes(k)); DEFAULT_ORDER.forEach(k=>{if(!order.includes(k)) order.push(k)});
+  return {order,hide:(L.hide||[]).filter(k=>k!=="search"&&k!=="supps"&&k!=="water")}}
 function applyLayout(){
   const L=getLayout(), root=$("view-today");
   SECTIONS.forEach(([k,,,sels])=>{const i=L.order.indexOf(k), hide=L.hide.includes(k);
@@ -1801,14 +1818,11 @@ $("bNudgeX").onclick=()=>{save("backupSnooze",Date.now()+7*864e5);$("bNudge").hi
 
 /* ---------- water reminder ---------- */
 function renderWaterNudge(){
-  const el=$("wNudge"); if(S.date!==todayKey()){el.hidden=true;return}
-  const day=S.days[S.date]||emptyDay(), g=G(), t=totals(day), n=new Date(), h=n.getHours()+n.getMinutes()/60;
-  const behind=(g.waterMl||0)*Math.min(1,Math.max(0,(h-7)/15))-t.w, snooze=load("waterSnooze")||0;
-  const show=g.waterMl&&h>=10&&h<22&&behind>Math.max(240,g.waterMl*.12)&&Date.now()>snooze;
-  el.hidden=!show; if(!show) return;
-  const glass=S.settings.unit==="oz"?[8*OZ,"8 oz"]:[250,"250 ml"];
-  $("wNudgeTxt").innerHTML=`You're <b>${fmtW(behind)} ${uW()}</b> behind on water. A glass now keeps you on pace.`;
-  $("wNudgeAdd").dataset.ml=glass[0]; $("wNudgeAdd").textContent="+ "+glass[1];
+  const el=$("wNote"); if(S.date!==todayKey()){el.hidden=true;return}
+  const day=S.days[S.date]||emptyDay(), g=G(), t=totals(day), n=new Date(), hr=n.getHours()+n.getMinutes()/60;
+  const behind=(g.waterMl||0)*Math.min(1,Math.max(0,(hr-7)/15))-t.w;
+  const show=g.waterMl&&hr>=10&&hr<22&&behind>Math.max(240,g.waterMl*.12)&&t.w<g.waterMl;
+  el.hidden=!show; if(show) el.innerHTML=`⏰ You're <b>${fmtW(behind)} ${uW()}</b> behind pace. A glass now keeps you on track.`;
 }
 $("wNudgeX").onclick=()=>{save("waterSnooze",Date.now()+2*36e5);$("wNudge").hidden=true;toast("I'll remind you again in 2 hours")};
 setInterval(()=>{if(!document.hidden&&S.ready)renderWaterNudge()},5*60*1000);
