@@ -513,6 +513,13 @@ details.panel[open] summary h3::after{content:" −"}
 .ract .stepper input{width:64px}
 .heart[aria-pressed="true"]{color:var(--protein);border-color:color-mix(in srgb,var(--protein) 50%,var(--line))}
 .recbuild{display:flex;flex-direction:column;gap:12px;border:1px solid var(--line);border-radius:8px;padding:12px}
+.rpaste{display:flex;flex-direction:column;gap:10px;padding-bottom:4px;border-bottom:1px dashed var(--line)}
+.rpaste .chip{align-self:flex-start}
+#rbPasteBox{display:flex;flex-direction:column;gap:8px}
+.ronline{display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--line);padding-top:12px;margin-top:4px}
+.ronline .links{display:flex;flex-wrap:wrap;gap:6px}
+.ronline a{border:1px solid var(--line);background:var(--bg);border-radius:999px;padding:7px 12px;font-weight:650;font-size:13.5px;color:var(--ink);text-decoration:none}
+.ronline a::after{content:" ↗";color:var(--muted)}
 .recbuild textarea{width:100%;border:1px solid var(--line);background:var(--bg);border-radius:6px;padding:9px 10px;font:inherit;font-size:15px;resize:vertical;color:var(--ink)}
 .rbl{display:grid;grid-template-columns:1fr auto auto;gap:3px 10px;align-items:center;padding:8px 0;border-top:1px solid var(--line)}
 .rbl:first-child{border-top:0}
@@ -575,6 +582,7 @@ details.panel[open] summary h3::after{content:" −"}
 .shop input{width:18px;height:18px;margin-top:2px;accent-color:var(--good);flex:none}
 .shop input:checked+span{text-decoration:line-through;color:var(--muted)}
 .shop .chip{align-self:flex-start;margin-top:8px}
+.linkbtn{border:0;background:none;padding:0;color:var(--accent);font:inherit;font-weight:650;text-decoration:underline;cursor:pointer}
 .rfbox{display:flex;flex-direction:column;gap:12px;border:1px solid var(--line);border-radius:8px;padding:12px}
 .rsum{margin:0}
 #recFiltBtn[aria-expanded="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
@@ -955,12 +963,22 @@ details.panel[open] summary h3::after{content:" −"}
     <div class="ph"><h3 id="hMyRec">My recipes</h3><button type="button" class="chip" id="recNew">+ New recipe</button></div>
     <p class="hint" id="myRecHint">Add the ingredients of something you cook, and Fuel Log works out calories and macros per serving. Your recipes also show up when you type their name in the bar at the top.</p>
     <form class="recbuild" id="recBuild" autocomplete="off" hidden>
+      <div class="rpaste">
+        <button type="button" class="chip" id="rbPasteBtn" aria-expanded="false" aria-controls="rbPasteBox">📋 Paste a whole recipe from a website</button>
+        <div id="rbPasteBox" hidden>
+          <label class="f"><span class="lbl">Paste the recipe</span>
+            <textarea id="rbPaste" rows="7" placeholder="Copy the recipe from any website (title, servings, ingredients and steps) and paste it here."></textarea></label>
+          <div class="actions"><button type="button" class="secondary" id="rbPasteGo">Fill in from paste</button><span class="hint" id="rbPasteMsg" aria-live="polite"></span></div>
+        </div>
+      </div>
       <div class="grid">
         <label class="f half"><span class="lbl">Recipe name</span><input id="rbName" required placeholder="Mom's chili"></label>
         <label class="f half"><span class="lbl">Makes how many servings?</span><input id="rbServes" type="number" min="1" max="50" step="1" value="4" inputmode="numeric"></label>
       </div>
       <label class="f"><span class="lbl">Ingredients, one per line</span>
         <textarea id="rbIng" rows="6" placeholder="1 lb ground turkey&#10;1 can black beans&#10;1 cup brown rice&#10;2 tbsp olive oil"></textarea></label>
+      <label class="f"><span class="lbl">Steps or notes (optional)</span>
+        <textarea id="rbSteps" rows="3" placeholder="How you make it, or where the recipe came from"></textarea></label>
       <div class="actions"><button type="button" class="secondary" id="rbCalc">Work out nutrition</button><span class="hint" id="rbMsg" aria-live="polite"></span></div>
       <div id="rbLines"></div>
       <div class="rbtot" id="rbTot" hidden></div>
@@ -1192,7 +1210,7 @@ details.panel[open] summary h3::after{content:" −"}
 
 <script>
 (() => {
-const APP_VERSION="3.14.0";
+const APP_VERSION="3.15.0";
 const REPO="kefirman9000/fuel-log";
 const $ = id => document.getElementById(id);
 const OZ=29.5735, LB=0.45359237, IN=2.54;
@@ -2339,7 +2357,7 @@ function servInfo(s){
 const norm=s=>s.toLowerCase().replace(/[^a-z0-9 ]+/g," ").replace(/\s+/g," ").trim();
 const STOP=new Set(["with","and","the","of","a","an","my","some","in","on"]);
 /* Words that describe how food was made or its size. They don't decide which food it is, so they're ignored when matching. */
-const PREP=new Set(["shredded","crumbled","minced","rinsed","drained","peeled","halved","cubed","trimmed","boneless","skinless","packed","heaping","level","scrambled","poached","over","easy","sunny","side","up","grilled","baked","roasted","steamed","toasted","homemade","fresh","plain","cooked","large","small","medium","big","little","regular","whole","sliced","diced","chopped","hot","cold","iced","leftover","piece","pieces"]);
+const PREP=new Set(["florets","floret","sprigs","leaves","chunks","strips","wedges","shredded","crumbled","minced","rinsed","drained","peeled","halved","cubed","trimmed","boneless","skinless","packed","heaping","level","scrambled","poached","over","easy","sunny","side","up","grilled","baked","roasted","steamed","toasted","homemade","fresh","plain","cooked","large","small","medium","big","little","regular","whole","sliced","diced","chopped","hot","cold","iced","leftover","piece","pieces"]);
 function qwords(q){const all=norm(q).split(" ").filter(w=>w.length>1&&!STOP.has(w)); const core=all.filter(w=>!PREP.has(w)); return core.length?core:all}
 /* Typo-tolerant compare: one slip allowed for 5+ letter words, two for 8+ (swapped letters count as one). */
 function typoDist(a,b,max){
@@ -2739,6 +2757,9 @@ function startAmount(r){
   if(canG&&size&&!unit&&ms.length){const sz=size==="big"?"large":size==="little"?"small":size==="huge"||size==="jumbo"||size==="xl"?"extra large":size;
     const m=ms.find(x=>x[1].toLowerCase().startsWith(sz)); if(m) return gOut(amt*m[2]/m[0],`${r1(amt)} ${size} = ${Math.round(amt*m[2]/m[0])} g`)}
   if(canG&&unit&&ms.length){const m=mFor(unit); if(m){const g=amt*m[2]/m[0]*sm; return gOut(g,`${r1(amt)} ${size?size+" ":""}${unit} = ${Math.round(g)} g`)}}
+  // volume units convert between each other: 2 tsp of a food listed per tbsp is 2/3 tbsp
+  const VOL={tsp:1,tbsp:3,cup:48,"fl oz":6,floz:6};
+  if(canG&&VOL[unit]&&ms.length){const m=ms.find(x=>VOL[UNITS[first(x[1])]||first(x[1])]); if(m){const mu=UNITS[first(m[1])]||first(m[1]); const g=amt*VOL[unit]/VOL[mu]*m[2]/m[0]; return gOut(g,`${r1(amt)} ${unit} = ${Math.round(g)} g`)}}
   if(canG&&unit&&PORTION[unit]){const each=PORTION[unit](name)*sm; return gOut(amt*each,`A ${size?size+" ":""}${unit} of this is about ${Math.round(each)} g. Adjust if yours was different.`)}
   const si=servInfo(r.serving);
   let res;
@@ -2746,6 +2767,9 @@ function startAmount(r){
   else if(unit&&si&&si.unit===unit){const n=amt/si.qty; res={amt:r1(n)||amt,mode:"serv",note:Math.abs(n-amt)<.01?"":`${r1(amt)} ${unit} = ${sv(n)} (1 serving is ${esc(r.serving)}).`}}
   else if(unit==="cup"&&si&&si.unit==="tbsp") res={amt:r1(amt*16/si.qty),mode:"serv",note:`${r1(amt)} cup = ${sv(amt*16/si.qty)}.`};
   else if(unit==="tbsp"&&si&&si.unit==="cup") res={amt:r1(amt/16/si.qty),mode:"serv",note:`${r1(amt)} tbsp = ${sv(amt/16/si.qty)}.`};
+  else if(unit==="tsp"&&si&&si.unit==="tbsp") res={amt:r1(amt/3/si.qty),mode:"serv",note:`${r1(amt)} tsp = ${sv(amt/3/si.qty)}.`};
+  else if(unit==="tbsp"&&si&&si.unit==="tsp") res={amt:r1(amt*3/si.qty),mode:"serv",note:`${r1(amt)} tbsp = ${sv(amt*3/si.qty)}.`};
+  else if(unit==="tsp"&&si&&si.unit==="cup") res={amt:r1(amt/48/si.qty),mode:"serv",note:`${r1(amt)} tsp = ${sv(amt/48/si.qty)}.`};
   else if((unit==="slice"||unit==="piece"||unit==="bar")&&si) res={amt,mode:"serv",note:`Counting 1 ${unit} as 1 serving (${esc(r.serving)}). Adjust if yours was bigger or smaller.`};
   else if(unit&&unit!=="serving"&&unit!=="piece"&&!PORTION[unit]) res={amt,mode:"serv",note:`Couldn't convert "${esc(unit)}" to this serving size, so it's set to ${sv(amt)}. Adjust if needed.`};
   else if(unit&&PORTION[unit]) res={amt,mode:"serv",note:`Counting a ${unit} as 1 serving. Adjust if needed.`};
@@ -2804,6 +2828,7 @@ const MEALN={breakfast:"Breakfast",lunch:"Lunch",dinner:"Dinner",snack:"Snack"};
 const RTAGN={protein:"High protein",light:"Under 400 cal",veg:"Vegetarian",quick:"Quick",prep:"Meal prep",sweet:"Sweet",freezer:"Freezer-friendly"};
 const PRON={chicken:"Chicken",beef:"Beef",pork:"Pork",turkey:"Turkey",seafood:"Fish & seafood",eggs:"Eggs",dairy:"Yogurt & dairy",plant:"Plant-based"};
 const CUIS=["American","Mexican","Italian","Asian","Mediterranean","Indian"];
+const fmtMins=m=>m<60?m+" min":Math.floor(m/60)+" hr"+(m%60?" "+m%60+" min":"");
 const mealCol=m=>(MEALS.find(x=>x[0]===m)||[])[3]||"var(--line)";
 function loadRecipes(){
   if(RECIPES) return Promise.resolve(RECIPES);
@@ -2845,12 +2870,12 @@ function recFiltered(list,L,fav){
 const anyFilter=()=>RF.meal!=="all"||RF.tags.size||RF.cuisine||RF.pro;
 function cardHTML(r,st){return `<button type="button" class="scard" data-rid="${r.id}" style="--mc:${mealCol(r.meal)}">
   <span class="si" aria-hidden="true">${foodIcon(r.name)}</span><span class="sn">${esc(r.name)}</span>
-  <span class="sk"><b>${r.n.kcal}</b> ${CU()} · <span class="p">${Math.round(r.n.p)}g P</span></span><span class="st">${st||r.mins+" min"}${!st&&r.fz?" · ❄️":""}</span></button>`}
+  <span class="sk"><b>${r.n.kcal}</b> ${CU()} · <span class="p">${Math.round(r.n.p)}g P</span></span><span class="st">${st||fmtMins(r.mins)}${!st&&r.fz?" · ❄️":""}</span></button>`}
 function rowHTML(r,extra){const fav=recFavs().has(r.id);
   return `<button type="button" class="rrow" data-rid="${r.id}" style="--mc:${mealCol(r.meal)}">
     <span class="si" aria-hidden="true">${foodIcon(r.name)}</span>
     <span class="nm">${esc(r.name)}${fav?` <span class="hv" aria-label="saved">♥</span>`:""}</span>
-    <span class="sm">${MEALN[r.meal]} · ${r.mins} min · ${esc(r.cuisine)}</span>
+    <span class="sm">${MEALN[r.meal]} · ${fmtMins(r.mins)} · ${esc(r.cuisine)}</span>
     ${extra?`<span class="uses">${extra}</span>`:""}
     <span class="rk"><b>${r.n.kcal}</b> ${CU()}<br><span class="p">${r1(r.n.p)}g P</span></span></button>`}
 function shelf(title,items,see,sub){
@@ -2882,7 +2907,8 @@ function renderBrowse(list,L,fav){
     +shelf("Meal prep",by(r=>r.tags.includes("prep")),{tags:["prep"]},"Cook once, eat all week")
     +shelf("❄️ Freezer-friendly",by(r=>r.fz),{tags:["freezer"]},"Batch cook, freeze, reheat")
     +shelf("Under 400 calories",by(r=>r.tags.includes("light")&&r.meal!=="snack"),{tags:["light"]})
-    +shelf("Vegetarian",by(r=>r.tags.includes("veg")),{tags:["veg"]});
+    +shelf("Vegetarian",by(r=>r.tags.includes("veg")),{tags:["veg"]})
+    +onlineHTML("");
 }
 function renderList(list,L,fav){
   let rs=recFiltered(list,L,fav), terms=[], ingMode=false;
@@ -2908,15 +2934,15 @@ function renderList(list,L,fav){
   $("recSummary").innerHTML=bits.join(" · ");
   $("recMeta").textContent=`${rs.length} of ${list.length} recipes`;
   if(!rs.length){
-    $("recList").innerHTML=`<p class="empty">${ingMode?"No recipes use those ingredients. Try fewer, or more general words like \"chicken\" or \"beans\".":RF.tags.has("saved")&&!fav.size?"Tap ♡ Save on a recipe to keep it here.":RF.tags.has("fit")&&L.kl==null?"Set a calorie goal under Me to see what fits.":RF.tags.has("fit")?"Nothing fits what's left today. Try a snack, or turn off Fits my day.":"No recipes match. Try fewer filters."}</p>`;
+    $("recList").innerHTML=onlineHTML(q).replace('<div class="ronline">','<div class="ronline" style="border-top:0;padding-top:0">')+`<p class="empty">${ingMode?"No recipes use those ingredients. Try fewer, or more general words like \"chicken\" or \"beans\".":RF.tags.has("saved")&&!fav.size?"Tap ♡ Save on a recipe to keep it here.":RF.tags.has("fit")&&L.kl==null?"Set a calorie goal under Me to see what fits.":RF.tags.has("fit")?"Nothing fits what's left today. Try a snack, or turn off Fits my day.":"No recipes match. Try fewer filters."}</p>`;
     return}
-  $("recList").innerHTML=rs.map(r=>rowHTML(r,extras[r.id])).join("");
+  $("recList").innerHTML=rs.map(r=>rowHTML(r,extras[r.id])).join("")+onlineHTML(q||[RF.cuisine,RF.pro&&PRON[RF.pro],RF.meal!=="all"&&RF.meal].filter(Boolean).join(" "));
 }
 function recBody(r){
   const n=r.n, fav=recFavs().has(r.id);
   return `<div class="rbody">
     <div class="rnut"><div><b>${n.kcal}</b><span>${CUL()}</span></div><div class="p"><b>${r1(n.p)}g</b><span>Protein</span></div><div class="c"><b>${r1(n.c)}g</b><span>Carbs</span></div><div><b>${r1(n.f)}g</b><span>Fat</span></div></div>
-    <p class="rnote">Per serving · ${r1(n.fi)} g fiber · ${n.na.toLocaleString()} mg sodium. Makes ${r.serves} serving${r.serves>1?"s":""}. Salt and spices aren't counted.</p>
+    <p class="rnote">Per serving · ${r1(n.fi)} g fiber · ${n.na.toLocaleString()} mg sodium. Makes ${r.serves} serving${r.serves>1?"s":""}. Salt and seasonings aren't counted.</p>
     <div class="ract">
       <div class="stepper"><span class="lbl">Servings</span><div class="f"><input type="number" id="rsv-${r.id}" min="0.25" step="0.25" value="1" inputmode="decimal" aria-label="Servings to log"></div></div>
       <button type="button" class="primary" data-rlog="${r.id}">Log it</button>
@@ -2933,7 +2959,7 @@ function renderDetail(r){
   const used=RF.q.trim()&&RF.back==="list"?ingTerms(RF.q).filter(t=>termHit(t,r)):[];
   $("recDetail").innerHTML=`<button type="button" class="chip ghost" id="recDBack">← ${RF.back==="list"?"Back to results":"All recipes"}</button>
     <div class="rdhead" style="--mc:${mealCol(r.meal)}"><span class="si" aria-hidden="true">${foodIcon(r.name)}</span>
-      <div><h2>${esc(r.name)}</h2><p class="sm">${MEALN[r.meal]} · ${r.mins} min · serves ${r.serves} · ${esc(r.cuisine)}</p>
+      <div><h2>${esc(r.name)}</h2><p class="sm">${MEALN[r.meal]} · ${fmtMins(r.mins)} · serves ${r.serves} · ${esc(r.cuisine)}</p>
       <div class="rpills">${r.tags.map(t=>`<span class="tag">${RTAGN[t]}</span>`).join("")}</div></div></div>
     ${used.length>1?`<p class="hint">Uses your ${used.map(t=>esc(t.label)).join(", ")}.</p>`:""}
     ${recBody(r)}`;
@@ -3160,7 +3186,7 @@ function rbLine(text){
   return finishLine({t:text,pq,spice:SPICE_RE.test(text)},pool,rbPrefer(pq,pool,best));
 }
 const RB_ODD=["leaves","stems","seeds","peel","flour","oil","skin","roll","deli","luncheon","nugget","nuggets","patty","patties","sandwich","tenders","strips","sticks","jerky","baby food","soup","sauce","juice","paste","dried","powder","salad","chips","dip","bread","rings","yolk","white","substitute","imitation","flavored","sweetened","nectar","pie","dessert","candy","drink","mix"];
-const SPICE_RE=/\b(salt|pepper(?!s)|powder|spices?|seasoning|to taste|oregano|cumin|paprika|thyme|rosemary|cinnamon|chil[il]i flakes|vanilla|baking soda|baking powder|water|cooking spray|bay leaf)\b/i;
+const SPICE_RE=/\b(salt|pepper(?!s)|powder|spices?|seasoning|to taste|oregano|cumin|paprika|thyme|rosemary|cinnamon|chil[il]i flakes|vanilla|baking soda|baking powder|water|cooking spray|bay leaf|broth|stock|bouillon|garam masala|turmeric|coriander|nutmeg|cayenne|dill|basil leaves|parsley|cilantro|zest)\b/i;
 /* Recipe ingredients are usually raw ("1 onion", "1 lb ground beef") or canned ("1 can beans"), so among foods with all your words, prefer those. */
 function rbPrefer(pq,pool,best){
   if(!best||best.guess||best.r.src==="learned"||best.r.src==="saved") return best;
@@ -3188,8 +3214,7 @@ function rbPrefer(pq,pool,best){
 }
 function finishLine(L,pool,best){
   const seen=new Set(), cands=[];
-  if(best) {cands.push(best.r); seen.add(best.r.name)}
-  pool.forEach(r=>{if(!seen.has(r.name)&&cands.length<6){seen.add(r.name);cands.push(r)}});
+  if(best){cands.push(best.r); seen.add(best.r.name); pool.forEach(r=>{if(!seen.has(r.name)&&cands.length<6){seen.add(r.name);cands.push(r)}})}
   const gw=(L.pq.q0.match(/\b(rice|quinoa|pasta|oats|lentils|couscous|barley|noodles|spaghetti|macaroni|farro|bulgur)\b/i)||[])[1];
   if(gw&&cands.length&&!cands.some(r=>/uncooked|\bdry\b|\braw\b/i.test(r.name))){
     const dry=DBF.filter(x=>toksOf(x.name).some(t=>t===gw.toLowerCase()||t===gw.toLowerCase()+"s")&&/uncooked|\bdry\b|\braw\b/i.test(x.name)&&!/flour|bran|cereal|bar|cookie|baby/i.test(x.name)).sort((a,b)=>a.name.length-b.name.length)[0];
@@ -3211,7 +3236,7 @@ function setLineAmount(L){
 const lineMac=L=>{const r=L.cands[L.ci]; return r&&L.amt>0?macrosFor(r,L.amt,L.mode):null};
 function renderBuild(){
   $("rbLines").innerHTML=RB.lines.map((L,i)=>{const m=lineMac(L), r=L.cands[L.ci];
-    if(!r) return L.spice?`<div class="rbl"><span class="t">${esc(L.t)}</span><p class="hint" style="margin:0;grid-column:1/-1">Not counted (seasoning)</p></div>`
+    if(!r) return L.spice?`<div class="rbl"><span class="t">${esc(L.t)}</span><p class="hint" style="margin:0;grid-column:1/-1">Not counted (seasoning, herbs or broth)</p></div>`
       :`<div class="rbl miss"><span class="t">${esc(L.t)}</span><p class="chk">No match, so this line isn't counted. Try simpler words, like "chicken breast" or "brown rice".</p></div>`;
     return `<div class="rbl"><span class="t">${esc(L.t)}</span>
       <select data-rbc="${i}" aria-label="Food for ${esc(L.t)}">${L.cands.map((c,j)=>`<option value="${j}"${j===L.ci?" selected":""}>${esc(c.name)}</option>`).join("")}</select>
@@ -3227,7 +3252,7 @@ function renderBuild(){
     <div class="rnut"><div><b>${RB.per.kcal}</b><span>${CUL()}</span></div><div class="p"><b>${RB.per.p}g</b><span>Protein</span></div><div class="c"><b>${RB.per.c}g</b><span>Carbs</span></div><div><b>${RB.per.f}g</b><span>Fat</span></div></div>`;
 }
 async function rbCalc(){
-  const lines=$("rbIng").value.split(/\n+/).map(x=>x.replace(/^\s*(?:[-*•]|\d+[.)])\s+/,"").trim()).filter(Boolean);
+  const lines=$("rbIng").value.split(/\n+/).map(x=>uniFrac(x).replace(/^\s*(?:[-*•▢□☐✓]|\d+[.)])\s+/,"").trim()).filter(Boolean);
   if(!lines.length){$("rbMsg").textContent="Add at least one ingredient."; return}
   RB.lines=lines.map(rbLine); renderBuild();
   const miss=RB.lines.filter(L=>!L.cands.length&&!L.spice);
@@ -3248,13 +3273,60 @@ function renderMyRecipes(){
 }
 function openBuild(id){
   const f=id&&S.foods.items[id]; RB={lines:[],editId:id||null};
-  $("rbName").value=f?f.name:""; $("rbServes").value=f?f.recipe.serves:4; $("rbIng").value=f?f.recipe.text:"";
+  $("rbName").value=f?f.name:""; $("rbServes").value=f?f.recipe.serves:4; $("rbIng").value=f?f.recipe.text:""; $("rbSteps").value=f&&f.recipe.steps||""; $("rbPaste").value=""; $("rbPasteBox").hidden=true; $("rbPasteBtn").setAttribute("aria-expanded","false"); $("rbPasteMsg").textContent="";
   $("rbLines").innerHTML=""; $("rbTot").hidden=true; $("rbSaveRow").hidden=true; $("rbMsg").textContent="";
   $("recBuild").hidden=false; $("myRecHint").hidden=true; $("recNew").hidden=true;
   if(f) rbCalc(); $("rbName").focus();
 }
+/* "1½ cups" -> "1 1/2 cups" */
+const UFR={"½":"1/2","¼":"1/4","¾":"3/4","⅓":"1/3","⅔":"2/3","⅛":"1/8","⅜":"3/8","⅝":"5/8","⅞":"7/8","⅕":"1/5"};
+const uniFrac=t=>t.replace(/(\d)?\s*([½¼¾⅓⅔⅛⅜⅝⅞⅕])/g,(m,d,f)=>(d?d+" ":"")+UFR[f]).replace(/(\d)\s*⁄\s*(\d)/g,"$1/$2");
+/* Pulls the name, servings, ingredients and steps out of a recipe copied from a website. */
+function parseRecipeText(raw){
+  const lines=uniFrac(raw).split(/\r?\n/).map(x=>x.replace(/^\s*[▢□☐✓•*-]\s*/,"").replace(/\s+/g," ").trim()).filter(Boolean);
+  const isIngHead=l=>/^ingredients?\b[:\s]*$/i.test(l)||/^ingredients?:?$/i.test(l);
+  const isStepHead=l=>/^(directions|instructions|method|steps|preparation|how to make( it)?)\b[:\s]*$/i.test(l);
+  const isNoise=l=>/^(notes?|nutrition( facts| information)?|equipment|print( recipe)?|pin( recipe)?|rate this recipe|jump to recipe|course|cuisine|keyword|author|prep time|cook time|total time|servings?|yield|calories)\b/i.test(l);
+  let name="", serves=null;
+  for(const l of lines){const m=l.match(/\b(?:serves|servings?|makes|yield)\b[^\d]{0,12}(\d{1,2})/i); if(m){serves=+m[1]; break}}
+  const ih=lines.findIndex(isIngHead), sh=lines.findIndex(isStepHead);
+  const looksIng=l=>l.length<=100&&/^(\d|a |an |one |two |three |pinch|dash|salt|pepper|handful|juice|zest)/i.test(l)&&!/[.!?]$/.test(l.replace(/\b(oz|lb|tsp|tbsp|approx)\.$/i,""));
+  let ing=[], steps=[];
+  if(ih>=0){const end=sh>ih?sh:lines.length; ing=lines.slice(ih+1,end).filter(l=>!isNoise(l)&&!/^for the /i.test(l)&&l.length<=120)}
+  else ing=lines.filter(looksIng);
+  const unnum=l=>l.replace(/^(step\s*)?\d+[.):]?\s+/i,"");
+  if(sh>=0){const rest=lines.slice(sh+1), stop=rest.findIndex(isNoise); steps=(stop>=0?rest.slice(0,stop):rest).map(unnum).filter(l=>l.length>3)}
+  else steps=lines.filter(l=>l.length>60&&/[.!]$/.test(l)&&!ing.includes(l)).map(unnum);
+  const first=lines.find(l=>!isIngHead(l)&&!isStepHead(l)&&!isNoise(l)&&!looksIng(l)&&l.length<=80&&!/^(jump|skip|home|recipes?|menu|search)\b/i.test(l));
+  if(first) name=first.replace(/\s+recipe$/i,"");
+  return {name,serves,ing,steps};
+}
+$("rbPasteBtn").onclick=()=>{const open=$("rbPasteBox").hidden; $("rbPasteBox").hidden=!open; $("rbPasteBtn").setAttribute("aria-expanded",open); if(open) $("rbPaste").focus()};
+$("rbPasteGo").onclick=()=>{
+  const p=parseRecipeText($("rbPaste").value);
+  if(!p.ing.length){$("rbPasteMsg").textContent="Couldn't find an ingredient list. Paste just the ingredients into the box below instead."; return}
+  if(p.name&&!$("rbName").value.trim()) $("rbName").value=p.name;
+  if(p.serves) $("rbServes").value=p.serves;
+  $("rbIng").value=p.ing.join("\n");
+  if(p.steps.length&&!$("rbSteps").value.trim()) $("rbSteps").value=p.steps.map((x,i)=>`${i+1}. ${x}`).join("\n");
+  $("rbPasteMsg").textContent=`Found ${p.ing.length} ingredient${p.ing.length>1?"s":""}${p.serves?` and ${p.serves} servings`:""}${p.steps.length?`, plus ${p.steps.length} steps`:""}. Check them below.`;
+  $("rbPasteBox").hidden=true; $("rbPasteBtn").setAttribute("aria-expanded","false"); rbCalc();
+};
+/* Links out to free recipe sites. Nothing is copied: you open the recipe there, and can paste it into My recipes for nutrition. */
+function onlineHTML(q){
+  const enc=s=>encodeURIComponent(s), base="https://www.google.com/search?q=", term=(q||"").trim()||"healthy";
+  return `<div class="ronline"><span class="lbl">Find more recipes online</span>
+    <div class="links"><a href="${base+enc(term+" recipe site:myplate.gov/recipes")}" target="_blank" rel="noopener">MyPlate Kitchen (USDA)</a>
+      <a href="${base+enc(term+" recipe site:foodhero.org")}" target="_blank" rel="noopener">Food Hero</a>
+      <a href="${base+enc(term+" healthy recipe")}" target="_blank" rel="noopener">Search the web</a></div>
+    <p class="hint" style="margin:0">Found one you like? <button type="button" class="linkbtn" data-paste-open>Paste it into My recipes</button> to get calories and macros per serving.</p></div>`;
+}
 function closeBuild(){$("recBuild").hidden=true; $("recNew").hidden=false; RB={lines:[],editId:null}; renderMyRecipes()}
 $("recNew").onclick=()=>openBuild(null);
+document.addEventListener("click",ev=>{if(!ev.target.closest("[data-paste-open]")) return;
+  if($("recBuild").hidden) openBuild(null);
+  $("rbPasteBox").hidden=false; $("rbPasteBtn").setAttribute("aria-expanded","true");
+  $("recBuild").scrollIntoView({behavior:calm?"auto":"smooth",block:"start"}); setTimeout(()=>$("rbPaste").focus(),350)});
 $("rbCancel").onclick=closeBuild;
 $("rbCalc").onclick=rbCalc;
 $("rbServes").oninput=()=>{if(RB.lines.length) renderBuild()};
@@ -3270,7 +3342,7 @@ $("recBuild").onsubmit=ev=>{ev.preventDefault();
   const sv=Math.max(1,+$("rbServes").value||1);
   const id=RB.editId||("r-"+name.toLowerCase().replace(/[^a-z0-9]+/g,"-").slice(0,40));
   if(RB.editId){const old=S.foods.items[RB.editId]; if(old) S.foods.items[RB.editId]={used:old.used,fav:old.fav}}
-  saveFood({name,serving:`1 serving (1/${sv} of recipe)`,...RB.per,recipe:{serves:sv,text:$("rbIng").value.trim()}},id);
+  saveFood({name,serving:`1 serving (1/${sv} of recipe)`,...RB.per,recipe:{serves:sv,text:$("rbIng").value.trim(),steps:$("rbSteps").value.trim()}},id);
   VOCAB=null; toast(RB.editId?"Recipe updated":"Recipe saved. Type its name in the bar to log a serving.");
   closeBuild();
 };
