@@ -1296,7 +1296,7 @@ details.panel[open] summary h3::after{content:" −"}
 
 <script>
 (() => {
-const APP_VERSION="3.16.1";
+const APP_VERSION="3.17.0";
 const REPO="kefirman9000/fuel-log";
 const $ = id => document.getElementById(id);
 const OZ=29.5735, LB=0.45359237, IN=2.54;
@@ -1873,11 +1873,24 @@ function renderGoalStrip(day,t,g){
 
 /* ---------- "what fits now": foods that fill remaining protein within the calories left ---------- */
 const NO_SUGGEST=/soda|beer|coffee|tea with|butter|cream cheese|juice|sports drink|bacon|french fries|cola|whey protein powder|ground beef|cheddar|^peanut butter$|^egg, large$|sausage|pancake|^chipotle (?!chicken|steak|barbacoa|carnitas|sofritas)/i;
+/* your own foods, counted over the last 45 days: how often each was added and when it was last added */
+function foodStats(days=45){
+  const m=new Map(), today=todayKey();
+  for(let i=0;i<days;i++){const k=shift(today,-i), d=S.days[k]||load(dayKey(k)); if(!d||!d.entries) continue;
+    d.entries.forEach((e,j)=>{if(!e||!e.name) return; const key=e.name.toLowerCase(); let o=m.get(key);
+      if(!o){o={e,n:0,last:-i*1000+j}; m.set(key,o)} o.n++; if(-i*1000+j>o.last){o.last=-i*1000+j;o.e=e}})}
+  return m;
+}
 function fitCandidates(){
   const out=[], seen=new Set(), add=(o)=>{const k=o.name.toLowerCase(); if(seen.has(k)||o.kcal==null) return; seen.add(k); out.push(o)};
-  Object.values(S.foods.items).filter(f=>f.fav).forEach(f=>add({name:f.name,p:+f.p||0,c:+f.c||0,f:+f.f||0,kcal:kcalOf(f),fi:f.fi,src:"fav"}));
-  recentFoods().forEach(e=>add({name:e.name,p:+e.p||0,c:+e.c||0,f:+e.f||0,kcal:kcalOf(e),fi:e.fi,src:"recent"}));
-  [...SNACKS,...COMMON,...LOCAL.filter(x=>/bowl|salad|grilled/i.test(x.name))].forEach(x=>{if(!NO_SUGGEST.test(x.name)) add({name:x.name,serving:x.serving,p:x.v[0],c:x.v[1],f:x.v[2],kcal:x.v[3],fi:x.fi,src:x.snack?"snack":"idea"})});
+  const st=foodStats();
+  Object.values(S.foods.items).filter(f=>f.fav).forEach(f=>{const h=st.get(f.name.toLowerCase());
+    add({name:f.name,p:+f.p||0,c:+f.c||0,f:+f.f||0,kcal:kcalOf(f),fi:f.fi,src:"fav",n:Math.max(h?h.n:0,f.used||0),last:h?h.last:-1e6})});
+  [...st.values()].forEach(({e,n,last})=>add({name:e.name,p:+e.p||0,c:+e.c||0,f:+e.f||0,kcal:kcalOf(e),fi:e.fi,src:n>1?"often":"recent",n,last}));
+  Object.values(S.foods.items).filter(f=>(f.used||0)>0).forEach(f=>add({name:f.name,serving:f.serving,p:+f.p||0,c:+f.c||0,f:+f.f||0,kcal:kcalOf(f),fi:f.fi,src:"often",n:f.used,last:-1e6}));
+  if(out.length) return out;
+  // brand-new log with nothing added yet: fall back to a few common ideas
+  [...SNACKS,...COMMON].forEach(x=>{if(!NO_SUGGEST.test(x.name)) add({name:x.name,serving:x.serving,p:x.v[0],c:x.v[1],f:x.v[2],kcal:x.v[3],fi:x.fi,src:x.snack?"snack":"idea",n:0,last:-1e6})});
   return out;
 }
 function renderFit(t,g){
@@ -1887,10 +1900,11 @@ function renderFit(t,g){
   const bigGap=kl>900, mealTime=bigGap||(hr>=6&&hr<10)||(hr>=11&&hr<14)||(hr>=17&&hr<21), maxK=Math.max(60,kl+40);
   const want=mealTime&&kl>450?[300,Math.min(800,kl)]:[60,Math.min(350,kl)];
   const scored=fitCandidates().filter(x=>x.kcal<=maxK&&x.kcal>0).map(x=>{
-    const pScore=pl>0?Math.min(x.p,pl)/Math.max(pl,15):0, dens=x.p/Math.max(x.kcal,1);
-    let s=pScore*2+dens*(pl>15?18:6)+(fil>5&&x.fi?Math.min(x.fi,fil)/fil*.6:0);
-    if(x.kcal>=want[0]&&x.kcal<=want[1]) s+=.6;
-    if(x.src==="fav") s+=.35; else if(x.src==="recent") s+=.25;
+    // mostly how often you add it and how recently, with a small nudge toward what fills protein
+    const pScore=pl>0?Math.min(x.p,pl)/Math.max(pl,15):0;
+    let s=Math.log2(1+(x.n||0))*1.5+Math.max(0,1+(x.last||-1e6)/30000)+pScore*.6;
+    if(x.kcal>=want[0]&&x.kcal<=want[1]) s+=.3;
+    if(x.src==="fav") s+=.5;
     return {...x,s};
   }).sort((a,b)=>b.s-a.s);
   const picks=scored.slice(0,4);
@@ -1901,9 +1915,9 @@ function renderFit(t,g){
   if(!picks.length){panel.hidden=true;return}
   panel.hidden=false;
   const when=hr<10?"Breakfast ideas":hr<11?"Morning snack ideas":hr<14?"Lunch ideas":hr<17?"Snack ideas":hr<21?"Dinner ideas":bigGap?"A meal still fits":"Light evening snacks";
-  $("fitMeta").textContent=when;
+  $("fitMeta").textContent=scored.some(x=>x.n>0||x.src==="fav")?"Your usual foods":when;
   $("fitMsg").innerHTML=`You have <b>${Math.max(0,kl).toLocaleString()} ${CU()}</b>${pl>0?` and <b>${Math.round(pl)} g protein</b>`:""} left. These fit:`;
-  const tag=x=>x.src==="fav"?"⭐ favorite":x.src==="recent"?"🕘 recent":x.kcal<300?"snack":"meal";
+  const tag=x=>x.src==="fav"?"⭐ favorite":x.src==="often"?"🔁 added "+x.n+"×":x.src==="recent"?"🕘 recent":x.kcal<300?"snack":"meal";
   const row=(x,i)=>`<div class="item fit"><span class="nm"><span class="fi" aria-hidden="true">${foodIcon(x.name)}</span>${esc(x.name)}<span class="tag">${tag(x)}</span></span>
     <span class="sm">${x.serving?esc(x.serving)+" · ":""}${x.kcal} ${CU()}</span><span class="mac"><span class="p">${r1(x.p)}g P</span></span>
     <button class="chip" data-fit="${i}" style="grid-row:1/3;grid-column:3">+ Log</button></div>`;
@@ -2128,10 +2142,9 @@ function favForEntry(e){
 }
 const isFavName=n=>Object.values(S.foods.items).some(f=>f.fav&&f.name===n);
 function recentFoods(){
-  const seen=new Set(Object.values(S.foods.items).filter(f=>f.fav).map(f=>f.name)), out=[];
-  for(let i=0;i<10&&out.length<8;i++){const d=S.days[shift(todayKey(),-i)]||load(dayKey(shift(todayKey(),-i))); if(!d||!d.entries) continue;
-    for(const e of [...d.entries].reverse()){if(out.length>=8) break; if(seen.has(e.name)) continue; seen.add(e.name); out.push(e)}}
-  return out;
+  const fav=new Set(Object.values(S.foods.items).filter(f=>f.fav).map(f=>f.name.toLowerCase()));
+  return [...foodStats().entries()].filter(([k])=>!fav.has(k)).map(([,o])=>o)
+    .sort((a,b)=>(b.n-a.n)||(b.last-a.last)).slice(0,10).map(o=>o.e);
 }
 function renderFavs(){
   const ids=favIds(); S.recent=S.favEdit?[]:recentFoods();
